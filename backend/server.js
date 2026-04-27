@@ -18,6 +18,12 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' })); // Permite payload maior para upload base64
 
+// Garantir UTF-8 em todas as respostas
+app.use((req, res, next) => {
+  res.set('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
+
 // Rota de teste simples para ver se o servidor está online
 app.get('/api/status', (req, res) => {
   res.json({ mensagem: 'Servidor do Prontuário Pessoal rodando perfeitamente!' });
