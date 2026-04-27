@@ -127,9 +127,9 @@ export default function DashboardProfissional() {
         {/* Cabeçalho do Médico */}
         <div className="bg-white rounded-xl shadow-sm p-6 flex justify-between items-center border-l-4 border-teal-500">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">OlÃ¡, {profissional?.nome || 'Profissional'}</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Olá, {profissional?.nome || 'Profissional'}</h1>
             <p className="text-gray-500">
-              CRM: {profissional?.crm || 'NÃ£o informado'} | Especialidade: {profissional?.especialidade || 'NÃ£o informada'}
+              CRM: {profissional?.crm || 'Não informado'} | Especialidade: {profissional?.especialidade || 'Não informada'}
             </p>
           </div>
           <div className="flex gap-3">
@@ -186,9 +186,9 @@ export default function DashboardProfissional() {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200 text-sm text-gray-600 uppercase tracking-wider">
                   <th className="p-4 font-semibold">Paciente</th>
-                  <th className="p-4 font-semibold">NÃ­vel de Permissão</th>
+                  <th className="p-4 font-semibold">Nível de Permissão</th>
                   <th className="p-4 font-semibold">Expiração</th>
-                  <th className="p-4 font-semibold text-center">AÃ§Ãµes</th>
+                  <th className="p-4 font-semibold text-center">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -231,7 +231,7 @@ export default function DashboardProfissional() {
                               : 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm'
                           }`}
                         >
-                          ProntuÃ¡rio
+                          Prontuário
                         </button>
                       </div>
                     </td>

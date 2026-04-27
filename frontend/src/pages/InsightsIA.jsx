@@ -290,7 +290,7 @@ export default function InsightsIA() {
                   <div>
                     <p className="font-medium text-gray-800">{item.resumoClinico}</p>
                     <p className="text-xs text-gray-500">
-                      {new Date(item.criadoEm).toLocaleString('pt-BR')} â€¢ {item.modelo}
+                      {new Date(item.criadoEm).toLocaleString('pt-BR')} • {item.modelo}
                     </p>
                   </div>
                   <span className="text-xs px-2 py-1 h-fit rounded bg-gray-200 text-gray-700">{item.status}</span>

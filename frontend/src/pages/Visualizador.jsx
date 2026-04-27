@@ -42,7 +42,7 @@ export default function Visualizador() {
         const dados = await resposta.json();
 
         if (!resposta.ok) {
-          setErro(dados.erro || 'NÃ£o foi possÃ­vel carregar os registros.');
+          setErro(dados.erro || 'Não foi possÃ­vel carregar os registros.');
 
           if (resposta.status === 401 || resposta.status === 403) {
             localStorage.removeItem('token');
@@ -132,7 +132,7 @@ export default function Visualizador() {
       if (respostaInsight.ok) {
         setInsightRegistro(dadosInsight.insight || null);
       } else {
-        setErroInsight(dadosInsight.erro || 'NÃ£o foi possÃ­vel gerar insight deste registro.');
+        setErroInsight(dadosInsight.erro || 'Não foi possÃ­vel gerar insight deste registro.');
       }
     } catch (error) {
       console.error('Erro ao gerar insight do registro:', error);
@@ -230,7 +230,7 @@ export default function Visualizador() {
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-4">
         
-        {/* Cabeçalho de AÃ§Ãµes */}
+        {/* Cabeçalho de Ações */}
         <div className="flex items-center justify-between bg-white rounded-xl shadow-sm p-4">
           <div className="flex items-center gap-4">
             <button 
@@ -318,7 +318,7 @@ export default function Visualizador() {
 
                     <div>
                       <p className="text-sm text-gray-500 mb-1">Ã“rgÃ£o / Sistema</p>
-                      <p className="font-medium text-gray-800">{registroSelecionado.orgao || 'NÃ£o informado'}</p>
+                      <p className="font-medium text-gray-800">{registroSelecionado.orgao || 'Não informado'}</p>
                     </div>
 
                     <div>
@@ -330,7 +330,7 @@ export default function Visualizador() {
                   <div className="mt-5 border-t border-gray-100 pt-4">
                     <p className="text-sm text-gray-500 mb-1">Resumo ClÃ­nico Informado</p>
                     <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                      {registroSelecionado.descricaoClinica || 'NÃ£o informado pelo paciente.'}
+                      {registroSelecionado.descricaoClinica || 'Não informado pelo paciente.'}
                     </p>
                   </div>
                 </div>
@@ -366,9 +366,9 @@ export default function Visualizador() {
                       <p className="text-xs text-gray-500">Modelo: {insightRegistro.modelo}</p>
                       {insightRegistro.diagnosticoExtracao && (
                         <p className="text-xs text-gray-500">
-                          Extração: {insightRegistro.diagnosticoExtracao.origem || 'sem origem'} â€¢ 
+                          Extração: {insightRegistro.diagnosticoExtracao.origem || 'sem origem'} • 
                           {` ${insightRegistro.diagnosticoExtracao.caracteresExtraidos || 0} caracteres`}
-                          {insightRegistro.diagnosticoExtracao.erro ? ` â€¢ erro: ${insightRegistro.diagnosticoExtracao.erro}` : ''}
+                          {insightRegistro.diagnosticoExtracao.erro ? ` • erro: ${insightRegistro.diagnosticoExtracao.erro}` : ''}
                         </p>
                       )}
                     </div>

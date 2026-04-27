@@ -57,7 +57,7 @@ export default function Permissoes() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro || 'NÃ£o foi possÃ­vel carregar permissÃµes.');
+        setErro(dados.erro || 'Não foi possÃ­vel carregar permissÃµes.');
         if (resposta.status === 401 || resposta.status === 403) {
           localStorage.removeItem('token');
           localStorage.removeItem('usuario');
@@ -106,7 +106,7 @@ export default function Permissoes() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro || 'NÃ£o foi possÃ­vel conceder a permissÃ£o.');
+        setErro(dados.erro || 'Não foi possÃ­vel conceder a permissÃ£o.');
         return;
       }
 
@@ -139,7 +139,7 @@ export default function Permissoes() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro || 'NÃ£o foi possÃ­vel revogar a permissÃ£o.');
+        setErro(dados.erro || 'Não foi possÃ­vel revogar a permissÃ£o.');
         return;
       }
 
@@ -188,7 +188,7 @@ export default function Permissoes() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">NÃ­vel de Acesso</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nível de Acesso</label>
                 <select
                   value={nivelAcesso}
                   onChange={(e) => setNivelAcesso(e.target.value)}
@@ -242,7 +242,7 @@ export default function Permissoes() {
                       {item.profissional.nome} {item.profissional.especialidade ? `(${item.profissional.especialidade})` : ''}
                     </p>
                     <p className="text-sm text-gray-500">
-                      Acesso: {item.nivelAcesso} â€¢ Expira em: {formatarExpiracao(item.expiraEm)} â€¢ Status: {item.status}
+                      Acesso: {item.nivelAcesso} • Expira em: {formatarExpiracao(item.expiraEm)} • Status: {item.status}
                     </p>
                   </div>
                   <button
