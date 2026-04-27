@@ -5,9 +5,9 @@ generator client {
 }
 
 datasource db {
-  // Para o desenvolvimento inicial, vamos usar o SQLite para não precisar instalar 
-  // um servidor PostgreSQL pesado agora. Depois mudamos para "postgresql" 
-  provider = "sqlite" 
+  // PostgreSQL para produção no Render
+  // SQLite para desenvolvimento local (configure DATABASE_URL="file:./dev.db" no .env local)
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
