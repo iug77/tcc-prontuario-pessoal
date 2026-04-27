@@ -41,7 +41,7 @@ export default function Dashboard() {
         const dadosMensagens = await respostaMensagens.json();
 
         if (!respostaDashboard.ok) {
-          setErro(dadosDashboard.erro || 'NÃ£o foi possÃ­vel carregar o dashboard.');
+          setErro(dadosDashboard.erro || 'Não foi possível carregar o dashboard.');
 
           if (respostaDashboard.status === 401 || respostaDashboard.status === 403) {
             localStorage.removeItem('token');
@@ -58,7 +58,7 @@ export default function Dashboard() {
         setTotalMensagens(dadosMensagens.totalMensagens || 0);
       } catch (error) {
         console.error('Erro ao carregar dashboard do paciente:', error);
-        setErro('Erro de conexÃ£o com o servidor.');
+        setErro('Erro de conexão com o servidor.');
       } finally {
         setCarregando(false);
       }
@@ -82,7 +82,7 @@ export default function Dashboard() {
           setTotalMensagens(dadosMensagens.totalMensagens || 0);
         }
       } catch {
-        // Evita ruÃ­do de erro em polling
+        // Evita ruído de erro em polling
       }
     }, 8000);
 
@@ -105,7 +105,7 @@ export default function Dashboard() {
 
   const formatarDataRegistro = (dataIso) => {
     if (!dataIso) {
-      return 'Data nÃ£o informada';
+      return 'Data não informada';
     }
 
     return new Date(dataIso).toLocaleDateString('pt-BR', {
@@ -119,11 +119,11 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-4xl mx-auto">
         
-       {/* CabeÃ§alho do Dashboard */}
+       {/* Cabeçalho do Dashboard */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6 flex justify-between items-center flex-wrap gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">OlÃ¡, {paciente?.nome || 'Paciente'}</h1>
-            <p className="text-gray-500">Aqui estÃ¡ o resumo da sua saÃºde. PermissÃµes ativas: {totalPermissoesAtivas}</p>
+            <h1 className="text-2xl font-bold text-gray-800">Olá, {paciente?.nome || 'Paciente'}</h1>
+            <p className="text-gray-500">Aqui está o resumo da sua saúde. Permissões ativas: {totalPermissoesAtivas}</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <button 
@@ -133,19 +133,19 @@ export default function Dashboard() {
               }}
               className="bg-green-50 text-green-700 px-4 py-2 rounded-lg font-medium hover:bg-green-100 transition-colors border border-green-200"
             >
-              ðŸ’¬ Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
+              💬 Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
             </button>
             <button 
               onClick={() => navigate('/auditoria')}
               className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors border border-indigo-200"
             >
-              ðŸ“‹ Logs (LGPD)
+              📋 Logs (LGPD)
             </button>
             <button 
               onClick={() => navigate('/permissoes')}
               className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors border border-gray-200"
             >
-              ðŸ”’ PermissÃµes
+              📝 Permissões
             </button>
             <button 
               onClick={() => navigate('/novo-registro')}
@@ -157,7 +157,7 @@ export default function Dashboard() {
               onClick={() => navigate('/meus-registros')}
               className="bg-teal-50 text-teal-700 px-4 py-2 rounded-lg font-medium hover:bg-teal-100 transition-colors border border-teal-200"
             >
-              ðŸ§¾ Ver Registros
+              🧾 Ver Registros
             </button>
             <button
               onClick={handleLogout}
@@ -182,7 +182,7 @@ export default function Dashboard() {
           {carregando && <p className="text-sm text-gray-500">Carregando registros...</p>}
 
           {!carregando && !erro && registros.length === 0 && (
-            <p className="text-sm text-gray-500">VocÃª ainda nÃ£o adicionou registros.</p>
+            <p className="text-sm text-gray-500">Você ainda não adicionou registros.</p>
           )}
 
           {!carregando && !erro && registros.length > 0 && (
