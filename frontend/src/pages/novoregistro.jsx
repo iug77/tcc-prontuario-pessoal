@@ -113,7 +113,7 @@ export default function NovoRegistro() {
       }, 1500);
     } catch (error) {
       console.error('Erro ao criar registro:', error);
-      setErro('Erro de conexÃ£o com o servidor.');
+      setErro('Erro de conexão com o servidor.');
       setCarregando(false);
     }
   };
@@ -122,11 +122,11 @@ export default function NovoRegistro() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-sm p-8">
         
-        {/* CabeÃ§alho */}
+        {/* Cabeçalho */}
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Novo Registro de SaÃºde</h1>
-            <p className="text-gray-500">Adicione um novo documento ou histÃ³rico mÃ©dico</p>
+            <p className="text-gray-500">Adicione um novo documento ou histÃ³rico médico</p>
           </div>
           <button 
             onClick={() => navigate('/dashboard')}
@@ -191,7 +191,7 @@ export default function NovoRegistro() {
                 type="text" 
                 value={orgao}
                 onChange={(e) => setOrgao(e.target.value)}
-                placeholder="Ex: CoraÃ§Ã£o, PulmÃ£o, Pele..."
+                placeholder="Ex: Coração, PulmÃ£o, Pele..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
@@ -259,7 +259,7 @@ export default function NovoRegistro() {
             </div>
           </div>
 
-          {/* BotÃµes de AÃ§Ã£o */}
+          {/* BotÃµes de Ação */}
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
             <button 
               type="button"

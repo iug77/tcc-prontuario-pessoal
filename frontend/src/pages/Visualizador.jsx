@@ -59,7 +59,7 @@ export default function Visualizador() {
         }
       } catch (error) {
         console.error('Erro ao carregar registros:', error);
-        setErro('Erro de conexÃ£o com o servidor.');
+        setErro('Erro de conexão com o servidor.');
       } finally {
         setCarregando(false);
       }
@@ -136,7 +136,7 @@ export default function Visualizador() {
       }
     } catch (error) {
       console.error('Erro ao gerar insight do registro:', error);
-      setErroInsight('Erro de conexÃ£o ao gerar insight do registro.');
+      setErroInsight('Erro de conexão ao gerar insight do registro.');
     } finally {
       setCarregandoInsight(false);
     }
@@ -230,7 +230,7 @@ export default function Visualizador() {
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-4">
         
-        {/* CabeÃ§alho de AÃ§Ãµes */}
+        {/* Cabeçalho de AÃ§Ãµes */}
         <div className="flex items-center justify-between bg-white rounded-xl shadow-sm p-4">
           <div className="flex items-center gap-4">
             <button 
@@ -312,7 +312,7 @@ export default function Visualizador() {
                     </div>
                     
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Data de RealizaÃ§Ã£o</p>
+                      <p className="text-sm text-gray-500 mb-1">Data de Realização</p>
                       <p className="font-medium text-gray-800">{formatarData(registroSelecionado.data)}</p>
                     </div>
 
@@ -361,12 +361,12 @@ export default function Visualizador() {
                     <div className="space-y-3">
                       <p className="text-sm text-gray-800">{insightRegistro.resumo}</p>
                       {insightRegistro.conclusao && (
-                        <p className="text-sm font-medium text-gray-900">ConclusÃ£o: {insightRegistro.conclusao}</p>
+                        <p className="text-sm font-medium text-gray-900">Conclusão: {insightRegistro.conclusao}</p>
                       )}
                       <p className="text-xs text-gray-500">Modelo: {insightRegistro.modelo}</p>
                       {insightRegistro.diagnosticoExtracao && (
                         <p className="text-xs text-gray-500">
-                          ExtraÃ§Ã£o: {insightRegistro.diagnosticoExtracao.origem || 'sem origem'} â€¢ 
+                          Extração: {insightRegistro.diagnosticoExtracao.origem || 'sem origem'} â€¢ 
                           {` ${insightRegistro.diagnosticoExtracao.caracteresExtraidos || 0} caracteres`}
                           {insightRegistro.diagnosticoExtracao.erro ? ` â€¢ erro: ${insightRegistro.diagnosticoExtracao.erro}` : ''}
                         </p>
@@ -378,7 +378,7 @@ export default function Visualizador() {
                 </div>
               )}
 
-              {/* VisualizaÃ§Ã£o do Documento */}
+              {/* Visualização do Documento */}
               <div className="bg-gray-200 rounded-xl shadow-inner border border-gray-300 flex items-center justify-center overflow-hidden h-[50vh]">
                 {registroSelecionado?.arquivoUrl ? (
                   ehImagem ? (
@@ -390,7 +390,7 @@ export default function Visualizador() {
                   ) : (
                     <iframe
                       src={registroSelecionado.arquivoUrl}
-                      title={nomeArquivo || 'VisualizaÃ§Ã£o do documento'}
+                      title={nomeArquivo || 'Visualização do documento'}
                       className="w-full h-full bg-white"
                     />
                   )
@@ -399,7 +399,7 @@ export default function Visualizador() {
                     <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <p className="text-gray-500 font-medium">VisualizaÃ§Ã£o do Documento</p>
+                    <p className="text-gray-500 font-medium">Visualização do Documento</p>
                     <p className="text-sm text-gray-400">Arquivo nÃ£o disponÃ­vel</p>
                   </div>
                 )}

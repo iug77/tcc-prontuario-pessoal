@@ -186,8 +186,8 @@ export default function DashboardProfissional() {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200 text-sm text-gray-600 uppercase tracking-wider">
                   <th className="p-4 font-semibold">Paciente</th>
-                  <th className="p-4 font-semibold">NÃ­vel de PermissÃ£o</th>
-                  <th className="p-4 font-semibold">ExpiraÃ§Ã£o</th>
+                  <th className="p-4 font-semibold">NÃ­vel de Permissão</th>
+                  <th className="p-4 font-semibold">Expiração</th>
                   <th className="p-4 font-semibold text-center">AÃ§Ãµes</th>
                 </tr>
               </thead>

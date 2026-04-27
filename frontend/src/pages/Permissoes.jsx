@@ -69,7 +69,7 @@ export default function Permissoes() {
       setPermissoes(dados.permissoes || []);
     } catch (error) {
       console.error('Erro ao carregar permissÃµes:', error);
-      setErro('Erro de conexÃ£o com o servidor.');
+      setErro('Erro de conexão com o servidor.');
     }
   };
 
@@ -110,12 +110,12 @@ export default function Permissoes() {
         return;
       }
 
-      setMensagem('PermissÃ£o concedida com sucesso.');
+      setMensagem('Permissão concedida com sucesso.');
       setEmailProfissional('');
       await carregarPermissoes();
     } catch (error) {
       console.error('Erro ao conceder permissÃ£o:', error);
-      setErro('Erro de conexÃ£o com o servidor.');
+      setErro('Erro de conexão com o servidor.');
     } finally {
       setCarregando(false);
     }
@@ -143,11 +143,11 @@ export default function Permissoes() {
         return;
       }
 
-      setMensagem('PermissÃ£o revogada com sucesso.');
+      setMensagem('Permissão revogada com sucesso.');
       await carregarPermissoes();
     } catch (error) {
       console.error('Erro ao revogar permissÃ£o:', error);
-      setErro('Erro de conexÃ£o com o servidor.');
+      setErro('Erro de conexão com o servidor.');
     }
   };
 
@@ -155,11 +155,11 @@ export default function Permissoes() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         
-        {/* CabeÃ§alho */}
+        {/* Cabeçalho */}
         <div className="flex items-center justify-between bg-white rounded-xl shadow-sm p-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">GestÃ£o de PermissÃµes</h1>
-            <p className="text-gray-500">Controle quem tem acesso ao seu prontuÃ¡rio</p>
+            <h1 className="text-2xl font-bold text-gray-800">Gestão de Permissões</h1>
+            <p className="text-gray-500">Controle quem tem acesso ao seu prontuário</p>
           </div>
           <button 
             onClick={() => navigate('/dashboard')}
@@ -200,7 +200,7 @@ export default function Permissoes() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ExpiraÃ§Ã£o do Link</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Expiração do Link</label>
                 <select
                   value={expiracao}
                   onChange={(e) => setExpiracao(e.target.value)}

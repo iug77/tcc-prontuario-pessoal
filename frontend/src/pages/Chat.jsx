@@ -57,7 +57,7 @@ export default function Chat() {
       }
     } catch (error) {
       console.error('Erro ao carregar contatos do chat:', error);
-      setErro('Erro de conexÃ£o com o servidor.');
+      setErro('Erro de conexão com o servidor.');
     } finally {
       setCarregandoContatos(false);
     }
@@ -112,7 +112,7 @@ export default function Chat() {
       setMensagens(dados.mensagens || []);
     } catch (error) {
       console.error('Erro ao carregar mensagens:', error);
-      setErro('Erro de conexÃ£o com o servidor.');
+      setErro('Erro de conexão com o servidor.');
     }
   };
 
@@ -171,7 +171,7 @@ export default function Chat() {
       setMensagens((listaAtual) => [...listaAtual, dados.mensagem]);
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
-      setErro('Erro de conexÃ£o com o servidor.');
+      setErro('Erro de conexão com o servidor.');
     } finally {
       setEnviando(false);
     }

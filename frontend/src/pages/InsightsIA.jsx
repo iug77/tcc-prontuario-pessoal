@@ -58,7 +58,7 @@ export default function InsightsIA() {
       }
     } catch (error) {
       console.error('Erro ao carregar insights IA:', error);
-      setErro('Erro de conexÃ£o com o servidor.');
+      setErro('Erro de conexão com o servidor.');
     } finally {
       setCarregando(false);
     }
@@ -91,7 +91,7 @@ export default function InsightsIA() {
       await carregarInsights();
     } catch (error) {
       console.error('Erro ao gerar insights:', error);
-      setErro('Erro de conexÃ£o com o servidor.');
+      setErro('Erro de conexão com o servidor.');
     } finally {
       setGerando(false);
     }
@@ -135,7 +135,7 @@ export default function InsightsIA() {
       setFeedbackTexto('');
     } catch (error) {
       console.error('Erro ao enviar feedback:', error);
-      setErro('Erro de conexÃ£o com o servidor.');
+      setErro('Erro de conexão com o servidor.');
     }
   };
 
