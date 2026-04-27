@@ -237,7 +237,7 @@ export default function Visualizador() {
               onClick={() => navigate('/dashboard-profissional')}
               className="text-gray-500 hover:text-gray-800 font-medium"
             >
-              â† Voltar
+              ← Voltar
             </button>
             <h1 className="text-xl font-bold text-gray-800 border-l-2 border-gray-300 pl-4">
               {registroSelecionado ? formatarTipo(registroSelecionado.tipo) : 'Registros'}
@@ -249,14 +249,14 @@ export default function Visualizador() {
               disabled={!registroSelecionado?.arquivoUrl}
               className="px-4 py-2 text-blue-600 bg-blue-50 rounded-lg font-medium hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              â¬‡ Download
+              ↓ Download
             </button>
             <button
               onClick={handlePrint}
               disabled={!registroSelecionado?.arquivoUrl}
               className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              ðŸ–¨ Imprimir
+              🖨 Imprimir
             </button>
           </div>
         </div>

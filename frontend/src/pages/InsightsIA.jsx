@@ -153,7 +153,7 @@ export default function InsightsIA() {
               onClick={() => navigate('/dashboard-profissional')}
               className="text-sm text-gray-500 hover:text-gray-800 mb-1"
             >
-              â† Voltar
+              ← Voltar
             </button>
             <h1 className="text-2xl font-bold text-gray-800">Insights IA</h1>
             <p className="text-gray-500">

@@ -165,7 +165,7 @@ export default function Permissoes() {
             onClick={() => navigate('/dashboard')}
             className="text-blue-600 hover:underline font-medium"
           >
-            â† Voltar ao Painel
+            ← Voltar ao Painel
           </button>
         </div>
 

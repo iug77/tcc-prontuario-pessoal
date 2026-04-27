@@ -156,7 +156,7 @@ export default function MeusRegistros() {
               onClick={() => navigate('/dashboard')}
               className="text-gray-500 hover:text-gray-800 font-medium"
             >
-              â† Voltar
+              ← Voltar
             </button>
             <h1 className="text-xl font-bold text-gray-800 border-l-2 border-gray-300 pl-4">Meus Registros</h1>
           </div>
@@ -165,7 +165,7 @@ export default function MeusRegistros() {
             disabled={!registroSelecionado?.arquivoUrl}
             className="px-4 py-2 text-blue-600 bg-blue-50 rounded-lg font-medium hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            â¬‡ Download
+            ↓ Download
           </button>
         </div>
 

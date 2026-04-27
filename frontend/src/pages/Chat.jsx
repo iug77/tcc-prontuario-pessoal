@@ -198,7 +198,7 @@ export default function Chat() {
               onClick={() => navigate(rotaVoltar)}
               className="text-sm text-gray-500 hover:text-gray-800"
             >
-              â† Voltar
+              ← Voltar
             </button>
           </div>
           

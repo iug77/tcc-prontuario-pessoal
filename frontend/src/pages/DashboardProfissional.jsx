@@ -137,7 +137,7 @@ export default function DashboardProfissional() {
               onClick={() => navigate('/auditoria')}
               className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors border border-indigo-200"
             >
-              ðŸ“‹ Auditoria
+              📋 Auditoria
             </button>
             <button 
               onClick={() => {
@@ -146,7 +146,7 @@ export default function DashboardProfissional() {
               }}
               className="bg-green-50 text-green-700 px-4 py-2 rounded-lg font-medium hover:bg-green-100 transition-colors border border-green-200"
             >
-              ðŸ’¬ Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
+              💬 Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
             </button>
             <button 
               onClick={handleLogout}

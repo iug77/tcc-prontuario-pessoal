@@ -85,7 +85,7 @@ export default function Auditoria() {
             onClick={() => navigate(rotaVoltar)}
             className="text-indigo-600 hover:underline font-medium"
           >
-            â† Voltar ao Painel
+            ← Voltar ao Painel
           </button>
         </div>
 
