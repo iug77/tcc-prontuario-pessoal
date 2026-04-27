@@ -31,7 +31,7 @@ export default function Auditoria() {
         setCarregando(true);
         setErro('');
 
-        const resposta = await fetch(${API_URL}/api/auditoria', {
+        const resposta = await fetch(`${API_URL}/api/auditoria`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -155,4 +155,5 @@ export default function Auditoria() {
     </div>
   );
 }
+
 

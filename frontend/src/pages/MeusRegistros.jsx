@@ -25,7 +25,7 @@ export default function MeusRegistros() {
         setCarregando(true);
         setErro('');
 
-        const resposta = await fetch(${API_URL}/api/pacientes/registros', {
+        const resposta = await fetch(`${API_URL}/api/pacientes/registros`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -271,5 +271,6 @@ export default function MeusRegistros() {
     </div>
   );
 }
+
 
 

@@ -25,12 +25,12 @@ export default function DashboardProfissional() {
         setErro('');
 
         const [respostaDashboard, respostaMensagens] = await Promise.all([
-          fetch(${API_URL}/api/profissionais/dashboard', {
+          fetch(`${API_URL}/api/profissionais/dashboard`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
           }),
-          fetch(${API_URL}/api/chat/contar', {
+          fetch(`${API_URL}/api/chat/contar`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -70,7 +70,7 @@ export default function DashboardProfissional() {
         const tokenAtual = localStorage.getItem('token');
         if (!tokenAtual) return;
 
-        const respostaMensagens = await fetch(${API_URL}/api/chat/contar', {
+        const respostaMensagens = await fetch(`${API_URL}/api/chat/contar`, {
           headers: {
             Authorization: `Bearer ${tokenAtual}`
           }
@@ -247,4 +247,5 @@ export default function DashboardProfissional() {
     </div>
   );
 }
+
 

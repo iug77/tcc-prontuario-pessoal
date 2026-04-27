@@ -25,12 +25,12 @@ export default function Dashboard() {
         setErro('');
 
         const [respostaDashboard, respostaMensagens] = await Promise.all([
-          fetch(${API_URL}/api/pacientes/dashboard', {
+          fetch(`${API_URL}/api/pacientes/dashboard`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
           }),
-          fetch(${API_URL}/api/chat/contar', {
+          fetch(`${API_URL}/api/chat/contar`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -71,7 +71,7 @@ export default function Dashboard() {
         const tokenAtual = localStorage.getItem('token');
         if (!tokenAtual) return;
 
-        const respostaMensagens = await fetch(${API_URL}/api/chat/contar', {
+        const respostaMensagens = await fetch(`${API_URL}/api/chat/contar`, {
           headers: {
             Authorization: `Bearer ${tokenAtual}`
           }
@@ -209,4 +209,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
 

@@ -48,7 +48,7 @@ export default function Permissoes() {
 
     try {
       setErro('');
-      const resposta = await fetch(${API_URL}/api/pacientes/permissoes', {
+      const resposta = await fetch(`${API_URL}/api/pacientes/permissoes`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -90,7 +90,7 @@ export default function Permissoes() {
 
     try {
       setCarregando(true);
-      const resposta = await fetch(${API_URL}/api/pacientes/permissoes', {
+      const resposta = await fetch(`${API_URL}/api/pacientes/permissoes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -263,4 +263,5 @@ export default function Permissoes() {
     </div>
   );
 }
+
 
