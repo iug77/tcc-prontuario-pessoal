@@ -7,6 +7,7 @@ import Auditoria from './pages/Auditoria';
 import Chat from './pages/Chat';
 import DashboardProfissional from './pages/DashboardProfissional';
 import Visualizador from './pages/Visualizador';
+import MeusRegistros from './pages/MeusRegistros';
 
 const obterSessao = () => {
   const token = localStorage.getItem('token');
