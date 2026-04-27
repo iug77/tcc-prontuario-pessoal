@@ -1,0 +1,133 @@
+// backend/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // Para o desenvolvimento inicial, vamos usar o SQLite para não precisar instalar 
+  // um servidor PostgreSQL pesado agora. Depois mudamos para "postgresql" 
+  provider = "sqlite" 
+  url      = env("DATABASE_URL")
+}
+
+// Tabela de Pacientes (Donos dos dados) [cite: 3]
+model Paciente {
+  id        String   @id @default(uuid())
+  nome      String
+  email     String   @unique
+  senha     String   
+  criadoEm  DateTime @default(now())
+
+  // Relacionamentos
+  registros  Registro[]
+  permissoes Permissao[]
+  mensagens  Mensagem[]
+  insightsIA InsightIA[]
+}
+
+// Tabela de Profissionais
+model Profissional {
+  id            String   @id @default(uuid())
+  nome          String
+  email         String   @unique
+  senha         String
+  crm           String?
+  especialidade String?
+
+  // Relacionamentos
+  permissoesRecebidas Permissao[]
+  mensagens          Mensagem[]
+  insightsGerados    InsightIA[]
+}
+
+// Tabela de Registros (Exames, Receitas, etc) 
+model Registro {
+  id          String   @id @default(uuid())
+  tipo        String   // exame, receita, medicamento 
+  data        DateTime
+  orgao       String?  // metadado [cite: 12]
+  descricaoClinica String? // resumo textual do laudo/achados
+  arquivoUrl  String?  // link do S3/Upload [cite: 12]
+  insightRegistro InsightRegistro?
+  
+  pacienteId  String
+  paciente    Paciente @relation(fields: [pacienteId], references: [id])
+}
+
+model InsightRegistro {
+  id                    String   @id @default(uuid())
+  registroId            String   @unique
+  resumo                String
+  conclusao             String
+  foraReferenciaJson    String
+  itensNormaisJson      String
+  itensAlteradosJson    String
+  valoresImportantesJson String
+  alertasJson           String
+  pendenciasJson        String
+  recomendacoesJson     String
+  diagnosticoExtracaoJson String
+  modelo                String
+  geradoEm              DateTime @default(now())
+  atualizadoEm          DateTime @updatedAt
+
+  registro              Registro @relation(fields: [registroId], references: [id])
+}
+
+// Tabela de Compartilhamento (Módulo de Permissões) [cite: 14]
+model Permissao {
+  id             String   @id @default(uuid())
+  nivelAcesso    String   // leitura ou escrita [cite: 8]
+  expiraEm       DateTime? // data de expiração [cite: 8]
+  ativo          Boolean  @default(true)
+
+  pacienteId     String
+  paciente       Paciente @relation(fields: [pacienteId], references: [id])
+  
+  profissionalId String
+  profissional   Profissional @relation(fields: [profissionalId], references: [id])
+}
+
+// Tabela de Auditoria (LGPD) [cite: 9, 17]
+model LogAuditoria {
+  id          String   @id @default(uuid())
+  data        DateTime @default(now())
+  usuarioId   String   // Quem acessou 
+  acao        String   // O que fez (visualizou, baixou) 
+  documentoId String?  // Qual arquivo 
+  status      String   
+}
+
+model Mensagem {
+  id             String       @id @default(uuid())
+  conteudo       String
+  criadoEm       DateTime     @default(now())
+  remetenteTipo  String
+
+  pacienteId     String
+  paciente       Paciente     @relation(fields: [pacienteId], references: [id])
+
+  profissionalId String
+  profissional   Profissional @relation(fields: [profissionalId], references: [id])
+}
+
+model InsightIA {
+  id               String       @id @default(uuid())
+  pacienteId       String
+  profissionalId   String
+  resumoClinico    String
+  alertasJson      String
+  tendenciasJson   String
+  pendenciasJson   String
+  recomendacoesJson String
+  confiancaGeral   Float?
+  modelo           String
+  status           String       @default("GERADO")
+  feedback         String?
+  criadoEm         DateTime     @default(now())
+  atualizadoEm     DateTime     @updatedAt
+
+  paciente         Paciente     @relation(fields: [pacienteId], references: [id])
+  profissional     Profissional @relation(fields: [profissionalId], references: [id])
+}
