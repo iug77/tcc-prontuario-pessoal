@@ -41,7 +41,7 @@ export default function DashboardProfissional() {
         const dadosMensagens = await respostaMensagens.json();
 
         if (!respostaDashboard.ok) {
-          setErro(dadosDashboard.erro || 'NÃ£o foi possÃ­vel carregar os dados do dashboard.');
+          setErro(dadosDashboard.erro || 'Não foi possível carregar os dados do dashboard.');
 
           if (respostaDashboard.status === 401 || respostaDashboard.status === 403) {
             localStorage.removeItem('token');
@@ -57,7 +57,7 @@ export default function DashboardProfissional() {
         setTotalMensagens(dadosMensagens.totalMensagens || 0);
       } catch (error) {
         console.error('Erro ao carregar dashboard profissional:', error);
-        setErro('Erro de conexÃ£o com o servidor.');
+        setErro('Erro de conexão com o servidor.');
       } finally {
         setCarregando(false);
       }
@@ -81,7 +81,7 @@ export default function DashboardProfissional() {
           setTotalMensagens(dadosMensagens.totalMensagens || 0);
         }
       } catch {
-        // Evita ruÃ­do de erro em polling
+        // Evita ruído de erro em polling
       }
     }, 8000);
 
@@ -103,7 +103,7 @@ export default function DashboardProfissional() {
 
   const formatarExpiracao = (dataIso, status) => {
     if (!dataIso) {
-      return 'Sem expiraÃ§Ã£o';
+      return 'Sem expiração';
     }
 
     if (status === 'Inativo') {
@@ -124,7 +124,7 @@ export default function DashboardProfissional() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         
-        {/* CabeÃ§alho do MÃ©dico */}
+        {/* Cabeçalho do Médico */}
         <div className="bg-white rounded-xl shadow-sm p-6 flex justify-between items-center border-l-4 border-teal-500">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">OlÃ¡, {profissional?.nome || 'Profissional'}</h1>

@@ -242,7 +242,7 @@ export default function InsightsIA() {
               <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
                 <h2 className="font-bold text-gray-800 mb-3">Recomendações de Revisão</h2>
                 {recomendacoes.length === 0 ? (
-                  <p className="text-sm text-gray-500">Sem recomendaÃ§Ãµes.</p>
+                  <p className="text-sm text-gray-500">Sem recomendações.</p>
                 ) : (
                   <ul className="space-y-2 list-disc list-inside text-sm text-gray-700">
                     {recomendacoes.map((item, idx) => (
@@ -258,7 +258,7 @@ export default function InsightsIA() {
               <textarea
                 value={feedbackTexto}
                 onChange={(e) => setFeedbackTexto(e.target.value)}
-                placeholder="Ex.: insight Ãºtil para triagem, mas faltou detalhe em exames laboratoriais."
+                placeholder="Ex.: insight útil para triagem, mas faltou detalhe em exames laboratoriais."
                 className="w-full min-h-24 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 outline-none"
               />
               <div className="mt-3 flex gap-2">
@@ -280,9 +280,9 @@ export default function InsightsIA() {
         )}
 
         <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-          <h2 className="font-bold text-gray-800 mb-3">HistÃ³rico de GeraÃ§Ãµes</h2>
+          <h2 className="font-bold text-gray-800 mb-3">Histórico de Gerações</h2>
           {historico.length === 0 ? (
-            <p className="text-sm text-gray-500">Sem histÃ³rico ainda.</p>
+            <p className="text-sm text-gray-500">Sem histórico ainda.</p>
           ) : (
             <div className="space-y-2">
               {historico.map((item) => (
@@ -301,7 +301,7 @@ export default function InsightsIA() {
         </div>
 
         <p className="text-xs text-gray-500">
-          Insight assistivo por IA. NÃ£o substitui decisÃ£o clÃ­nica profissional.
+          Insight assistivo por IA. Não substitui decisão clínica profissional.
         </p>
       </div>
     </div>

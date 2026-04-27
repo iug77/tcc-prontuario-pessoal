@@ -163,7 +163,7 @@ export default function Chat() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro || 'NÃ£o foi possÃ­vel enviar a mensagem.');
+        setErro(dados.erro || 'Não foi possível enviar a mensagem.');
         return;
       }
 
@@ -207,7 +207,7 @@ export default function Chat() {
 
             {!carregandoContatos && contatos.length === 0 && (
               <p className="text-sm text-gray-500 p-2">
-                Nenhum contato disponÃ­vel. O chat sÃ³ Ã© liberado com permissÃ£o ativa entre paciente e profissional.
+                Nenhum contato disponível. O chat só é liberado com permissão ativa entre paciente e profissional.
               </p>
             )}
 
@@ -238,10 +238,10 @@ export default function Chat() {
           </div>
         </div>
 
-        {/* Ãrea Principal: Conversa */}
+        {/* Área Principal: Conversa */}
         <div className="w-full md:w-2/3 flex flex-col bg-white">
           
-          {/* CabeÃ§alho da Conversa */}
+          {/* Cabeçalho da Conversa */}
           <div className="p-4 border-b border-gray-200 flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-200 text-blue-700 rounded-full flex items-center justify-center font-bold">
               {iniciais(contatoAtivo?.nome)}
@@ -252,7 +252,7 @@ export default function Chat() {
             </div>
           </div>
 
-          {/* HistÃ³rico de Mensagens */}
+          {/* Histórico de Mensagens */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
             {erro && <p className="text-sm text-red-700">{erro}</p>}
 
@@ -276,7 +276,7 @@ export default function Chat() {
             })}
           </div>
 
-          {/* Campo de DigitaÃ§Ã£o */}
+          {/* Campo de Digitação */}
           <div className="p-4 border-t border-gray-200 bg-white">
             <form className="flex gap-2" onSubmit={enviarMensagem}>
               <input 
