@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { API_URL } from '../config';\nimport { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Visualizador() {
@@ -41,7 +41,7 @@ export default function Visualizador() {
         const dados = await resposta.json();
 
         if (!resposta.ok) {
-          setErro(dados.erro || 'Não foi possível carregar os registros.');
+          setErro(dados.erro || 'NÃ£o foi possÃ­vel carregar os registros.');
 
           if (resposta.status === 401 || resposta.status === 403) {
             localStorage.removeItem('token');
@@ -58,7 +58,7 @@ export default function Visualizador() {
         }
       } catch (error) {
         console.error('Erro ao carregar registros:', error);
-        setErro('Erro de conexão com o servidor.');
+        setErro('Erro de conexÃ£o com o servidor.');
       } finally {
         setCarregando(false);
       }
@@ -131,11 +131,11 @@ export default function Visualizador() {
       if (respostaInsight.ok) {
         setInsightRegistro(dadosInsight.insight || null);
       } else {
-        setErroInsight(dadosInsight.erro || 'Não foi possível gerar insight deste registro.');
+        setErroInsight(dadosInsight.erro || 'NÃ£o foi possÃ­vel gerar insight deste registro.');
       }
     } catch (error) {
       console.error('Erro ao gerar insight do registro:', error);
-      setErroInsight('Erro de conexão ao gerar insight do registro.');
+      setErroInsight('Erro de conexÃ£o ao gerar insight do registro.');
     } finally {
       setCarregandoInsight(false);
     }
@@ -229,14 +229,14 @@ export default function Visualizador() {
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-4">
         
-        {/* Cabeçalho de Ações */}
+        {/* CabeÃ§alho de AÃ§Ãµes */}
         <div className="flex items-center justify-between bg-white rounded-xl shadow-sm p-4">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => navigate('/dashboard-profissional')}
               className="text-gray-500 hover:text-gray-800 font-medium"
             >
-              ← Voltar
+              â† Voltar
             </button>
             <h1 className="text-xl font-bold text-gray-800 border-l-2 border-gray-300 pl-4">
               {registroSelecionado ? formatarTipo(registroSelecionado.tipo) : 'Registros'}
@@ -248,14 +248,14 @@ export default function Visualizador() {
               disabled={!registroSelecionado?.arquivoUrl}
               className="px-4 py-2 text-blue-600 bg-blue-50 rounded-lg font-medium hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              ⬇ Download
+              â¬‡ Download
             </button>
             <button
               onClick={handlePrint}
               disabled={!registroSelecionado?.arquivoUrl}
               className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              🖨 Imprimir
+              ðŸ–¨ Imprimir
             </button>
           </div>
         </div>
@@ -302,7 +302,7 @@ export default function Visualizador() {
               {/* Metadados do Registro */}
               {registroSelecionado ? (
                 <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Informações do Registro</h3>
+                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">InformaÃ§Ãµes do Registro</h3>
                   
                   <div className="grid grid-cols-2 gap-6">
                     <div>
@@ -311,13 +311,13 @@ export default function Visualizador() {
                     </div>
                     
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Data de Realização</p>
+                      <p className="text-sm text-gray-500 mb-1">Data de RealizaÃ§Ã£o</p>
                       <p className="font-medium text-gray-800">{formatarData(registroSelecionado.data)}</p>
                     </div>
 
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Órgão / Sistema</p>
-                      <p className="font-medium text-gray-800">{registroSelecionado.orgao || 'Não informado'}</p>
+                      <p className="text-sm text-gray-500 mb-1">Ã“rgÃ£o / Sistema</p>
+                      <p className="font-medium text-gray-800">{registroSelecionado.orgao || 'NÃ£o informado'}</p>
                     </div>
 
                     <div>
@@ -327,9 +327,9 @@ export default function Visualizador() {
                   </div>
 
                   <div className="mt-5 border-t border-gray-100 pt-4">
-                    <p className="text-sm text-gray-500 mb-1">Resumo Clínico Informado</p>
+                    <p className="text-sm text-gray-500 mb-1">Resumo ClÃ­nico Informado</p>
                     <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                      {registroSelecionado.descricaoClinica || 'Não informado pelo paciente.'}
+                      {registroSelecionado.descricaoClinica || 'NÃ£o informado pelo paciente.'}
                     </p>
                   </div>
                 </div>
@@ -360,14 +360,14 @@ export default function Visualizador() {
                     <div className="space-y-3">
                       <p className="text-sm text-gray-800">{insightRegistro.resumo}</p>
                       {insightRegistro.conclusao && (
-                        <p className="text-sm font-medium text-gray-900">Conclusão: {insightRegistro.conclusao}</p>
+                        <p className="text-sm font-medium text-gray-900">ConclusÃ£o: {insightRegistro.conclusao}</p>
                       )}
                       <p className="text-xs text-gray-500">Modelo: {insightRegistro.modelo}</p>
                       {insightRegistro.diagnosticoExtracao && (
                         <p className="text-xs text-gray-500">
-                          Extração: {insightRegistro.diagnosticoExtracao.origem || 'sem origem'} • 
+                          ExtraÃ§Ã£o: {insightRegistro.diagnosticoExtracao.origem || 'sem origem'} â€¢ 
                           {` ${insightRegistro.diagnosticoExtracao.caracteresExtraidos || 0} caracteres`}
-                          {insightRegistro.diagnosticoExtracao.erro ? ` • erro: ${insightRegistro.diagnosticoExtracao.erro}` : ''}
+                          {insightRegistro.diagnosticoExtracao.erro ? ` â€¢ erro: ${insightRegistro.diagnosticoExtracao.erro}` : ''}
                         </p>
                       )}
                     </div>
@@ -377,7 +377,7 @@ export default function Visualizador() {
                 </div>
               )}
 
-              {/* Visualização do Documento */}
+              {/* VisualizaÃ§Ã£o do Documento */}
               <div className="bg-gray-200 rounded-xl shadow-inner border border-gray-300 flex items-center justify-center overflow-hidden h-[50vh]">
                 {registroSelecionado?.arquivoUrl ? (
                   ehImagem ? (
@@ -389,7 +389,7 @@ export default function Visualizador() {
                   ) : (
                     <iframe
                       src={registroSelecionado.arquivoUrl}
-                      title={nomeArquivo || 'Visualização do documento'}
+                      title={nomeArquivo || 'VisualizaÃ§Ã£o do documento'}
                       className="w-full h-full bg-white"
                     />
                   )
@@ -398,8 +398,8 @@ export default function Visualizador() {
                     <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <p className="text-gray-500 font-medium">Visualização do Documento</p>
-                    <p className="text-sm text-gray-400">Arquivo não disponível</p>
+                    <p className="text-gray-500 font-medium">VisualizaÃ§Ã£o do Documento</p>
+                    <p className="text-sm text-gray-400">Arquivo nÃ£o disponÃ­vel</p>
                   </div>
                 )}
               </div>

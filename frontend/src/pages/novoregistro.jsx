@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { API_URL } from '../config';\nimport { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 
@@ -21,13 +21,13 @@ export default function NovoRegistro() {
 
     const tiposPermitidos = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
     if (!tiposPermitidos.includes(file.type)) {
-      setErro('Apenas PDF, JPG e PNG são permitidos.');
+      setErro('Apenas PDF, JPG e PNG sÃ£o permitidos.');
       return;
     }
 
     const tamanhoMB = file.size / (1024 * 1024);
     if (tamanhoMB > 5) {
-      setErro('Arquivo excede o tamanho máximo de 5MB.');
+      setErro('Arquivo excede o tamanho mÃ¡ximo de 5MB.');
       return;
     }
 
@@ -70,7 +70,7 @@ export default function NovoRegistro() {
       }
 
       if (!tipo || !data) {
-        setErro('Tipo de registro e data são obrigatórios.');
+        setErro('Tipo de registro e data sÃ£o obrigatÃ³rios.');
         setCarregando(false);
         return;
       }
@@ -112,7 +112,7 @@ export default function NovoRegistro() {
       }, 1500);
     } catch (error) {
       console.error('Erro ao criar registro:', error);
-      setErro('Erro de conexão com o servidor.');
+      setErro('Erro de conexÃ£o com o servidor.');
       setCarregando(false);
     }
   };
@@ -121,17 +121,17 @@ export default function NovoRegistro() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-sm p-8">
         
-        {/* Cabeçalho */}
+        {/* CabeÃ§alho */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Novo Registro de Saúde</h1>
-            <p className="text-gray-500">Adicione um novo documento ou histórico médico</p>
+            <h1 className="text-2xl font-bold text-gray-800">Novo Registro de SaÃºde</h1>
+            <p className="text-gray-500">Adicione um novo documento ou histÃ³rico mÃ©dico</p>
           </div>
           <button 
             onClick={() => navigate('/dashboard')}
             className="text-gray-500 hover:text-gray-700"
           >
-            ✕ Cancelar
+            âœ• Cancelar
           </button>
         </div>
 
@@ -144,11 +144,11 @@ export default function NovoRegistro() {
 
         {sucesso && (
           <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg font-medium">
-            ✓ {sucesso}
+            âœ“ {sucesso}
           </div>
         )}
 
-        {/* Formulário Macro */}
+        {/* FormulÃ¡rio Macro */}
         <form onSubmit={handleSubmit} className="space-y-6">
           
           {/* Metadado: Tipo de Registro */}
@@ -162,10 +162,10 @@ export default function NovoRegistro() {
             >
               <option value="">Selecione...</option>
               <option value="exame">Exame (Sangue, Imagem, etc.)</option>
-              <option value="receita">Receita Médica</option>
+              <option value="receita">Receita MÃ©dica</option>
               <option value="medicamento">Medicamento em Uso</option>
               <option value="alergia">Alergia</option>
-              <option value="doenca">Doença / Condição</option>
+              <option value="doenca">DoenÃ§a / CondiÃ§Ã£o</option>
               <option value="cirurgia">Cirurgia</option>
             </select>
           </div>
@@ -183,29 +183,29 @@ export default function NovoRegistro() {
               />
             </div>
 
-            {/* Metadado: Órgão/Sistema */}
+            {/* Metadado: Ã“rgÃ£o/Sistema */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Órgão / Sistema (Opcional)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Ã“rgÃ£o / Sistema (Opcional)</label>
               <input 
                 type="text" 
                 value={orgao}
                 onChange={(e) => setOrgao(e.target.value)}
-                placeholder="Ex: Coração, Pulmão, Pele..."
+                placeholder="Ex: CoraÃ§Ã£o, PulmÃ£o, Pele..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Resumo Clínico do Laudo (Opcional, recomendado)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Resumo ClÃ­nico do Laudo (Opcional, recomendado)</label>
             <textarea
               value={descricaoClinica}
               onChange={(e) => setDescricaoClinica(e.target.value)}
-              placeholder="Ex: Hematócrito 52% (referência até 50%), hemoglobina normal, leucócitos sem alterações..."
+              placeholder="Ex: HematÃ³crito 52% (referÃªncia atÃ© 50%), hemoglobina normal, leucÃ³citos sem alteraÃ§Ãµes..."
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none min-h-28"
               maxLength={8000}
             />
-            <p className="text-xs text-gray-500 mt-1">Esse texto melhora muito a qualidade dos insights de normalidade/alterações.</p>
+            <p className="text-xs text-gray-500 mt-1">Esse texto melhora muito a qualidade dos insights de normalidade/alteraÃ§Ãµes.</p>
           </div>
 
           {/* Info sobre Upload */}
@@ -232,7 +232,7 @@ export default function NovoRegistro() {
                     onClick={handleRemoverArquivo}
                     className="text-green-700 hover:text-green-900 font-medium"
                   >
-                    ✕ Remover
+                    âœ• Remover
                   </button>
                 </div>
               ) : (
@@ -244,7 +244,7 @@ export default function NovoRegistro() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                   <p className="text-sm text-gray-600 mb-1">Arraste um arquivo ou clique para fazer upload</p>
-                  <p className="text-xs text-gray-500">PDF, JPG ou PNG (Máx. 5MB)</p>
+                  <p className="text-xs text-gray-500">PDF, JPG ou PNG (MÃ¡x. 5MB)</p>
                 </div>
               )}
             
@@ -258,7 +258,7 @@ export default function NovoRegistro() {
             </div>
           </div>
 
-          {/* Botões de Ação */}
+          {/* BotÃµes de AÃ§Ã£o */}
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
             <button 
               type="button"

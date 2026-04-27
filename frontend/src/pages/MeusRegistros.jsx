@@ -1,3 +1,4 @@
+import { API_URL } from '../config';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -33,7 +34,7 @@ export default function MeusRegistros() {
         const dados = await resposta.json();
 
         if (!resposta.ok) {
-          setErro(dados.erro || 'Não foi possível carregar seus registros.');
+          setErro(dados.erro || 'NÃ£o foi possÃ­vel carregar seus registros.');
           return;
         }
 
@@ -45,7 +46,7 @@ export default function MeusRegistros() {
         }
       } catch (error) {
         console.error('Erro ao carregar registros do paciente:', error);
-        setErro('Erro de conexão com o servidor.');
+        setErro('Erro de conexÃ£o com o servidor.');
       } finally {
         setCarregando(false);
       }
@@ -83,7 +84,7 @@ export default function MeusRegistros() {
       receita: 'Receita',
       medicamento: 'Medicamento',
       alergia: 'Alergia',
-      doenca: 'Doença',
+      doenca: 'DoenÃ§a',
       cirurgia: 'Cirurgia'
     };
     return tipos[tipo] || tipo;
@@ -155,7 +156,7 @@ export default function MeusRegistros() {
               onClick={() => navigate('/dashboard')}
               className="text-gray-500 hover:text-gray-800 font-medium"
             >
-              ← Voltar
+              â† Voltar
             </button>
             <h1 className="text-xl font-bold text-gray-800 border-l-2 border-gray-300 pl-4">Meus Registros</h1>
           </div>
@@ -164,7 +165,7 @@ export default function MeusRegistros() {
             disabled={!registroSelecionado?.arquivoUrl}
             className="px-4 py-2 text-blue-600 bg-blue-50 rounded-lg font-medium hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            ⬇ Download
+            â¬‡ Download
           </button>
         </div>
 
@@ -187,7 +188,7 @@ export default function MeusRegistros() {
                 <option value="receita">Receita</option>
                 <option value="medicamento">Medicamento</option>
                 <option value="alergia">Alergia</option>
-                <option value="doenca">Doença</option>
+                <option value="doenca">DoenÃ§a</option>
                 <option value="cirurgia">Cirurgia</option>
               </select>
 
@@ -227,8 +228,8 @@ export default function MeusRegistros() {
                       <p className="font-medium text-gray-800">{formatarData(registroSelecionado.data)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Órgão / Sistema</p>
-                      <p className="font-medium text-gray-800">{registroSelecionado.orgao || 'Não informado'}</p>
+                      <p className="text-sm text-gray-500 mb-1">Ã“rgÃ£o / Sistema</p>
+                      <p className="font-medium text-gray-800">{registroSelecionado.orgao || 'NÃ£o informado'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 mb-1">Arquivo</p>
@@ -253,13 +254,13 @@ export default function MeusRegistros() {
                   ) : (
                     <iframe
                       src={registroSelecionado.arquivoUrl}
-                      title={nomeArquivo || 'Visualização do documento'}
+                      title={nomeArquivo || 'VisualizaÃ§Ã£o do documento'}
                       className="w-full h-full bg-white"
                     />
                   )
                 ) : (
                   <div className="text-center">
-                    <p className="text-gray-500 font-medium">Arquivo não disponível</p>
+                    <p className="text-gray-500 font-medium">Arquivo nÃ£o disponÃ­vel</p>
                   </div>
                 )}
               </div>

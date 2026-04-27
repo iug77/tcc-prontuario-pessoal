@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { API_URL } from '../config';\nimport { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Permissoes() {
@@ -56,7 +56,7 @@ export default function Permissoes() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro || 'Não foi possível carregar permissões.');
+        setErro(dados.erro || 'NÃ£o foi possÃ­vel carregar permissÃµes.');
         if (resposta.status === 401 || resposta.status === 403) {
           localStorage.removeItem('token');
           localStorage.removeItem('usuario');
@@ -67,8 +67,8 @@ export default function Permissoes() {
 
       setPermissoes(dados.permissoes || []);
     } catch (error) {
-      console.error('Erro ao carregar permissões:', error);
-      setErro('Erro de conexão com o servidor.');
+      console.error('Erro ao carregar permissÃµes:', error);
+      setErro('Erro de conexÃ£o com o servidor.');
     }
   };
 
@@ -105,16 +105,16 @@ export default function Permissoes() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro || 'Não foi possível conceder a permissão.');
+        setErro(dados.erro || 'NÃ£o foi possÃ­vel conceder a permissÃ£o.');
         return;
       }
 
-      setMensagem('Permissão concedida com sucesso.');
+      setMensagem('PermissÃ£o concedida com sucesso.');
       setEmailProfissional('');
       await carregarPermissoes();
     } catch (error) {
-      console.error('Erro ao conceder permissão:', error);
-      setErro('Erro de conexão com o servidor.');
+      console.error('Erro ao conceder permissÃ£o:', error);
+      setErro('Erro de conexÃ£o com o servidor.');
     } finally {
       setCarregando(false);
     }
@@ -138,15 +138,15 @@ export default function Permissoes() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro || 'Não foi possível revogar a permissão.');
+        setErro(dados.erro || 'NÃ£o foi possÃ­vel revogar a permissÃ£o.');
         return;
       }
 
-      setMensagem('Permissão revogada com sucesso.');
+      setMensagem('PermissÃ£o revogada com sucesso.');
       await carregarPermissoes();
     } catch (error) {
-      console.error('Erro ao revogar permissão:', error);
-      setErro('Erro de conexão com o servidor.');
+      console.error('Erro ao revogar permissÃ£o:', error);
+      setErro('Erro de conexÃ£o com o servidor.');
     }
   };
 
@@ -154,17 +154,17 @@ export default function Permissoes() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         
-        {/* Cabeçalho */}
+        {/* CabeÃ§alho */}
         <div className="flex items-center justify-between bg-white rounded-xl shadow-sm p-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Gestão de Permissões</h1>
-            <p className="text-gray-500">Controle quem tem acesso ao seu prontuário</p>
+            <h1 className="text-2xl font-bold text-gray-800">GestÃ£o de PermissÃµes</h1>
+            <p className="text-gray-500">Controle quem tem acesso ao seu prontuÃ¡rio</p>
           </div>
           <button 
             onClick={() => navigate('/dashboard')}
             className="text-blue-600 hover:underline font-medium"
           >
-            ← Voltar ao Painel
+            â† Voltar ao Painel
           </button>
         </div>
 
@@ -187,7 +187,7 @@ export default function Permissoes() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nível de Acesso</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">NÃ­vel de Acesso</label>
                 <select
                   value={nivelAcesso}
                   onChange={(e) => setNivelAcesso(e.target.value)}
@@ -199,7 +199,7 @@ export default function Permissoes() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Expiração do Link</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">ExpiraÃ§Ã£o do Link</label>
                 <select
                   value={expiracao}
                   onChange={(e) => setExpiracao(e.target.value)}
@@ -231,7 +231,7 @@ export default function Permissoes() {
             
             <div className="space-y-4">
               {permissoes.length === 0 && (
-                <p className="text-sm text-gray-500">Você ainda não concedeu permissões.</p>
+                <p className="text-sm text-gray-500">VocÃª ainda nÃ£o concedeu permissÃµes.</p>
               )}
 
               {permissoes.map((item) => (
@@ -241,7 +241,7 @@ export default function Permissoes() {
                       {item.profissional.nome} {item.profissional.especialidade ? `(${item.profissional.especialidade})` : ''}
                     </p>
                     <p className="text-sm text-gray-500">
-                      Acesso: {item.nivelAcesso} • Expira em: {formatarExpiracao(item.expiraEm)} • Status: {item.status}
+                      Acesso: {item.nivelAcesso} â€¢ Expira em: {formatarExpiracao(item.expiraEm)} â€¢ Status: {item.status}
                     </p>
                   </div>
                   <button

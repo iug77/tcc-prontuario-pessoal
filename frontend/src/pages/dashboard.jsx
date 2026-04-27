@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { API_URL } from '../config';\nimport { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
@@ -40,7 +40,7 @@ export default function Dashboard() {
         const dadosMensagens = await respostaMensagens.json();
 
         if (!respostaDashboard.ok) {
-          setErro(dadosDashboard.erro || 'Não foi possível carregar o dashboard.');
+          setErro(dadosDashboard.erro || 'NÃ£o foi possÃ­vel carregar o dashboard.');
 
           if (respostaDashboard.status === 401 || respostaDashboard.status === 403) {
             localStorage.removeItem('token');
@@ -57,7 +57,7 @@ export default function Dashboard() {
         setTotalMensagens(dadosMensagens.totalMensagens || 0);
       } catch (error) {
         console.error('Erro ao carregar dashboard do paciente:', error);
-        setErro('Erro de conexão com o servidor.');
+        setErro('Erro de conexÃ£o com o servidor.');
       } finally {
         setCarregando(false);
       }
@@ -81,7 +81,7 @@ export default function Dashboard() {
           setTotalMensagens(dadosMensagens.totalMensagens || 0);
         }
       } catch {
-        // Evita ruído de erro em polling
+        // Evita ruÃ­do de erro em polling
       }
     }, 8000);
 
@@ -104,7 +104,7 @@ export default function Dashboard() {
 
   const formatarDataRegistro = (dataIso) => {
     if (!dataIso) {
-      return 'Data não informada';
+      return 'Data nÃ£o informada';
     }
 
     return new Date(dataIso).toLocaleDateString('pt-BR', {
@@ -118,11 +118,11 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-4xl mx-auto">
         
-       {/* Cabeçalho do Dashboard */}
+       {/* CabeÃ§alho do Dashboard */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6 flex justify-between items-center flex-wrap gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Olá, {paciente?.nome || 'Paciente'}</h1>
-            <p className="text-gray-500">Aqui está o resumo da sua saúde. Permissões ativas: {totalPermissoesAtivas}</p>
+            <h1 className="text-2xl font-bold text-gray-800">OlÃ¡, {paciente?.nome || 'Paciente'}</h1>
+            <p className="text-gray-500">Aqui estÃ¡ o resumo da sua saÃºde. PermissÃµes ativas: {totalPermissoesAtivas}</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <button 
@@ -132,19 +132,19 @@ export default function Dashboard() {
               }}
               className="bg-green-50 text-green-700 px-4 py-2 rounded-lg font-medium hover:bg-green-100 transition-colors border border-green-200"
             >
-              💬 Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
+              ðŸ’¬ Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
             </button>
             <button 
               onClick={() => navigate('/auditoria')}
               className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors border border-indigo-200"
             >
-              📋 Logs (LGPD)
+              ðŸ“‹ Logs (LGPD)
             </button>
             <button 
               onClick={() => navigate('/permissoes')}
               className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors border border-gray-200"
             >
-              🔒 Permissões
+              ðŸ”’ PermissÃµes
             </button>
             <button 
               onClick={() => navigate('/novo-registro')}
@@ -156,7 +156,7 @@ export default function Dashboard() {
               onClick={() => navigate('/meus-registros')}
               className="bg-teal-50 text-teal-700 px-4 py-2 rounded-lg font-medium hover:bg-teal-100 transition-colors border border-teal-200"
             >
-              🧾 Ver Registros
+              ðŸ§¾ Ver Registros
             </button>
             <button
               onClick={handleLogout}
@@ -181,7 +181,7 @@ export default function Dashboard() {
           {carregando && <p className="text-sm text-gray-500">Carregando registros...</p>}
 
           {!carregando && !erro && registros.length === 0 && (
-            <p className="text-sm text-gray-500">Você ainda não adicionou registros.</p>
+            <p className="text-sm text-gray-500">VocÃª ainda nÃ£o adicionou registros.</p>
           )}
 
           {!carregando && !erro && registros.length > 0 && (

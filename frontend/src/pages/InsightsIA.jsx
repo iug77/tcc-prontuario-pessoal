@@ -1,3 +1,4 @@
+import { API_URL } from '../config';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -53,11 +54,11 @@ export default function InsightsIA() {
       if (resAtual.ok) {
         setInsight(dadosAtual.insight);
       } else if (resAtual.status !== 404) {
-        setErro(dadosAtual.erro || 'Não foi possível carregar insights.');
+        setErro(dadosAtual.erro || 'NÃ£o foi possÃ­vel carregar insights.');
       }
     } catch (error) {
       console.error('Erro ao carregar insights IA:', error);
-      setErro('Erro de conexão com o servidor.');
+      setErro('Erro de conexÃ£o com o servidor.');
     } finally {
       setCarregando(false);
     }
@@ -82,7 +83,7 @@ export default function InsightsIA() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro || 'Não foi possível gerar insights.');
+        setErro(dados.erro || 'NÃ£o foi possÃ­vel gerar insights.');
         return;
       }
 
@@ -90,7 +91,7 @@ export default function InsightsIA() {
       await carregarInsights();
     } catch (error) {
       console.error('Erro ao gerar insights:', error);
-      setErro('Erro de conexão com o servidor.');
+      setErro('Erro de conexÃ£o com o servidor.');
     } finally {
       setGerando(false);
     }
@@ -120,7 +121,7 @@ export default function InsightsIA() {
 
       const dados = await resposta.json();
       if (!resposta.ok) {
-        setErro(dados.erro || 'Não foi possível salvar feedback.');
+        setErro(dados.erro || 'NÃ£o foi possÃ­vel salvar feedback.');
         return;
       }
 
@@ -134,7 +135,7 @@ export default function InsightsIA() {
       setFeedbackTexto('');
     } catch (error) {
       console.error('Erro ao enviar feedback:', error);
-      setErro('Erro de conexão com o servidor.');
+      setErro('Erro de conexÃ£o com o servidor.');
     }
   };
 
@@ -152,7 +153,7 @@ export default function InsightsIA() {
               onClick={() => navigate('/dashboard-profissional')}
               className="text-sm text-gray-500 hover:text-gray-800 mb-1"
             >
-              ← Voltar
+              â† Voltar
             </button>
             <h1 className="text-2xl font-bold text-gray-800">Insights IA</h1>
             <p className="text-gray-500">
@@ -174,18 +175,18 @@ export default function InsightsIA() {
           <div className="p-6 bg-white rounded-xl text-gray-500">Carregando insights...</div>
         ) : !insight ? (
           <div className="p-6 bg-white rounded-xl text-gray-500 border border-gray-100">
-            Ainda não há insights gerados para este paciente. Clique em "Gerar Insights" para começar.
+            Ainda nÃ£o hÃ¡ insights gerados para este paciente. Clique em "Gerar Insights" para comeÃ§ar.
           </div>
         ) : (
           <>
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-              <p className="text-sm text-gray-500 mb-2">Resumo Clínico Assistivo</p>
+              <p className="text-sm text-gray-500 mb-2">Resumo ClÃ­nico Assistivo</p>
               <p className="text-gray-800">{insight.resumoClinico}</p>
               <div className="mt-4 flex gap-2 flex-wrap text-xs">
                 <span className="px-2 py-1 rounded bg-cyan-100 text-cyan-700">Modelo: {insight.modelo}</span>
                 <span className="px-2 py-1 rounded bg-gray-100 text-gray-700">Status: {insight.status}</span>
                 <span className="px-2 py-1 rounded bg-green-100 text-green-700">
-                  Confiança: {insight.confiancaGeral ? `${Math.round(insight.confiancaGeral * 100)}%` : '-'}
+                  ConfianÃ§a: {insight.confiancaGeral ? `${Math.round(insight.confiancaGeral * 100)}%` : '-'}
                 </span>
               </div>
             </div>
@@ -208,9 +209,9 @@ export default function InsightsIA() {
               </div>
 
               <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                <h2 className="font-bold text-gray-800 mb-3">Tendências</h2>
+                <h2 className="font-bold text-gray-800 mb-3">TendÃªncias</h2>
                 {tendencias.length === 0 ? (
-                  <p className="text-sm text-gray-500">Sem tendências detectadas.</p>
+                  <p className="text-sm text-gray-500">Sem tendÃªncias detectadas.</p>
                 ) : (
                   <ul className="space-y-2">
                     {tendencias.map((item, idx) => (
@@ -224,9 +225,9 @@ export default function InsightsIA() {
               </div>
 
               <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                <h2 className="font-bold text-gray-800 mb-3">Pendências</h2>
+                <h2 className="font-bold text-gray-800 mb-3">PendÃªncias</h2>
                 {pendencias.length === 0 ? (
-                  <p className="text-sm text-gray-500">Sem pendências mapeadas.</p>
+                  <p className="text-sm text-gray-500">Sem pendÃªncias mapeadas.</p>
                 ) : (
                   <ul className="space-y-2">
                     {pendencias.map((item, idx) => (
@@ -239,9 +240,9 @@ export default function InsightsIA() {
               </div>
 
               <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                <h2 className="font-bold text-gray-800 mb-3">Recomendações de Revisão</h2>
+                <h2 className="font-bold text-gray-800 mb-3">RecomendaÃ§Ãµes de RevisÃ£o</h2>
                 {recomendacoes.length === 0 ? (
-                  <p className="text-sm text-gray-500">Sem recomendações.</p>
+                  <p className="text-sm text-gray-500">Sem recomendaÃ§Ãµes.</p>
                 ) : (
                   <ul className="space-y-2 list-disc list-inside text-sm text-gray-700">
                     {recomendacoes.map((item, idx) => (
@@ -257,7 +258,7 @@ export default function InsightsIA() {
               <textarea
                 value={feedbackTexto}
                 onChange={(e) => setFeedbackTexto(e.target.value)}
-                placeholder="Ex.: insight útil para triagem, mas faltou detalhe em exames laboratoriais."
+                placeholder="Ex.: insight Ãºtil para triagem, mas faltou detalhe em exames laboratoriais."
                 className="w-full min-h-24 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 outline-none"
               />
               <div className="mt-3 flex gap-2">
@@ -279,9 +280,9 @@ export default function InsightsIA() {
         )}
 
         <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-          <h2 className="font-bold text-gray-800 mb-3">Histórico de Gerações</h2>
+          <h2 className="font-bold text-gray-800 mb-3">HistÃ³rico de GeraÃ§Ãµes</h2>
           {historico.length === 0 ? (
-            <p className="text-sm text-gray-500">Sem histórico ainda.</p>
+            <p className="text-sm text-gray-500">Sem histÃ³rico ainda.</p>
           ) : (
             <div className="space-y-2">
               {historico.map((item) => (
@@ -289,7 +290,7 @@ export default function InsightsIA() {
                   <div>
                     <p className="font-medium text-gray-800">{item.resumoClinico}</p>
                     <p className="text-xs text-gray-500">
-                      {new Date(item.criadoEm).toLocaleString('pt-BR')} • {item.modelo}
+                      {new Date(item.criadoEm).toLocaleString('pt-BR')} â€¢ {item.modelo}
                     </p>
                   </div>
                   <span className="text-xs px-2 py-1 h-fit rounded bg-gray-200 text-gray-700">{item.status}</span>
@@ -300,7 +301,7 @@ export default function InsightsIA() {
         </div>
 
         <p className="text-xs text-gray-500">
-          Insight assistivo por IA. Não substitui decisão clínica profissional.
+          Insight assistivo por IA. NÃ£o substitui decisÃ£o clÃ­nica profissional.
         </p>
       </div>
     </div>

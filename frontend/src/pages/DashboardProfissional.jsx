@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { API_URL } from '../config';\nimport { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function DashboardProfissional() {
@@ -40,7 +40,7 @@ export default function DashboardProfissional() {
         const dadosMensagens = await respostaMensagens.json();
 
         if (!respostaDashboard.ok) {
-          setErro(dadosDashboard.erro || 'Não foi possível carregar os dados do dashboard.');
+          setErro(dadosDashboard.erro || 'NÃ£o foi possÃ­vel carregar os dados do dashboard.');
 
           if (respostaDashboard.status === 401 || respostaDashboard.status === 403) {
             localStorage.removeItem('token');
@@ -56,7 +56,7 @@ export default function DashboardProfissional() {
         setTotalMensagens(dadosMensagens.totalMensagens || 0);
       } catch (error) {
         console.error('Erro ao carregar dashboard profissional:', error);
-        setErro('Erro de conexão com o servidor.');
+        setErro('Erro de conexÃ£o com o servidor.');
       } finally {
         setCarregando(false);
       }
@@ -80,7 +80,7 @@ export default function DashboardProfissional() {
           setTotalMensagens(dadosMensagens.totalMensagens || 0);
         }
       } catch {
-        // Evita ruído de erro em polling
+        // Evita ruÃ­do de erro em polling
       }
     }, 8000);
 
@@ -102,7 +102,7 @@ export default function DashboardProfissional() {
 
   const formatarExpiracao = (dataIso, status) => {
     if (!dataIso) {
-      return 'Sem expiração';
+      return 'Sem expiraÃ§Ã£o';
     }
 
     if (status === 'Inativo') {
@@ -123,12 +123,12 @@ export default function DashboardProfissional() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         
-        {/* Cabeçalho do Médico */}
+        {/* CabeÃ§alho do MÃ©dico */}
         <div className="bg-white rounded-xl shadow-sm p-6 flex justify-between items-center border-l-4 border-teal-500">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Olá, {profissional?.nome || 'Profissional'}</h1>
+            <h1 className="text-2xl font-bold text-gray-800">OlÃ¡, {profissional?.nome || 'Profissional'}</h1>
             <p className="text-gray-500">
-              CRM: {profissional?.crm || 'Não informado'} | Especialidade: {profissional?.especialidade || 'Não informada'}
+              CRM: {profissional?.crm || 'NÃ£o informado'} | Especialidade: {profissional?.especialidade || 'NÃ£o informada'}
             </p>
           </div>
           <div className="flex gap-3">
@@ -136,7 +136,7 @@ export default function DashboardProfissional() {
               onClick={() => navigate('/auditoria')}
               className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors border border-indigo-200"
             >
-              📋 Auditoria
+              ðŸ“‹ Auditoria
             </button>
             <button 
               onClick={() => {
@@ -145,7 +145,7 @@ export default function DashboardProfissional() {
               }}
               className="bg-green-50 text-green-700 px-4 py-2 rounded-lg font-medium hover:bg-green-100 transition-colors border border-green-200"
             >
-              💬 Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
+              ðŸ’¬ Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
             </button>
             <button 
               onClick={handleLogout}
@@ -185,9 +185,9 @@ export default function DashboardProfissional() {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200 text-sm text-gray-600 uppercase tracking-wider">
                   <th className="p-4 font-semibold">Paciente</th>
-                  <th className="p-4 font-semibold">Nível de Permissão</th>
-                  <th className="p-4 font-semibold">Expiração</th>
-                  <th className="p-4 font-semibold text-center">Ações</th>
+                  <th className="p-4 font-semibold">NÃ­vel de PermissÃ£o</th>
+                  <th className="p-4 font-semibold">ExpiraÃ§Ã£o</th>
+                  <th className="p-4 font-semibold text-center">AÃ§Ãµes</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -230,7 +230,7 @@ export default function DashboardProfissional() {
                               : 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm'
                           }`}
                         >
-                          Prontuário
+                          ProntuÃ¡rio
                         </button>
                       </div>
                     </td>
