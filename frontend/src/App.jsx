@@ -1,13 +1,12 @@
 import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 import Login from './pages/login';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/dashboard';
 import NovoRegistro from './pages/novoregistro';
 import Permissoes from './pages/Permissoes';
 import Auditoria from './pages/Auditoria';
 import Chat from './pages/Chat';
 import DashboardProfissional from './pages/DashboardProfissional';
 import Visualizador from './pages/Visualizador';
-import MeusRegistros from './pages/MeusRegistros';
 
 const obterSessao = () => {
   const token = localStorage.getItem('token');
