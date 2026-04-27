@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../config';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -24,8 +25,8 @@ export default function Login() {
     if (isCadastro) {
       const endpointCadastro =
         tipoUsuario === 'paciente'
-          ? 'http://localhost:3000/api/pacientes'
-          : 'http://localhost:3000/api/profissionais';
+          ? `${API_URL}/api/pacientes`
+          : `${API_URL}/api/profissionais`;
 
       try {
         const payload = {
@@ -63,8 +64,8 @@ export default function Login() {
       try {
         const endpointLogin =
           tipoUsuario === 'paciente'
-            ? 'http://localhost:3000/api/pacientes/login'
-            : 'http://localhost:3000/api/profissionais/login';
+            ? `${API_URL}/api/pacientes/login`
+            : `${API_URL}/api/profissionais/login`;
 
         const resposta = await fetch(endpointLogin, {
           method: 'POST',
