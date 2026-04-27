@@ -1,4 +1,5 @@
-import { API_URL } from '../config';\nimport { useEffect, useState } from 'react';
+import { API_URL } from '../config';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Visualizador() {
