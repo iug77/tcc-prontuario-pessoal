@@ -34,7 +34,7 @@ export default function MeusRegistros() {
         const dados = await resposta.json();
 
         if (!resposta.ok) {
-          setErro(dados.erro || 'NÃ£o foi possÃ­vel carregar seus registros.');
+          setErro(dados.erro || 'Não foi possível carregar seus registros.');
           return;
         }
 
@@ -46,7 +46,7 @@ export default function MeusRegistros() {
         }
       } catch (error) {
         console.error('Erro ao carregar registros do paciente:', error);
-        setErro('Erro de conexÃ£o com o servidor.');
+        setErro('Erro de conexão com o servidor.');
       } finally {
         setCarregando(false);
       }
@@ -84,7 +84,7 @@ export default function MeusRegistros() {
       receita: 'Receita',
       medicamento: 'Medicamento',
       alergia: 'Alergia',
-      doenca: 'DoenÃ§a',
+      doenca: 'Doença',
       cirurgia: 'Cirurgia'
     };
     return tipos[tipo] || tipo;
@@ -188,7 +188,7 @@ export default function MeusRegistros() {
                 <option value="receita">Receita</option>
                 <option value="medicamento">Medicamento</option>
                 <option value="alergia">Alergia</option>
-                <option value="doenca">DoenÃ§a</option>
+                <option value="doenca">Doença</option>
                 <option value="cirurgia">Cirurgia</option>
               </select>
 
@@ -228,8 +228,8 @@ export default function MeusRegistros() {
                       <p className="font-medium text-gray-800">{formatarData(registroSelecionado.data)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Ã“rgÃ£o / Sistema</p>
-                      <p className="font-medium text-gray-800">{registroSelecionado.orgao || 'NÃ£o informado'}</p>
+                      <p className="text-sm text-gray-500 mb-1">Órgão / Sistema</p>
+                      <p className="font-medium text-gray-800">{registroSelecionado.orgao || 'Não informado'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 mb-1">Arquivo</p>
@@ -254,13 +254,13 @@ export default function MeusRegistros() {
                   ) : (
                     <iframe
                       src={registroSelecionado.arquivoUrl}
-                      title={nomeArquivo || 'VisualizaÃ§Ã£o do documento'}
+                      title={nomeArquivo || 'Visualização do documento'}
                       className="w-full h-full bg-white"
                     />
                   )
                 ) : (
                   <div className="text-center">
-                    <p className="text-gray-500 font-medium">Arquivo nÃ£o disponÃ­vel</p>
+                    <p className="text-gray-500 font-medium">Arquivo não disponível</p>
                   </div>
                 )}
               </div>

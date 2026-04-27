@@ -54,7 +54,7 @@ export default function InsightsIA() {
       if (resAtual.ok) {
         setInsight(dadosAtual.insight);
       } else if (resAtual.status !== 404) {
-        setErro(dadosAtual.erro || 'NÃ£o foi possÃ­vel carregar insights.');
+        setErro(dadosAtual.erro || 'Não foi possível carregar insights.');
       }
     } catch (error) {
       console.error('Erro ao carregar insights IA:', error);
@@ -83,7 +83,7 @@ export default function InsightsIA() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro || 'NÃ£o foi possÃ­vel gerar insights.');
+        setErro(dados.erro || 'Não foi possível gerar insights.');
         return;
       }
 
@@ -121,7 +121,7 @@ export default function InsightsIA() {
 
       const dados = await resposta.json();
       if (!resposta.ok) {
-        setErro(dados.erro || 'NÃ£o foi possÃ­vel salvar feedback.');
+        setErro(dados.erro || 'Não foi possível salvar feedback.');
         return;
       }
 
@@ -175,18 +175,18 @@ export default function InsightsIA() {
           <div className="p-6 bg-white rounded-xl text-gray-500">Carregando insights...</div>
         ) : !insight ? (
           <div className="p-6 bg-white rounded-xl text-gray-500 border border-gray-100">
-            Ainda nÃ£o hÃ¡ insights gerados para este paciente. Clique em "Gerar Insights" para comeÃ§ar.
+            Ainda não há insights gerados para este paciente. Clique em "Gerar Insights" para começar.
           </div>
         ) : (
           <>
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-              <p className="text-sm text-gray-500 mb-2">Resumo ClÃ­nico Assistivo</p>
+              <p className="text-sm text-gray-500 mb-2">Resumo Clínico Assistivo</p>
               <p className="text-gray-800">{insight.resumoClinico}</p>
               <div className="mt-4 flex gap-2 flex-wrap text-xs">
                 <span className="px-2 py-1 rounded bg-cyan-100 text-cyan-700">Modelo: {insight.modelo}</span>
                 <span className="px-2 py-1 rounded bg-gray-100 text-gray-700">Status: {insight.status}</span>
                 <span className="px-2 py-1 rounded bg-green-100 text-green-700">
-                  ConfianÃ§a: {insight.confiancaGeral ? `${Math.round(insight.confiancaGeral * 100)}%` : '-'}
+                  Confiança: {insight.confiancaGeral ? `${Math.round(insight.confiancaGeral * 100)}%` : '-'}
                 </span>
               </div>
             </div>
@@ -209,9 +209,9 @@ export default function InsightsIA() {
               </div>
 
               <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                <h2 className="font-bold text-gray-800 mb-3">TendÃªncias</h2>
+                <h2 className="font-bold text-gray-800 mb-3">Tendências</h2>
                 {tendencias.length === 0 ? (
-                  <p className="text-sm text-gray-500">Sem tendÃªncias detectadas.</p>
+                  <p className="text-sm text-gray-500">Sem tendências detectadas.</p>
                 ) : (
                   <ul className="space-y-2">
                     {tendencias.map((item, idx) => (
@@ -225,9 +225,9 @@ export default function InsightsIA() {
               </div>
 
               <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                <h2 className="font-bold text-gray-800 mb-3">PendÃªncias</h2>
+                <h2 className="font-bold text-gray-800 mb-3">Pendências</h2>
                 {pendencias.length === 0 ? (
-                  <p className="text-sm text-gray-500">Sem pendÃªncias mapeadas.</p>
+                  <p className="text-sm text-gray-500">Sem pendências mapeadas.</p>
                 ) : (
                   <ul className="space-y-2">
                     {pendencias.map((item, idx) => (
@@ -240,7 +240,7 @@ export default function InsightsIA() {
               </div>
 
               <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                <h2 className="font-bold text-gray-800 mb-3">RecomendaÃ§Ãµes de RevisÃ£o</h2>
+                <h2 className="font-bold text-gray-800 mb-3">Recomendações de Revisão</h2>
                 {recomendacoes.length === 0 ? (
                   <p className="text-sm text-gray-500">Sem recomendaÃ§Ãµes.</p>
                 ) : (

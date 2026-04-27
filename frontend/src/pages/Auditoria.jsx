@@ -40,7 +40,7 @@ export default function Auditoria() {
         const dados = await resposta.json();
 
         if (!resposta.ok) {
-          setErro(dados.erro || 'NÃ£o foi possÃ­vel carregar os logs de auditoria.');
+          setErro(dados.erro || 'Não foi possível carregar os logs de auditoria.');
 
           if (resposta.status === 401 || resposta.status === 403) {
             localStorage.removeItem('token');
@@ -54,7 +54,7 @@ export default function Auditoria() {
         setLogs(dados.logs || []);
       } catch (error) {
         console.error('Erro ao carregar auditoria:', error);
-        setErro('Erro de conexÃ£o com o servidor.');
+        setErro('Erro de conexão com o servidor.');
       } finally {
         setCarregando(false);
       }
@@ -75,11 +75,11 @@ export default function Auditoria() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         
-        {/* CabeÃ§alho */}
+        {/* Cabeçalho */}
         <div className="flex items-center justify-between bg-white rounded-xl shadow-sm p-6 border-l-4 border-indigo-600">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Auditoria e Logs (LGPD)</h1>
-            <p className="text-gray-500">Rastreabilidade completa de interaÃ§Ãµes para {usuario?.tipo === 'profissional' ? 'profissional' : 'paciente'}</p>
+            <p className="text-gray-500">Rastreabilidade completa de interações para {usuario?.tipo === 'profissional' ? 'profissional' : 'paciente'}</p>
           </div>
           <button 
             onClick={() => navigate(rotaVoltar)}
@@ -96,8 +96,8 @@ export default function Auditoria() {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200 text-sm text-gray-600 uppercase tracking-wider">
                   <th className="p-4 font-semibold">Data e Hora</th>
-                  <th className="p-4 font-semibold">UsuÃ¡rio / Agente</th>
-                  <th className="p-4 font-semibold">AÃ§Ã£o Realizada</th>
+                  <th className="p-4 font-semibold">Usuário / Agente</th>
+                  <th className="p-4 font-semibold">Ação Realizada</th>
                   <th className="p-4 font-semibold">Documento / Recurso</th>
                   <th className="p-4 font-semibold">Status</th>
                 </tr>
@@ -144,10 +144,10 @@ export default function Auditoria() {
             </table>
           </div>
           
-          {/* RodapÃ© da Tabela */}
+          {/* Rodapé da Tabela */}
           <div className="bg-gray-50 p-4 border-t border-gray-200 text-sm text-gray-500 flex justify-between items-center">
             <p>Mostrando os {logs.length} registros mais recentes.</p>
-            <button type="button" className="text-indigo-600 font-medium hover:underline">Exportar RelatÃ³rio (PDF)</button>
+            <button type="button" className="text-indigo-600 font-medium hover:underline">Exportar Relatório (PDF)</button>
           </div>
         </div>
 

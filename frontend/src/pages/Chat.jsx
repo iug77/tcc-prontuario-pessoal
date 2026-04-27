@@ -45,7 +45,7 @@ export default function Chat() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro || 'NÃ£o foi possÃ­vel carregar os contatos.');
+        setErro(dados.erro || 'Não foi possível carregar os contatos.');
         return;
       }
 
@@ -105,7 +105,7 @@ export default function Chat() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro || 'NÃ£o foi possÃ­vel carregar as mensagens.');
+        setErro(dados.erro || 'Não foi possível carregar as mensagens.');
         return;
       }
 
