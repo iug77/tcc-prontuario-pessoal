@@ -36,7 +36,7 @@ export default function Chat() {
       setErro('');
       setCarregandoContatos(true);
 
-      const resposta = await fetch('http://localhost:3000/api/chat/contatos', {
+      const resposta = await fetch(${API_URL}/api/chat/contatos', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -70,7 +70,7 @@ export default function Chat() {
     }
 
     try {
-      await fetch('http://localhost:3000/api/chat/marcar-lidas', {
+      await fetch(${API_URL}/api/chat/marcar-lidas', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`
@@ -96,7 +96,7 @@ export default function Chat() {
     try {
       setErro('');
 
-      const resposta = await fetch(`http://localhost:3000/api/chat/mensagens/${contatoId}`, {
+      const resposta = await fetch(`${API_URL}/api/chat/mensagens/${contatoId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -148,7 +148,7 @@ export default function Chat() {
       setEnviando(true);
       setErro('');
 
-      const resposta = await fetch('http://localhost:3000/api/chat/mensagens', {
+      const resposta = await fetch(${API_URL}/api/chat/mensagens', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -302,3 +302,4 @@ export default function Chat() {
     </div>
   );
 }
+

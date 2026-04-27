@@ -25,7 +25,7 @@ export default function MeusRegistros() {
         setCarregando(true);
         setErro('');
 
-        const resposta = await fetch('http://localhost:3000/api/pacientes/registros', {
+        const resposta = await fetch(${API_URL}/api/pacientes/registros', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -58,7 +58,7 @@ export default function MeusRegistros() {
   const carregarDetalhes = async (registroId) => {
     try {
       const token = localStorage.getItem('token');
-      const resposta = await fetch(`http://localhost:3000/api/pacientes/registros/${registroId}`, {
+      const resposta = await fetch(`${API_URL}/api/pacientes/registros/${registroId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -271,3 +271,5 @@ export default function MeusRegistros() {
     </div>
   );
 }
+
+

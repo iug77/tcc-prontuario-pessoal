@@ -37,10 +37,10 @@ export default function InsightsIA() {
       setErro('');
 
       const [resAtual, resHistorico] = await Promise.all([
-        fetch(`http://localhost:3000/api/ai/insights/${pacienteId}`, {
+        fetch(`${API_URL}/api/ai/insights/${pacienteId}`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch(`http://localhost:3000/api/ai/insights/${pacienteId}/historico`, {
+        fetch(`${API_URL}/api/ai/insights/${pacienteId}/historico`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
@@ -75,7 +75,7 @@ export default function InsightsIA() {
       setGerando(true);
       setErro('');
 
-      const resposta = await fetch(`http://localhost:3000/api/ai/insights/gerar/${pacienteId}`, {
+      const resposta = await fetch(`${API_URL}/api/ai/insights/gerar/${pacienteId}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -107,7 +107,7 @@ export default function InsightsIA() {
     }
 
     try {
-      const resposta = await fetch(`http://localhost:3000/api/ai/insights/${insight.id}/feedback`, {
+      const resposta = await fetch(`${API_URL}/api/ai/insights/${insight.id}/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -307,3 +307,5 @@ export default function InsightsIA() {
     </div>
   );
 }
+
+

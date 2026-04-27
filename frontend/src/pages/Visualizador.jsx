@@ -33,7 +33,7 @@ export default function Visualizador() {
         setCarregando(true);
         setErro('');
 
-        const resposta = await fetch(`http://localhost:3000/api/profissionais/registros/${pacienteId}`, {
+        const resposta = await fetch(`${API_URL}/api/profissionais/registros/${pacienteId}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -74,7 +74,7 @@ export default function Visualizador() {
       setErroInsight('');
       setInsightRegistro(null);
 
-      const respostaRegistro = await fetch(`http://localhost:3000/api/profissionais/registros/${pacienteId}/${registroId}`, {
+      const respostaRegistro = await fetch(`${API_URL}/api/profissionais/registros/${pacienteId}/${registroId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -86,7 +86,7 @@ export default function Visualizador() {
         setRegistroSelecionado(dadosRegistro.registro || null);
 
         const respostaInsight = await fetch(
-          `http://localhost:3000/api/profissionais/registros/${pacienteId}/${registroId}/insight`,
+          `${API_URL}/api/profissionais/registros/${pacienteId}/${registroId}/insight`,
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -119,7 +119,7 @@ export default function Visualizador() {
       setErroInsight('');
 
       const respostaInsight = await fetch(
-        `http://localhost:3000/api/profissionais/registros/${pacienteId}/${registroSelecionado.id}/insight/gerar`,
+        `${API_URL}/api/profissionais/registros/${pacienteId}/${registroSelecionado.id}/insight/gerar`,
         {
           method: 'POST',
           headers: {
@@ -411,3 +411,4 @@ export default function Visualizador() {
     </div>
   );
 }
+

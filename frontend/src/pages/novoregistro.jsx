@@ -76,7 +76,7 @@ export default function NovoRegistro() {
         return;
       }
 
-      const resposta = await fetch('http://localhost:3000/api/pacientes/registros', {
+      const resposta = await fetch(${API_URL}/api/pacientes/registros', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -286,3 +286,4 @@ export default function NovoRegistro() {
     </div>
   );
 }
+
