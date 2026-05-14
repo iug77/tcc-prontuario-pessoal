@@ -59,6 +59,23 @@ body {
 }
 
 /* Force specific max-widths */
+.max-w-md {
+  max-width: 28rem !important;
+}
+
+/* Ensure flex centering for login */
+.flex {
+  display: flex !important;
+}
+
+.items-center {
+  align-items: center !important;
+}
+
+.justify-center {
+  justify-content: center !important;
+}
+
 .max-w-2xl {
   max-width: 42rem !important;
 }
