@@ -29,11 +29,66 @@ body {
   font-size: 1rem;
   line-height: 1.5;
   color: #1f2937;
-  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 50%, #ffffff 100%);
   min-height: 100vh;
   font-feature-settings: "rounding" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==================== CONTAINERS ==================== */
+
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1536px;
+  }
+}
+
+.container-main {
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 /* ==================== TYPOGRAPHY ==================== */
@@ -171,6 +226,7 @@ input[type="submit"] {
   border-radius: 0.75rem;
   transition: all 200ms ease;
   padding: 0.75rem 1.5rem;
+  white-space: nowrap;
 }
 
 button {
@@ -248,12 +304,6 @@ tbody tr:hover {
 }
 
 /* ==================== UTILITIES & HELPERS ==================== */
-
-.container-main {
-  max-width: 80rem;
-  margin: 0 auto;
-  padding: 1.5rem;
-}
 
 .shadow-md {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
@@ -353,10 +403,6 @@ tbody tr:hover {
 
   h3 {
     font-size: 1.25rem;
-  }
-
-  .container-main {
-    padding: 1rem;
   }
 
   table {
