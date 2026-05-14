@@ -62,24 +62,25 @@ function PrivateRoute({ children, tiposPermitidos }) {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={(
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          )}
-        />
-        <Route
-          path="/dashboard"
-          element={(
-            <PrivateRoute tiposPermitidos={['paciente']}>
-              <Dashboard />
-            </PrivateRoute>
-          )}
-        />
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 50%, #ffffff 100%)' }}>
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={(
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            )}
+          />
+          <Route
+            path="/dashboard"
+            element={(
+              <PrivateRoute tiposPermitidos={['paciente']}>
+                <Dashboard />
+              </PrivateRoute>
+            )}
+          />
         <Route
           path="/novo-registro"
           element={(
@@ -147,6 +148,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
+    </div>
   );
 }
 

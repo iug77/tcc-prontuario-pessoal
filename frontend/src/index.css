@@ -24,7 +24,7 @@ html {
 }
 
 body {
-  @apply bg-gradient-to-br from-dark-50 via-white to-dark-100 text-dark-800 font-sans antialiased;
+  @apply bg-white text-dark-800 font-sans antialiased;
   font-feature-settings: "rounding" 1;
 }
 
@@ -35,7 +35,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  @apply text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent;
+  @apply text-4xl md:text-5xl font-extrabold text-primary-600;
 }
 
 h2 {
@@ -68,9 +68,9 @@ p {
   }
 
   .btn-primary {
-    @apply btn bg-gradient-to-r from-primary-500 to-primary-600 text-white 
-           shadow-lg hover:shadow-xl hover:shadow-primary-500/30 hover:-translate-y-0.5
-           focus:ring-primary-500;
+    @apply btn bg-blue-600 text-white 
+           shadow-lg hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5
+           focus:ring-blue-500;
   }
 
   .btn-secondary {
@@ -274,11 +274,11 @@ p {
 }
 
 .gradient-primary {
-  @apply bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700;
+  @apply bg-blue-600;
 }
 
 .gradient-accent {
-  @apply bg-gradient-to-r from-accent-400 via-accent-500 to-accent-600;
+  @apply bg-green-500;
 }
 
 .blur-effect {
@@ -286,7 +286,7 @@ p {
 }
 
 .text-gradient {
-  @apply bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent;
+  @apply text-primary-600 font-bold;
 }
 
 /* ==================== LOADER ==================== */
