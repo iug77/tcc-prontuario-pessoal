@@ -40,6 +40,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 50%, #ffffff 100%);
 }
 
 /* ==================== CONTAINERS ==================== */
@@ -50,6 +51,11 @@ body {
   margin-right: auto;
   padding-left: 1rem;
   padding-right: 1rem;
+}
+
+[class*="max-w-"] {
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
 @media (min-width: 640px) {

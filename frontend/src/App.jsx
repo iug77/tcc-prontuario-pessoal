@@ -62,9 +62,8 @@ function PrivateRoute({ children, tiposPermitidos }) {
 
 function App() {
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 50%, #ffffff 100%)' }}>
-      <BrowserRouter>
-        <Routes>
+    <BrowserRouter>
+      <Routes>
           <Route
             path="/"
             element={(
@@ -148,7 +147,6 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
-    </div>
   );
 }
 
