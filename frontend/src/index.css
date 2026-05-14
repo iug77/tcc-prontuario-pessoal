@@ -4,58 +4,271 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ==================== CUSTOM STYLES ==================== */
+/* ==================== BASE STYLES ==================== */
+
+:root {
+  --primary: #5b7dff;
+  --primary-dark: #3d4fc7;
+  --accent: #22c55e;
+  --dark: #111827;
+  --light: #f9fafb;
+}
+
+* {
+  box-sizing: border-box;
+}
 
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #1f2937;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 50%, #ffffff 100%);
+  min-height: 100vh;
   font-feature-settings: "rounding" 1;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Poppins', 'Inter', sans-serif;
-  font-weight: 700;
-}
+/* ==================== TYPOGRAPHY ==================== */
 
 h1 {
+  margin: 0.5em 0;
+  font-family: 'Poppins', sans-serif;
   font-size: 2.25rem;
   font-weight: 800;
   color: #5b7dff;
   line-height: 2.5rem;
+  letter-spacing: -0.5px;
 }
 
 h2 {
+  margin: 0.75em 0 0.5em;
+  font-family: 'Poppins', sans-serif;
   font-size: 1.875rem;
-  line-height: 2.25rem;
+  font-weight: 700;
   color: #111827;
+  line-height: 2.25rem;
 }
 
 h3 {
+  margin: 0.75em 0 0.5em;
+  font-family: 'Poppins', sans-serif;
   font-size: 1.5rem;
-  line-height: 2rem;
+  font-weight: 700;
   color: #111827;
+  line-height: 2rem;
 }
 
 h4 {
+  margin: 0.75em 0 0.5em;
+  font-family: 'Poppins', sans-serif;
   font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
   line-height: 1.75rem;
-  color: #111827;
 }
 
 h5 {
+  margin: 0.75em 0 0.5em;
+  font-family: 'Poppins', sans-serif;
   font-size: 1.125rem;
-  line-height: 1.75rem;
-  color: #111827;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+h6 {
+  margin: 0.75em 0 0.5em;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
 }
 
 p {
-  font-size: 1rem;
-  line-height: 1.5rem;
+  margin: 0.5em 0;
   color: #4b5563;
+  line-height: 1.6;
+}
+
+a {
+  color: #5b7dff;
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+a:hover {
+  color: #3d4fc7;
+  text-decoration: underline;
+}
+
+/* ==================== FORM ELEMENTS ==================== */
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin: 0.25rem 0;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  background-color: white;
+  color: #1f2937;
+  transition: all 200ms ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #5b7dff;
+  box-shadow: 0 0 0 3px rgba(91, 125, 255, 0.1);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: pointer;
+  accent-color: #5b7dff;
+}
+
+label {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+/* ==================== BUTTONS ==================== */
+
+button,
+input[type="button"],
+input[type="submit"] {
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  border-radius: 0.75rem;
+  transition: all 200ms ease;
+  padding: 0.75rem 1.5rem;
+}
+
+button {
+  background-color: #5b7dff;
+  color: white;
+}
+
+button:hover {
+  background-color: #3d4fc7;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(91, 125, 255, 0.3);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ==================== CARDS & CONTAINERS ==================== */
+
+.card,
+.container {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.card {
+  padding: 1.5rem;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 200ms ease;
+}
+
+/* ==================== TABLES ==================== */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+thead {
+  background-color: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  color: #4b5563;
+}
+
+tbody tr:hover {
+  background-color: #f9fafb;
+  transition: background-color 150ms ease;
+}
+
+/* ==================== UTILITIES & HELPERS ==================== */
+
+.container-main {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+.rounded-xl {
+  border-radius: 0.75rem;
+}
+
+.transparent {
+  background-color: transparent;
 }
 
 /* ==================== ANIMATIONS ==================== */
@@ -80,30 +293,77 @@ p {
   }
 }
 
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
 .animate-slideIn {
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ==================== SCROLLBAR ==================== */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ==================== SCROLLBAR STYLING ==================== */
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
   background-color: #f3f4f6;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
   background-color: #d1d5db;
-  border-radius: 4px;
+  border-radius: 10px;
+  border: 2px solid #f3f4f6;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: #9ca3af;
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 640px) {
+  body {
+    font-size: 0.95rem;
+  }
+
+  h1 {
+    font-size: 1.875rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  .container-main {
+    padding: 1rem;
+  }
+
+  table {
+    font-size: 0.875rem;
+  }
+
+  th, td {
+    padding: 0.5rem;
+  }
 }
