@@ -24,6 +24,12 @@ export default function Chat() {
 
   const contatoAtivo = contatos.find((item) => item.id === contatoAtivoId) || null;
 
+  const tipoContatoLabel = (tipo) => {
+    if (tipo === 'paciente') return 'Paciente';
+    if (tipo === 'profissional') return 'Profissional';
+    return 'Contato';
+  };
+
   const carregarContatos = async () => {
     const token = localStorage.getItem('token');
 
@@ -189,7 +195,7 @@ export default function Chat() {
   return (
     <div className="container-main relative z-10">
       <div className="max-w-6xl mx-auto w-full">
-        <div className="card p-0 overflow-hidden grid grid-cols-1 md:grid-cols-[340px_1fr] min-h-[560px] h-[calc(100vh-10rem)]">
+        <div className="card p-0 overflow-hidden grid grid-cols-1 md:grid-cols-[340px_1fr_320px] min-h-[560px] h-[calc(100vh-10rem)]">
         
         {/* Barra Lateral: Contatos */}
         <aside className="bg-gray-50/60 border-b md:border-b-0 md:border-r border-gray-200 flex flex-col">
@@ -258,6 +264,15 @@ export default function Chat() {
               <p className="text-sm text-gray-500">Sem mensagens ainda. Envie a primeira mensagem.</p>
             )}
 
+            {!erro && !contatoAtivo && (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center max-w-sm">
+                  <p className="m-0 text-gray-900 font-extrabold text-lg">Selecione um contato</p>
+                  <p className="m-0 mt-2 text-sm text-gray-500">Escolha alguém na lista para ver e enviar mensagens.</p>
+                </div>
+              </div>
+            )}
+
             {mensagens.map((mensagem) => {
               const mensagemMinha = mensagem.remetenteTipo === usuario?.tipo;
 
@@ -296,6 +311,42 @@ export default function Chat() {
           </div>
 
         </main>
+
+        {/* Painel de Detalhes */}
+        <aside className="hidden md:flex flex-col bg-white/60 border-l border-gray-200">
+          <div className="p-5 border-b border-gray-200 bg-white/70 backdrop-blur-sm">
+            <h3 className="m-0 text-lg font-extrabold text-gray-900">Detalhes</h3>
+            <p className="m-0 mt-1 text-xs text-gray-500 font-semibold">Informações do contato</p>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-5">
+            {contatoAtivo ? (
+              <div className="chat-details">
+                <div className="chat-details__header">
+                  <div className="chat-avatar chat-avatar--active chat-details__avatar">
+                    {iniciais(contatoAtivo?.nome)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="m-0 font-extrabold text-gray-900 text-lg leading-6 truncate">{contatoAtivo.nome}</p>
+                    <p className="m-0 mt-1 text-sm text-gray-500 font-semibold truncate">{contatoAtivo.subtitulo}</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <span className="chat-badge">{tipoContatoLabel(contatoAtivo.tipo)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="chat-details__section">
+                  <p className="chat-details__label">E-mail</p>
+                  <p className="chat-details__value">{contatoAtivo.email || 'Não informado'}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center text-sm text-gray-500">
+                Selecione um contato para ver detalhes.
+              </div>
+            )}
+          </div>
+        </aside>
         </div>
       </div>
     </div>
