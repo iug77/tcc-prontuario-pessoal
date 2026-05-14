@@ -96,21 +96,21 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+    <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
+      <div className="card max-w-md w-full p-8 md:p-10">
         
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-600 mb-2">Meu Prontuário</h1>
+          <h1 className="mb-2">Meu Prontuário</h1>
           <p className="text-gray-500">Acesse e controle seus dados de saúde</p>
         </div>
 
         {/* Seletor de Perfil */}
-        <div className="flex bg-gray-100 p-1 rounded-lg mb-6">
+        <div className="flex bg-gray-100 p-1.5 rounded-xl mb-8">
           <button
             type="button"
             onClick={() => setTipoUsuario('paciente')}
-            className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
-              tipoUsuario === 'paciente' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'
+            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${
+              tipoUsuario === 'paciente' ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' : 'text-gray-500 bg-transparent hover:text-gray-700'
             }`}
           >
             Sou Paciente
@@ -118,8 +118,8 @@ export default function Login() {
           <button
             type="button"
             onClick={() => setTipoUsuario('profissional')}
-            className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
-              tipoUsuario === 'profissional' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'
+            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${
+              tipoUsuario === 'profissional' ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' : 'text-gray-500 bg-transparent hover:text-gray-700'
             }`}
           >
             Sou Profissional
@@ -128,23 +128,22 @@ export default function Login() {
 
         {/* Mensagem de Feedback (Erro ou Sucesso) */}
         {mensagem && (
-          <div className={`p-3 rounded-lg mb-4 text-sm font-medium text-center ${mensagem.includes('sucesso') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+          <div className={`p-4 rounded-xl mb-6 text-sm font-medium text-center shadow-sm ${mensagem.includes('sucesso') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
             {mensagem}
           </div>
         )}
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-5" onSubmit={handleSubmit}>
           
-          {/* Campo NOME (Aparece em cadastro de paciente e profissional) */}
+          {/* Campo NOME */}
           {isCadastro && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Nome Completo</label>
               <input 
                 type="text" 
                 required
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 placeholder="Ex: João da Silva"
               />
             </div>
@@ -153,23 +152,21 @@ export default function Login() {
           {isCadastro && tipoUsuario === 'profissional' && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CRM (Opcional)</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">CRM (Opcional)</label>
                 <input
                   type="text"
                   value={crm}
                   onChange={(e) => setCrm(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   placeholder="Ex: CRM-SP 123456"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Especialidade (Opcional)</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Especialidade (Opcional)</label>
                 <input
                   type="text"
                   value={especialidade}
                   onChange={(e) => setEspecialidade(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   placeholder="Ex: Cardiologia"
                 />
               </div>
@@ -177,43 +174,42 @@ export default function Login() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">E-mail</label>
             <input 
               type="email" 
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               placeholder="seu@email.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Senha</label>
             <input 
               type="password" 
               required
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               placeholder="••••••••"
             />
           </div>
 
           <button 
             type="submit" 
-            className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors mt-4"
+            className="w-full mt-6"
           >
             {isCadastro ? 'Finalizar Cadastro' : `Entrar como ${tipoUsuario === 'paciente' ? 'Paciente' : 'Profissional'}`}
           </button>
         </form>
 
         {/* Alternador de Cadastro/Login */}
-        <p className="text-center text-sm text-gray-600 mt-6">
+        <p className="text-center text-sm text-gray-500 mt-8">
           {isCadastro ? 'Já tem uma conta?' : 'Não tem uma conta?'} {' '}
           <button
+            type="button"
             onClick={() => setIsCadastro(!isCadastro)}
-            className="text-blue-600 font-semibold hover:underline"
+            className="text-blue-600 font-bold hover:text-blue-700 transition-colors"
           >
             {isCadastro ? 'Faça Login' : 'Cadastre-se'}
           </button>

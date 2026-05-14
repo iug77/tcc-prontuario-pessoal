@@ -116,14 +116,14 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="container-main relative z-10">
+      <div className="max-w-5xl mx-auto w-full">
         
        {/* Cabeçalho do Dashboard */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-6 flex justify-between items-center flex-wrap gap-4">
+        <div className="card p-6 md:p-8 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Olá, {paciente?.nome || 'Paciente'}</h1>
-            <p className="text-gray-500">Aqui está o resumo da sua saúde. Permissões ativas: {totalPermissoesAtivas}</p>
+            <h1 className="mb-2">Olá, {paciente?.nome || 'Paciente'}</h1>
+            <p className="text-gray-500 font-medium text-lg">Resumo da sua saúde • Permissões ativas: <span className="text-blue-600 font-bold">{totalPermissoesAtivas}</span></p>
           </div>
           <div className="flex flex-wrap gap-3">
             <button 
@@ -131,13 +131,13 @@ export default function Dashboard() {
                 setTotalMensagens(0);
                 navigate('/chat');
               }}
-              className="bg-green-50 text-green-700 px-4 py-2 rounded-lg font-medium hover:bg-green-100 transition-colors border border-green-200"
+              className="bg-green-50 text-green-700 px-5 py-2.5 rounded-xl font-bold hover:bg-green-100 transition-all transform hover:scale-105 shadow-sm border border-green-200"
             >
               💬 Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
             </button>
             <button 
               onClick={() => navigate('/auditoria')}
-              className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors border border-indigo-200"
+              className="bg-indigo-50 text-indigo-700 px-5 py-2.5 rounded-xl font-bold hover:bg-indigo-100 transition-all transform hover:scale-105 shadow-sm border border-indigo-200"
             >
               📋 Logs (LGPD)
             </button>
