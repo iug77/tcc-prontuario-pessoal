@@ -11,11 +11,6 @@
   --accent: #22c55e;
   --dark: #111827;
   --light: #f9fafb;
-  --border: #e5e7eb;
-}
-
-* {
-  transition: color 200ms, background-color 200ms;
 }
 
 html {
@@ -23,8 +18,6 @@ html {
 }
 
 body {
-  background-color: white;
-  color: #1f2937;
   font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
   font-feature-settings: "rounding" 1;
   -webkit-font-smoothing: antialiased;
@@ -35,14 +28,38 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Poppins', 'Inter', sans-serif;
   font-weight: 700;
+}
+
+h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #5b7dff;
+  line-height: 2.5rem;
+}
+
+h2 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
   color: #111827;
 }
 
-h1 { font-size: 2.25rem; font-weight: 800; color: #5b7dff; line-height: 2.5rem; }
-h2 { font-size: 1.875rem; line-height: 2.25rem; }
-h3 { font-size: 1.5rem; line-height: 2rem; }
-h4 { font-size: 1.25rem; line-height: 1.75rem; }
-h5 { font-size: 1.125rem; line-height: 1.75rem; }
+h3 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  color: #111827;
+}
+
+h4 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  color: #111827;
+}
+
+h5 {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  color: #111827;
+}
 
 p {
   font-size: 1rem;
@@ -50,66 +67,72 @@ p {
   color: #4b5563;
 }
 
-/* ==================== UTILITÁRIOS ==================== */
+/* ==================== COMPONENTES ==================== */
 
-.container-main {
-  max-width: 80rem;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 1.5rem;
-}
+@layer components {
+  .card {
+    @apply bg-white rounded-lg shadow-sm p-6 border border-gray-100;
+  }
 
-.card {
-  background-color: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
-}
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200 focus:outline-none;
+  }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 1.5rem;
-  font-weight: 500;
-  border-radius: 0.75rem;
-  transition: all 200ms;
-  border: none;
-  cursor: pointer;
-}
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700;
+  }
 
-.btn-primary {
-  background-color: #2563eb;
-  color: white;
-}
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+  }
 
-.btn-primary:hover {
-  background-color: #1d4ed8;
-}
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700;
+  }
 
-.input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background-color: white;
-  border: 2px solid #e5e7eb;
-  border-radius: 0.75rem;
-  font-family: inherit;
-  font-size: 1rem;
-  transition: all 200ms;
-}
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500;
+  }
 
-.input:focus {
-  outline: none;
-  border-color: #5b7dff;
-}
+  .label {
+    @apply block text-sm font-semibold text-gray-700 mb-2;
+  }
 
-.label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0.5rem;
+  .badge {
+    @apply inline-block px-3 py-1 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply bg-green-100 text-green-700;
+  }
+
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-700;
+  }
+
+  .badge-danger {
+    @apply bg-red-100 text-red-700;
+  }
+
+  .alert {
+    @apply p-4 rounded-lg border-l-4;
+  }
+
+  .alert-info {
+    @apply bg-blue-50 border-blue-500 text-blue-700;
+  }
+
+  .alert-success {
+    @apply bg-green-50 border-green-500 text-green-700;
+  }
+
+  .alert-warning {
+    @apply bg-yellow-50 border-yellow-500 text-yellow-700;
+  }
+
+  .alert-danger {
+    @apply bg-red-50 border-red-500 text-red-700;
+  }
 }
 
 /* ==================== ANIMAÇÕES ==================== */
@@ -125,8 +148,21 @@ p {
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .animate-slideIn {
-  animation: slideIn 0.4s ease-out;
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
 }
 
 /* ==================== SCROLL ==================== */
@@ -138,12 +174,12 @@ p {
 
 ::-webkit-scrollbar-track {
   background-color: #f3f4f6;
-  border-radius: 9999px;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
   background-color: #d1d5db;
-  border-radius: 9999px;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
