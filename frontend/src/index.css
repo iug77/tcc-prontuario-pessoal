@@ -15,7 +15,7 @@
 }
 
 * {
-  transition-colors 200ms;
+  transition: color 200ms, background-color 200ms;
 }
 
 html {
