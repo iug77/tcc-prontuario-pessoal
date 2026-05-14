@@ -24,7 +24,7 @@ html {
 }
 
 body {
-  @apply bg-gradient-to-br from-slate-50 via-white to-slate-50 text-dark-800 font-sans antialiased;
+  @apply bg-gradient-to-br from-dark-50 via-white to-dark-100 text-dark-800 font-sans antialiased;
   font-feature-settings: "rounding" 1;
 }
 
