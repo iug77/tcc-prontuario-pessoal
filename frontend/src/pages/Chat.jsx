@@ -11,6 +11,7 @@ export default function Chat() {
   const [erro, setErro] = useState('');
   const [carregandoContatos, setCarregandoContatos] = useState(true);
   const [enviando, setEnviando] = useState(false);
+  const [abaContatos, setAbaContatos] = useState('online');
 
   const usuario = useMemo(() => {
     try {
@@ -199,15 +200,38 @@ export default function Chat() {
         
         {/* Barra Lateral: Contatos */}
         <aside className="bg-gray-50/60 border-b md:border-b-0 md:border-r border-gray-200 flex flex-col">
-          <div className="p-5 border-b border-gray-200 bg-white/70 backdrop-blur-sm flex justify-between items-center gap-3">
-            <h2 className="m-0 text-xl font-extrabold text-gray-900 tracking-tight">Mensagens</h2>
-            <button
-              type="button"
-              onClick={() => navigate(rotaVoltar)}
-              className="btn-link"
-            >
-              ← Voltar
-            </button>
+          <div className="chat-sidehead">
+            <div className="chat-user">
+              <div className="chat-user__avatar">{iniciais(usuario?.nome)}</div>
+              <div className="min-w-0">
+                <p className="chat-user__name">{usuario?.nome || 'Usuário'}</p>
+                <p className="chat-user__meta">{usuario?.tipo || 'Conta'}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate(rotaVoltar)}
+                className="btn-link"
+              >
+                Voltar
+              </button>
+            </div>
+
+            <div className="chat-tabs">
+              <button
+                type="button"
+                onClick={() => setAbaContatos('online')}
+                className={`chat-tab ${abaContatos === 'online' ? 'chat-tab--active' : ''}`}
+              >
+                Online
+              </button>
+              <button
+                type="button"
+                onClick={() => setAbaContatos('historico')}
+                className={`chat-tab ${abaContatos === 'historico' ? 'chat-tab--active' : ''}`}
+              >
+                Histórico
+              </button>
+            </div>
           </div>
           
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -217,6 +241,10 @@ export default function Chat() {
               <p className="text-sm text-gray-500 p-2">
                 Nenhum contato disponível. O chat só é liberado com permissão ativa entre paciente e profissional.
               </p>
+            )}
+
+            {abaContatos === 'historico' && contatos.length > 0 && (
+              <p className="text-xs text-gray-500 px-2">Histórico ainda não disponível. Mostrando conversas ativas.</p>
             )}
 
             {contatos.map((contato) => {
@@ -253,6 +281,10 @@ export default function Chat() {
             <div className="min-w-0">
               <h3 className="m-0 font-extrabold text-gray-900 truncate">{contatoAtivo?.nome || 'Selecione um contato'}</h3>
               <p className="m-0 mt-0.5 text-xs text-gray-500 font-semibold truncate">{contatoAtivo?.subtitulo || 'Sem conversa selecionada'}</p>
+            </div>
+            <div className="ml-auto hidden md:flex items-center gap-2">
+              <span className="chat-pill">Conversas: {contatos.length}</span>
+              <span className="chat-pill">Mensagens: {mensagens.length}</span>
             </div>
           </div>
 
@@ -291,7 +323,7 @@ export default function Chat() {
 
           {/* Campo de Digitação */}
           <div className="p-5 border-t border-gray-200 bg-white/70 backdrop-blur-sm">
-            <form className="flex items-end gap-3" onSubmit={enviarMensagem}>
+            <form className="chat-compose" onSubmit={enviarMensagem}>
               <input 
                 type="text" 
                 placeholder="Digite sua mensagem..." 
@@ -322,6 +354,14 @@ export default function Chat() {
           <div className="flex-1 overflow-y-auto p-5">
             {contatoAtivo ? (
               <div className="chat-details">
+                <div className="chat-actions">
+                  <button type="button" onClick={() => navigate(rotaVoltar)} className="chat-action chat-action--secondary">
+                    Fechar
+                  </button>
+                  <button type="button" disabled className="chat-action">
+                    Encaminhar
+                  </button>
+                </div>
                 <div className="chat-details__header">
                   <div className="chat-avatar chat-avatar--active chat-details__avatar">
                     {iniciais(contatoAtivo?.nome)}
