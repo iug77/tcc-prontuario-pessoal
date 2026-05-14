@@ -338,6 +338,28 @@ button.bg-indigo-50:hover {
   transform: translateY(-3px);
 }
 
+/* Link-style buttons (avoid global gradient button styling) */
+.btn-link {
+  background: transparent;
+  color: #0f766e;
+  box-shadow: none;
+  border: none;
+  padding: 0.375rem 0.625rem;
+  border-radius: 0.75rem;
+  transform: none;
+}
+
+.btn-link:hover {
+  background: rgba(13, 148, 136, 0.08);
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-link:active {
+  transform: none;
+  box-shadow: none;
+}
+
 button.bg-teal-50 {
   background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
   color: white;
@@ -427,6 +449,37 @@ tbody tr:hover {
 
 .transparent {
   background-color: transparent;
+}
+
+/* Dashboard recent record items */
+.registro-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.125rem;
+  border-radius: 0.875rem;
+  background: linear-gradient(135deg, rgba(249, 250, 251, 0.9) 0%, rgba(243, 244, 246, 0.7) 100%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 10px rgba(17, 24, 39, 0.06);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.registro-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.10);
+}
+
+.registro-item__title {
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.registro-item__meta {
+  margin: 0.125rem 0 0;
+  font-size: 0.8125rem;
+  color: #6b7280;
 }
 
 /* Badge styles */

@@ -168,12 +168,13 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-800">Registros Recentes</h2>
+        <section className="card mt-6 p-6 md:p-8">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <h2 className="text-xl md:text-2xl font-extrabold text-gray-900 tracking-tight">Registros Recentes</h2>
             <button
+              type="button"
               onClick={() => navigate('/meus-registros')}
-              className="text-sm font-medium text-teal-700 hover:text-teal-800"
+              className="btn-link"
             >
               Ver todos
             </button>
@@ -186,16 +187,17 @@ export default function Dashboard() {
           )}
 
           {!carregando && !erro && registros.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {registros.slice(0, 3).map((registro) => (
-                <div key={registro.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-between">
+                <div key={registro.id} className="registro-item">
                   <div>
-                    <p className="font-semibold text-gray-800">{formatarTipoRegistro(registro.tipo)}</p>
-                    <p className="text-xs text-gray-500">{formatarDataRegistro(registro.data)}</p>
+                    <p className="registro-item__title">{formatarTipoRegistro(registro.tipo)}</p>
+                    <p className="registro-item__meta">{formatarDataRegistro(registro.data)}</p>
                   </div>
                   <button
+                    type="button"
                     onClick={() => navigate('/meus-registros', { state: { registroId: registro.id } })}
-                    className="text-sm text-teal-700 font-medium hover:text-teal-800"
+                    className="btn-link"
                   >
                     Ver
                   </button>
@@ -203,7 +205,7 @@ export default function Dashboard() {
               ))}
             </div>
           )}
-        </div>
+        </section>
 
       </div>
     </div>
