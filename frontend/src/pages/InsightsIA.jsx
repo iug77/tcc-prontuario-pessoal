@@ -145,7 +145,7 @@ export default function InsightsIA() {
   const recomendacoes = useMemo(() => insight?.recomendacoes || [], [insight]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-cyan-500 flex items-center justify-between">
           <div>

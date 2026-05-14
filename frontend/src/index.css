@@ -58,6 +58,27 @@ body {
   margin-right: auto !important;
 }
 
+/* Force specific max-widths */
+.max-w-2xl {
+  max-width: 42rem !important;
+}
+
+.max-w-3xl {
+  max-width: 48rem !important;
+}
+
+.max-w-4xl {
+  max-width: 56rem !important;
+}
+
+.max-w-5xl {
+  max-width: 64rem !important;
+}
+
+.max-w-6xl {
+  max-width: 72rem !important;
+}
+
 @media (min-width: 640px) {
   .container {
     max-width: 640px;
