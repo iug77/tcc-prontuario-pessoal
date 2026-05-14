@@ -4,14 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ==================== ESTILOS GLOBAIS ==================== */
-
-:root {
-  --primary: #5b7dff;
-  --accent: #22c55e;
-  --dark: #111827;
-  --light: #f9fafb;
-}
+/* ==================== CUSTOM STYLES ==================== */
 
 html {
   scroll-behavior: smooth;
@@ -22,8 +15,6 @@ body {
   font-feature-settings: "rounding" 1;
   -webkit-font-smoothing: antialiased;
 }
-
-/* ==================== TIPOGRAFIA ==================== */
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Poppins', 'Inter', sans-serif;
@@ -67,75 +58,7 @@ p {
   color: #4b5563;
 }
 
-/* ==================== COMPONENTES ==================== */
-
-@layer components {
-  .card {
-    @apply bg-white rounded-lg shadow-sm p-6 border border-gray-100;
-  }
-
-  .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200 focus:outline-none;
-  }
-
-  .btn-primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700;
-  }
-
-  .btn-secondary {
-    @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
-  }
-
-  .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700;
-  }
-
-  .input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500;
-  }
-
-  .label {
-    @apply block text-sm font-semibold text-gray-700 mb-2;
-  }
-
-  .badge {
-    @apply inline-block px-3 py-1 rounded-full text-xs font-medium;
-  }
-
-  .badge-success {
-    @apply bg-green-100 text-green-700;
-  }
-
-  .badge-warning {
-    @apply bg-yellow-100 text-yellow-700;
-  }
-
-  .badge-danger {
-    @apply bg-red-100 text-red-700;
-  }
-
-  .alert {
-    @apply p-4 rounded-lg border-l-4;
-  }
-
-  .alert-info {
-    @apply bg-blue-50 border-blue-500 text-blue-700;
-  }
-
-  .alert-success {
-    @apply bg-green-50 border-green-500 text-green-700;
-  }
-
-  .alert-warning {
-    @apply bg-yellow-50 border-yellow-500 text-yellow-700;
-  }
-
-  .alert-danger {
-    @apply bg-red-50 border-red-500 text-red-700;
-  }
-}
-
-/* ==================== ANIMAÇÕES ==================== */
+/* ==================== ANIMATIONS ==================== */
 
 @keyframes slideIn {
   from {
@@ -165,7 +88,7 @@ p {
   animation: fadeIn 0.3s ease-out;
 }
 
-/* ==================== SCROLL ==================== */
+/* ==================== SCROLLBAR ==================== */
 
 ::-webkit-scrollbar {
   width: 8px;
@@ -174,7 +97,6 @@ p {
 
 ::-webkit-scrollbar-track {
   background-color: #f3f4f6;
-  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
