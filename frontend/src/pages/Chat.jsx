@@ -263,18 +263,18 @@ export default function Chat() {
           </div>
 
           {/* Histórico de Mensagens */}
-          <div className="flex-1 overflow-y-auto px-8 py-6 space-y-4 bg-white">
-            {erro && <p className="text-sm text-red-700">{erro}</p>}
+          <div className="flex-1 overflow-y-auto px-8 py-6 space-y-5 bg-white">
+            {erro && <p className="text-base text-red-600 font-medium">{erro}</p>}
 
             {!erro && contatoAtivo && mensagens.length === 0 && (
-              <p className="text-sm text-gray-500">Sem mensagens ainda. Envie a primeira mensagem.</p>
+              <p className="text-base text-gray-500">Sem mensagens ainda. Envie a primeira mensagem.</p>
             )}
 
             {!erro && !contatoAtivo && (
               <div className="h-full flex items-center justify-center">
                 <div className="text-center max-w-sm">
-                  <p className="m-0 text-gray-900 font-extrabold text-lg">Selecione um contato</p>
-                  <p className="m-0 mt-2 text-sm text-gray-500">Escolha alguém na lista para ver e enviar mensagens.</p>
+                  <p className="m-0 text-gray-900 font-extrabold text-xl">Selecione um contato</p>
+                  <p className="m-0 mt-3 text-base text-gray-500">Escolha alguém na lista para ver e enviar mensagens.</p>
                 </div>
               </div>
             )}
@@ -285,8 +285,8 @@ export default function Chat() {
               return (
                 <div key={mensagem.id} className={`flex ${mensagemMinha ? 'justify-end' : 'justify-start'}`}>
                   <div className={`chat-bubble ${mensagemMinha ? 'chat-bubble--mine' : 'chat-bubble--theirs'}`}>
-                    <p className="m-0 text-sm leading-5">{mensagem.conteudo}</p>
-                    <p className={`m-0 mt-1 text-[11px] text-right ${mensagemMinha ? 'text-blue-100/90' : 'text-gray-400'}`}>
+                    <p className="m-0 text-base leading-6">{mensagem.conteudo}</p>
+                    <p className={`m-0 mt-2 text-xs text-right ${mensagemMinha ? 'text-blue-100/80' : 'text-gray-400'}`}>
                       {new Date(mensagem.criadoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
@@ -304,7 +304,7 @@ export default function Chat() {
                 value={texto}
                 onChange={(e) => setTexto(e.target.value)}
                 disabled={!contatoAtivo || enviando}
-                className="chat-input flex-1"
+                className="chat-input flex-1 text-base"
               />
               <button 
                 type="submit"
