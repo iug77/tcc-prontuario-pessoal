@@ -497,6 +497,7 @@ button.bg-indigo-50:hover {
 /* Deterministic grid for chat layout to avoid relying on Tailwind arbitrary classes */
 .chat-grid {
   grid-template-columns: 1fr;
+  background-color: #f0fdf4 !important;
 }
 
 @media (min-width: 768px) {
