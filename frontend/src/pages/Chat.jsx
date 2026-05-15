@@ -254,6 +254,10 @@ export default function Chat() {
               <h3 className="m-0 font-extrabold text-gray-900 truncate">{contatoAtivo?.nome || 'Selecione um contato'}</h3>
               <p className="m-0 mt-0.5 text-xs text-gray-500 font-semibold truncate">{contatoAtivo?.subtitulo || 'Sem conversa selecionada'}</p>
             </div>
+            <div className="ml-auto text-right">
+              <div className="text-xs text-gray-400">Layout preview</div>
+              <div className="inline-block mt-1 px-3 py-1 rounded-full bg-primary-50 text-primary-700 font-semibold">commit: 7ffc172</div>
+            </div>
           </div>
 
           {/* Histórico de Mensagens */}
