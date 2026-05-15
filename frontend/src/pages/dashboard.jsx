@@ -116,14 +116,14 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="app-page">
+      <div className="app-container max-w-4xl">
         
        {/* Cabeçalho do Dashboard */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-6 flex justify-between items-center flex-wrap gap-4">
+        <div className="card p-6 mb-6 flex justify-between items-center flex-wrap gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Olá, {paciente?.nome || 'Paciente'}</h1>
-            <p className="text-gray-500">Aqui está o resumo da sua saúde. Permissões ativas: {totalPermissoesAtivas}</p>
+            <h1 className="text-2xl font-extrabold tracking-tight">Olá, {paciente?.nome || 'Paciente'}</h1>
+            <p className="subtitle">Aqui está o resumo da sua saúde. Permissões ativas: {totalPermissoesAtivas}</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <button 
@@ -131,49 +131,49 @@ export default function Dashboard() {
                 setTotalMensagens(0);
                 navigate('/chat');
               }}
-              className="bg-green-50 text-green-700 px-4 py-2 rounded-lg font-medium hover:bg-green-100 transition-colors border border-green-200"
+              className="btn btn-success"
             >
               💬 Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
             </button>
             <button 
               onClick={() => navigate('/auditoria')}
-              className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors border border-indigo-200"
+              className="btn btn-info"
             >
               📋 Logs (LGPD)
             </button>
             <button 
               onClick={() => navigate('/permissoes')}
-              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors border border-gray-200"
+              className="btn btn-outline"
             >
               📝 Permissões
             </button>
             <button 
               onClick={() => navigate('/novo-registro')}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              className="btn btn-primary"
             >
               + Novo Registro
             </button>
             <button
               onClick={() => navigate('/meus-registros')}
-              className="bg-teal-50 text-teal-700 px-4 py-2 rounded-lg font-medium hover:bg-teal-100 transition-colors border border-teal-200"
+              className="btn btn-accent"
             >
               🧾 Ver Registros
             </button>
             <button
               onClick={handleLogout}
-              className="bg-red-50 text-red-700 px-4 py-2 rounded-lg font-medium hover:bg-red-100 transition-colors border border-red-200"
+              className="btn btn-danger"
             >
               Sair
             </button>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mt-6">
+        <div className="card p-6 mt-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-gray-800">Registros Recentes</h2>
             <button
               onClick={() => navigate('/meus-registros')}
-              className="text-sm font-medium text-teal-700 hover:text-teal-800"
+              className="text-sm font-bold text-accent hover:underline"
             >
               Ver todos
             </button>
@@ -188,14 +188,14 @@ export default function Dashboard() {
           {!carregando && !erro && registros.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {registros.slice(0, 3).map((registro) => (
-                <div key={registro.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-between">
+                <div key={registro.id} className="p-4 bg-surface-2 rounded-xl border border-[rgb(var(--border))] flex items-center justify-between">
                   <div>
                     <p className="font-semibold text-gray-800">{formatarTipoRegistro(registro.tipo)}</p>
                     <p className="text-xs text-gray-500">{formatarDataRegistro(registro.data)}</p>
                   </div>
                   <button
                     onClick={() => navigate('/meus-registros', { state: { registroId: registro.id } })}
-                    className="text-sm text-teal-700 font-medium hover:text-teal-800"
+                    className="text-sm font-bold text-accent hover:underline"
                   >
                     Ver
                   </button>

@@ -72,66 +72,66 @@ export default function Auditoria() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="app-page">
+      <div className="app-container max-w-5xl space-y-6">
         
         {/* Cabeçalho */}
-        <div className="flex items-center justify-between bg-white rounded-xl shadow-sm p-6 border-l-4 border-indigo-600">
+        <div className="card strip-info p-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Auditoria e Logs (LGPD)</h1>
-            <p className="text-gray-500">Rastreabilidade completa de interações para {usuario?.tipo === 'profissional' ? 'profissional' : 'paciente'}</p>
+            <h1 className="text-2xl font-extrabold tracking-tight">Auditoria e Logs (LGPD)</h1>
+            <p className="subtitle">Rastreabilidade completa de interações para {usuario?.tipo === 'profissional' ? 'profissional' : 'paciente'}</p>
           </div>
           <button 
             onClick={() => navigate(rotaVoltar)}
-            className="text-indigo-600 hover:underline font-medium"
+            className="btn btn-outline"
           >
             ← Voltar ao Painel
           </button>
         </div>
 
         {/* Tabela de Logs */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+        <div className="card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="table">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-200 text-sm text-gray-600 uppercase tracking-wider">
-                  <th className="p-4 font-semibold">Data e Hora</th>
-                  <th className="p-4 font-semibold">Usuário / Agente</th>
-                  <th className="p-4 font-semibold">Ação Realizada</th>
-                  <th className="p-4 font-semibold">Documento / Recurso</th>
-                  <th className="p-4 font-semibold">Status</th>
+                <tr>
+                  <th>Data e Hora</th>
+                  <th>Usuário / Agente</th>
+                  <th>Ação Realizada</th>
+                  <th>Documento / Recurso</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {carregando && (
                   <tr>
-                    <td className="p-4 text-sm text-gray-500" colSpan={5}>Carregando logs...</td>
+                    <td className="text-sm text-muted" colSpan={5}>Carregando logs...</td>
                   </tr>
                 )}
 
                 {!carregando && erro && (
                   <tr>
-                    <td className="p-4 text-sm text-red-700" colSpan={5}>{erro}</td>
+                    <td className="text-sm text-danger" colSpan={5}>{erro}</td>
                   </tr>
                 )}
 
                 {!carregando && !erro && logs.length === 0 && (
                   <tr>
-                    <td className="p-4 text-sm text-gray-500" colSpan={5}>Nenhum log encontrado.</td>
+                    <td className="text-sm text-muted" colSpan={5}>Nenhum log encontrado.</td>
                   </tr>
                 )}
 
                 {logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50 transition-colors text-sm text-gray-700">
-                    <td className="p-4 whitespace-nowrap">{formatarData(log.data)}</td>
-                    <td className="p-4 font-medium text-gray-900">{log.usuario}</td>
-                    <td className="p-4">
-                      <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium">
+                  <tr key={log.id} className="text-sm">
+                    <td className="whitespace-nowrap">{formatarData(log.data)}</td>
+                    <td className="font-semibold">{log.usuario}</td>
+                    <td>
+                      <span className="badge">
                         {log.acao}
                       </span>
                     </td>
-                    <td className="p-4">{log.documento}</td>
-                    <td className="p-4">
+                    <td>{log.documento}</td>
+                    <td>
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         log.status === 'Sucesso' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                       }`}>
@@ -145,9 +145,9 @@ export default function Auditoria() {
           </div>
           
           {/* Rodapé da Tabela */}
-          <div className="bg-gray-50 p-4 border-t border-gray-200 text-sm text-gray-500 flex justify-between items-center">
+          <div className="bg-surface-2 p-4 border-t border-[rgb(var(--border))] text-sm text-muted flex justify-between items-center">
             <p>Mostrando os {logs.length} registros mais recentes.</p>
-            <button type="button" className="text-indigo-600 font-medium hover:underline">Exportar Relatório (PDF)</button>
+            <button type="button" className="btn btn-outline">Exportar Relatório (PDF)</button>
           </div>
         </div>
 

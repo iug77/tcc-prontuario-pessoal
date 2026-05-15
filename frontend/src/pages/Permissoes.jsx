@@ -57,7 +57,7 @@ export default function Permissoes() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro || 'Não foi possÃ­vel carregar permissÃµes.');
+        setErro(dados.erro || 'Não foi possível carregar permissões.');
         if (resposta.status === 401 || resposta.status === 403) {
           localStorage.removeItem('token');
           localStorage.removeItem('usuario');
@@ -106,7 +106,7 @@ export default function Permissoes() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro || 'Não foi possÃ­vel conceder a permissÃ£o.');
+        setErro(dados.erro || 'Não foi possível conceder a permissão.');
         return;
       }
 
@@ -139,7 +139,7 @@ export default function Permissoes() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro || 'Não foi possÃ­vel revogar a permissÃ£o.');
+        setErro(dados.erro || 'Não foi possível revogar a permissão.');
         return;
       }
 
@@ -152,18 +152,18 @@ export default function Permissoes() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="app-page">
+      <div className="app-container max-w-4xl space-y-6">
         
         {/* Cabeçalho */}
-        <div className="flex items-center justify-between bg-white rounded-xl shadow-sm p-6">
+        <div className="card p-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Gestão de Permissões</h1>
-            <p className="text-gray-500">Controle quem tem acesso ao seu prontuário</p>
+            <h1 className="text-2xl font-extrabold tracking-tight">Gestão de Permissões</h1>
+            <p className="subtitle">Controle quem tem acesso ao seu prontuário</p>
           </div>
           <button 
             onClick={() => navigate('/dashboard')}
-            className="text-blue-600 hover:underline font-medium"
+            className="btn btn-outline"
           >
             ← Voltar ao Painel
           </button>
@@ -172,7 +172,7 @@ export default function Permissoes() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* Coluna Esquerda: Novo Compartilhamento */}
-          <div className="md:col-span-1 bg-white rounded-xl shadow-sm p-6 h-fit border border-gray-100">
+          <div className="md:col-span-1 card p-6 h-fit">
             <h2 className="text-lg font-bold text-gray-800 mb-4">Novo Acesso</h2>
             <form className="space-y-4" onSubmit={handleConceder}>
               <div>
@@ -183,7 +183,7 @@ export default function Permissoes() {
                   required
                   value={emailProfissional}
                   onChange={(e) => setEmailProfissional(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="input"
                 />
               </div>
 
@@ -192,7 +192,7 @@ export default function Permissoes() {
                 <select
                   value={nivelAcesso}
                   onChange={(e) => setNivelAcesso(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                  className="select"
                 >
                   <option value="Apenas Leitura">Apenas Leitura</option>
                   <option value="Leitura e Escrita">Leitura e Escrita</option>
@@ -204,7 +204,7 @@ export default function Permissoes() {
                 <select
                   value={expiracao}
                   onChange={(e) => setExpiracao(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                  className="select"
                 >
                   <option value="24h">Em 24 horas</option>
                   <option value="7d">Em 7 dias</option>
@@ -216,27 +216,27 @@ export default function Permissoes() {
               <button 
                 type="submit"
                 disabled={carregando}
-                className="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 transition-colors mt-2"
+                className="btn btn-primary w-full mt-2"
               >
                 {carregando ? 'Salvando...' : 'Gerar Convite'}
               </button>
             </form>
 
-            {mensagem && <p className="text-green-700 text-sm mt-3">{mensagem}</p>}
-            {erro && <p className="text-red-700 text-sm mt-3">{erro}</p>}
+            {mensagem && <p className="text-success text-sm mt-3 font-semibold">{mensagem}</p>}
+            {erro && <p className="text-danger text-sm mt-3 font-semibold">{erro}</p>}
           </div>
 
           {/* Coluna Direita: Acessos Ativos */}
-          <div className="md:col-span-2 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="md:col-span-2 card p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-4">Profissionais com Acesso Ativo</h2>
             
             <div className="space-y-4">
               {permissoes.length === 0 && (
-                <p className="text-sm text-gray-500">VocÃª ainda nÃ£o concedeu permissÃµes.</p>
+                <p className="text-sm text-muted">Você ainda não concedeu permissões.</p>
               )}
 
               {permissoes.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <div key={item.id} className="flex items-center justify-between p-4 border border-[rgb(var(--border))] rounded-xl bg-surface-2">
                   <div>
                     <p className="font-semibold text-gray-800">
                       {item.profissional.nome} {item.profissional.especialidade ? `(${item.profissional.especialidade})` : ''}
@@ -248,7 +248,7 @@ export default function Permissoes() {
                   <button
                     onClick={() => handleRevogar(item.id)}
                     disabled={item.status !== 'Ativo'}
-                    className="text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1 border border-red-200 rounded bg-white hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn btn-danger"
                   >
                     Revogar Acesso
                   </button>

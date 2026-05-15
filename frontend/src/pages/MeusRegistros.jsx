@@ -148,40 +148,40 @@ export default function MeusRegistros() {
   }, [filtroTipo, registros]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-5xl mx-auto space-y-4">
-        <div className="flex items-center justify-between bg-white rounded-xl shadow-sm p-4">
+    <div className="app-page">
+      <div className="app-container max-w-5xl space-y-4">
+        <div className="card p-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/dashboard')}
-              className="text-gray-500 hover:text-gray-800 font-medium"
+              className="btn btn-outline"
             >
               ← Voltar
             </button>
-            <h1 className="text-xl font-bold text-gray-800 border-l-2 border-gray-300 pl-4">Meus Registros</h1>
+            <h1 className="text-xl font-extrabold tracking-tight">Meus Registros</h1>
           </div>
           <button
             onClick={handleDownload}
             disabled={!registroSelecionado?.arquivoUrl}
-            className="px-4 py-2 text-blue-600 bg-blue-50 rounded-lg font-medium hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn btn-soft"
           >
             ↓ Download
           </button>
         </div>
 
-        {erro && <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">{erro}</div>}
+        {erro && <div className="alert alert-danger">{erro}</div>}
 
         {carregando ? (
-          <div className="p-4 text-center text-gray-500">Carregando registros...</div>
+          <div className="p-4 text-center text-muted">Carregando registros...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[75vh]">
-            <div className="md:col-span-1 bg-white rounded-xl shadow-sm p-4 border border-gray-100 overflow-y-auto">
-              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Registros Adicionados</h3>
+            <div className="md:col-span-1 card p-4 overflow-y-auto">
+              <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted mb-4">Registros Adicionados</h3>
 
               <select
                 value={filtroTipo}
                 onChange={(e) => setFiltroTipo(e.target.value)}
-                className="w-full mb-3 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
+                className="select mb-3"
               >
                 <option value="todos">Todos os tipos</option>
                 <option value="exame">Exame</option>
@@ -193,21 +193,17 @@ export default function MeusRegistros() {
               </select>
 
               {registrosFiltrados.length === 0 ? (
-                <div className="text-sm text-gray-500">Nenhum registro encontrado.</div>
+                <div className="text-sm text-muted">Nenhum registro encontrado.</div>
               ) : (
                 <div className="space-y-2">
                   {registrosFiltrados.map((registro) => (
                     <button
                       key={registro.id}
                       onClick={() => carregarDetalhes(registro.id)}
-                      className={`w-full text-left p-3 rounded-lg transition-colors font-medium ${
-                        registroSelecionado?.id === registro.id
-                          ? 'bg-teal-100 text-teal-700 border-l-4 border-teal-600'
-                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                      }`}
+                      className={`list-item font-semibold ${registroSelecionado?.id === registro.id ? 'list-item-active' : ''}`}
                     >
                       <p className="text-sm">{formatarTipo(registro.tipo)}</p>
-                      <p className="text-xs text-gray-500 mt-1">{formatarData(registro.data)}</p>
+                      <p className="text-xs text-muted mt-1">{formatarData(registro.data)}</p>
                     </button>
                   ))}
                 </div>
@@ -216,34 +212,34 @@ export default function MeusRegistros() {
 
             <div className="md:col-span-2 space-y-4">
               {registroSelecionado ? (
-                <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Detalhes do Registro</h3>
+                <div className="card p-6">
+                  <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted mb-4">Detalhes do Registro</h3>
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Tipo</p>
-                      <p className="font-medium text-gray-800">{formatarTipo(registroSelecionado.tipo)}</p>
+                      <p className="text-sm text-muted mb-1">Tipo</p>
+                      <p className="font-semibold">{formatarTipo(registroSelecionado.tipo)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Data</p>
-                      <p className="font-medium text-gray-800">{formatarData(registroSelecionado.data)}</p>
+                      <p className="text-sm text-muted mb-1">Data</p>
+                      <p className="font-semibold">{formatarData(registroSelecionado.data)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Órgão / Sistema</p>
-                      <p className="font-medium text-gray-800">{registroSelecionado.orgao || 'Não informado'}</p>
+                      <p className="text-sm text-muted mb-1">Órgão / Sistema</p>
+                      <p className="font-semibold">{registroSelecionado.orgao || 'Não informado'}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Arquivo</p>
-                      <p className="font-medium text-gray-800 text-xs">{nomeArquivo || 'Sem nome'}</p>
+                      <p className="text-sm text-muted mb-1">Arquivo</p>
+                      <p className="font-semibold text-xs">{nomeArquivo || 'Sem nome'}</p>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 text-gray-500 text-center">
+                <div className="card p-6 text-muted text-center">
                   Selecione um registro para ver os detalhes
                 </div>
               )}
 
-              <div className="bg-gray-200 rounded-xl shadow-inner border border-gray-300 flex items-center justify-center overflow-hidden h-[50vh]">
+              <div className="viewer-panel flex items-center justify-center h-[50vh]">
                 {registroSelecionado?.arquivoUrl ? (
                   ehImagem ? (
                     <img
@@ -260,7 +256,7 @@ export default function MeusRegistros() {
                   )
                 ) : (
                   <div className="text-center">
-                    <p className="text-gray-500 font-medium">Arquivo não disponível</p>
+                    <p className="text-muted font-semibold">Arquivo não disponível</p>
                   </div>
                 )}
               </div>

@@ -187,16 +187,16 @@ export default function Chat() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col md:flex-row h-[85vh]">
+    <div className="app-page">
+      <div className="app-container max-w-6xl card overflow-hidden flex flex-col md:flex-row h-[85vh]">
         
         {/* Barra Lateral: Contatos */}
-        <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-gray-200 bg-gray-50 flex flex-col">
-          <div className="p-4 border-b border-gray-200 bg-white flex justify-between items-center">
-            <h2 className="text-lg font-bold text-gray-800">Mensagens</h2>
+        <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-[rgb(var(--border))] bg-surface-2 flex flex-col">
+          <div className="p-4 border-b border-[rgb(var(--border))] bg-white flex justify-between items-center">
+            <h2 className="text-lg font-extrabold tracking-tight">Mensagens</h2>
             <button 
               onClick={() => navigate(rotaVoltar)}
-              className="text-sm text-gray-500 hover:text-gray-800"
+              className="btn btn-outline"
             >
               ← Voltar
             </button>
@@ -219,10 +219,10 @@ export default function Chat() {
                   key={contato.id}
                   type="button"
                   onClick={() => setContatoAtivoId(contato.id)}
-                  className={`w-full text-left p-3 rounded-lg cursor-pointer flex items-center gap-3 transition-colors border ${
+                  className={`w-full text-left p-3 rounded-xl cursor-pointer flex items-center gap-3 transition-colors border ${
                     ativo
-                      ? 'bg-blue-50 border-blue-100'
-                      : 'bg-white border-transparent hover:bg-gray-100'
+                      ? 'bg-[rgba(var(--primary),0.08)] border-[rgba(var(--primary),0.18)]'
+                      : 'bg-white border-transparent hover:bg-[rgba(var(--primary),0.05)]'
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${ativo ? 'bg-blue-200 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
@@ -230,7 +230,7 @@ export default function Chat() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-800 text-sm">{contato.nome}</p>
-                    <p className={`text-xs ${ativo ? 'text-blue-600' : 'text-gray-500'}`}>{contato.subtitulo}</p>
+                    <p className={`text-xs ${ativo ? 'text-primary' : 'text-muted'}`}>{contato.subtitulo}</p>
                   </div>
                 </button>
               );
@@ -242,18 +242,18 @@ export default function Chat() {
         <div className="w-full md:w-2/3 flex flex-col bg-white">
           
           {/* Cabeçalho da Conversa */}
-          <div className="p-4 border-b border-gray-200 flex items-center gap-3">
+          <div className="p-4 border-b border-[rgb(var(--border))] flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-200 text-blue-700 rounded-full flex items-center justify-center font-bold">
               {iniciais(contatoAtivo?.nome)}
             </div>
             <div>
               <h3 className="font-bold text-gray-800">{contatoAtivo?.nome || 'Selecione um contato'}</h3>
-              <p className="text-xs text-green-500 font-medium">{contatoAtivo?.subtitulo || 'Sem conversa selecionada'}</p>
+              <p className="text-xs text-accent font-semibold">{contatoAtivo?.subtitulo || 'Sem conversa selecionada'}</p>
             </div>
           </div>
 
           {/* Histórico de Mensagens */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-surface-2">
             {erro && <p className="text-sm text-red-700">{erro}</p>}
 
             {!erro && contatoAtivo && mensagens.length === 0 && (
@@ -277,7 +277,7 @@ export default function Chat() {
           </div>
 
           {/* Campo de Digitação */}
-          <div className="p-4 border-t border-gray-200 bg-white">
+          <div className="p-4 border-t border-[rgb(var(--border))] bg-white">
             <form className="flex gap-2" onSubmit={enviarMensagem}>
               <input 
                 type="text" 
@@ -285,12 +285,12 @@ export default function Chat() {
                 value={texto}
                 onChange={(e) => setTexto(e.target.value)}
                 disabled={!contatoAtivo || enviando}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                className="input flex-1 rounded-full"
               />
               <button 
                 type="submit"
                 disabled={!contatoAtivo || enviando}
-                className="bg-blue-600 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-700 transition-colors text-sm"
+                className="btn btn-primary"
               >
                 {enviando ? 'Enviando...' : 'Enviar'}
               </button>

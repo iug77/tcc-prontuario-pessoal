@@ -121,21 +121,21 @@ export default function DashboardProfissional() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="app-page">
+      <div className="app-container max-w-5xl space-y-6">
         
         {/* Cabeçalho do Médico */}
-        <div className="bg-white rounded-xl shadow-sm p-6 flex justify-between items-center border-l-4 border-teal-500">
+        <div className="card strip-accent p-6 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Olá, {profissional?.nome || 'Profissional'}</h1>
-            <p className="text-gray-500">
+            <h1 className="text-2xl font-extrabold tracking-tight">Olá, {profissional?.nome || 'Profissional'}</h1>
+            <p className="subtitle">
               CRM: {profissional?.crm || 'Não informado'} | Especialidade: {profissional?.especialidade || 'Não informada'}
             </p>
           </div>
           <div className="flex gap-3">
             <button
               onClick={() => navigate('/auditoria')}
-              className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors border border-indigo-200"
+              className="btn btn-info"
             >
               📋 Auditoria
             </button>
@@ -144,13 +144,13 @@ export default function DashboardProfissional() {
                 setTotalMensagens(0);
                 navigate('/chat');
               }}
-              className="bg-green-50 text-green-700 px-4 py-2 rounded-lg font-medium hover:bg-green-100 transition-colors border border-green-200"
+              className="btn btn-success"
             >
               💬 Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
             </button>
             <button 
               onClick={handleLogout}
-              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors border border-gray-200"
+              className="btn btn-outline"
             >
               Sair
             </button>
@@ -158,8 +158,8 @@ export default function DashboardProfissional() {
         </div>
 
         {/* Lista de Pacientes Compartilhados */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+        <div className="card overflow-hidden">
+          <div className="card-header">
             <h2 className="text-lg font-bold text-gray-800">Pacientes com Acesso Concedido</h2>
             <div className="relative">
               <input 
@@ -167,7 +167,7 @@ export default function DashboardProfissional() {
                 placeholder="Buscar paciente..." 
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                className="pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none text-sm w-64"
+                className="input w-64"
               />
             </div>
           </div>
@@ -182,7 +182,7 @@ export default function DashboardProfissional() {
 
           {!carregando && !erro && (
             <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="table">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200 text-sm text-gray-600 uppercase tracking-wider">
                   <th className="p-4 font-semibold">Paciente</th>
@@ -201,35 +201,31 @@ export default function DashboardProfissional() {
                 )}
 
                 {pacientesFiltrados.map((paciente) => (
-                  <tr key={paciente.permissaoId} className={`hover:bg-gray-50 transition-colors text-sm ${paciente.status === 'Inativo' ? 'opacity-60 bg-gray-50' : ''}`}>
-                    <td className="p-4">
-                      <p className="font-bold text-gray-800">{paciente.nome}</p>
-                      <p className="text-gray-500 text-xs">{paciente.email}</p>
+                  <tr key={paciente.permissaoId} className={`${paciente.status === 'Inativo' ? 'opacity-60' : ''}`}>
+                    <td>
+                      <p className="font-extrabold tracking-tight">{paciente.nome}</p>
+                      <p className="text-muted text-xs">{paciente.email}</p>
                     </td>
-                    <td className="p-4">
+                    <td>
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         paciente.permissao === 'Leitura e Escrita' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
                       }`}>
                         {paciente.permissao}
                       </span>
                     </td>
-                    <td className="p-4">
+                    <td>
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         paciente.status === 'Inativo' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
                       }`}>
                         {formatarExpiracao(paciente.expiraEm, paciente.status)}
                       </span>
                     </td>
-                    <td className="p-4 text-center">
+                    <td className="text-center">
                       <div className="flex items-center justify-center gap-2">
                         <button 
                           onClick={() => paciente.status === 'Ativo' && navigate('/visualizador', { state: { pacienteId: paciente.pacienteId } })}
                           disabled={paciente.status === 'Inativo'}
-                          className={`px-3 py-2 rounded-lg font-medium transition-colors ${
-                            paciente.status === 'Inativo' 
-                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                              : 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm'
-                          }`}
+                          className={`btn ${paciente.status === 'Inativo' ? 'btn-outline' : 'btn-primary'}`}
                         >
                           Prontuário
                         </button>
