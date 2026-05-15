@@ -102,7 +102,7 @@ export default function Auditoria() {
                   <th>Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody>
                 {carregando && (
                   <tr>
                     <td className="text-sm text-muted" colSpan={5}>Carregando logs...</td>
@@ -132,9 +132,7 @@ export default function Auditoria() {
                     </td>
                     <td>{log.documento}</td>
                     <td>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        log.status === 'Sucesso' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                      }`}>
+                      <span className={`pill ${log.status === 'Sucesso' ? 'pill-success' : 'pill-danger'}`}>
                         {log.status}
                       </span>
                     </td>

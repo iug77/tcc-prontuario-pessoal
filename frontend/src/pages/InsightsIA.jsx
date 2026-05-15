@@ -145,106 +145,106 @@ export default function InsightsIA() {
   const recomendacoes = useMemo(() => insight?.recomendacoes || [], [insight]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-cyan-500 flex items-center justify-between">
+    <div className="app-page">
+      <div className="app-container max-w-6xl space-y-6">
+        <div className="card strip-accent p-6 flex items-center justify-between">
           <div>
             <button
               onClick={() => navigate('/dashboard-profissional')}
-              className="text-sm text-gray-500 hover:text-gray-800 mb-1"
+              className="btn btn-outline mb-2"
             >
               ← Voltar
             </button>
-            <h1 className="text-2xl font-bold text-gray-800">Insights IA</h1>
-            <p className="text-gray-500">
+            <h1 className="text-2xl font-extrabold tracking-tight">Insights IA</h1>
+            <p className="subtitle">
               Paciente: {pacienteNome || 'Paciente selecionado'}
             </p>
           </div>
           <button
             onClick={gerarInsights}
             disabled={gerando}
-            className="px-4 py-2 bg-cyan-600 text-white rounded-lg font-medium hover:bg-cyan-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="btn btn-accent"
           >
             {gerando ? 'Gerando...' : 'Gerar Insights'}
           </button>
         </div>
 
-        {erro && <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">{erro}</div>}
+        {erro && <div className="alert alert-danger">{erro}</div>}
 
         {carregando ? (
-          <div className="p-6 bg-white rounded-xl text-gray-500">Carregando insights...</div>
+          <div className="card p-6 text-muted">Carregando insights...</div>
         ) : !insight ? (
-          <div className="p-6 bg-white rounded-xl text-gray-500 border border-gray-100">
+          <div className="card p-6 text-muted">
             Ainda não há insights gerados para este paciente. Clique em "Gerar Insights" para começar.
           </div>
         ) : (
           <>
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-              <p className="text-sm text-gray-500 mb-2">Resumo Clínico Assistivo</p>
-              <p className="text-gray-800">{insight.resumoClinico}</p>
+            <div className="card p-6">
+              <p className="text-sm text-muted mb-2">Resumo clínico assistivo</p>
+              <p>{insight.resumoClinico}</p>
               <div className="mt-4 flex gap-2 flex-wrap text-xs">
-                <span className="px-2 py-1 rounded bg-cyan-100 text-cyan-700">Modelo: {insight.modelo}</span>
-                <span className="px-2 py-1 rounded bg-gray-100 text-gray-700">Status: {insight.status}</span>
-                <span className="px-2 py-1 rounded bg-green-100 text-green-700">
+                <span className="pill pill-accent">Modelo: {insight.modelo}</span>
+                <span className="pill">Status: {insight.status}</span>
+                <span className="pill pill-success">
                   Confiança: {insight.confiancaGeral ? `${Math.round(insight.confiancaGeral * 100)}%` : '-'}
                 </span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                <h2 className="font-bold text-gray-800 mb-3">Alertas</h2>
+              <div className="card p-5">
+                <h2 className="font-extrabold tracking-tight mb-3">Alertas</h2>
                 {alertas.length === 0 ? (
-                  <p className="text-sm text-gray-500">Sem alertas no momento.</p>
+                  <p className="text-sm text-muted">Sem alertas no momento.</p>
                 ) : (
                   <ul className="space-y-2">
                     {alertas.map((item, idx) => (
-                      <li key={`${item.titulo}-${idx}`} className="p-3 rounded-lg bg-amber-50 border border-amber-100">
-                        <p className="font-medium text-amber-800">{item.titulo}</p>
-                        <p className="text-sm text-amber-700">{item.descricao}</p>
+                      <li key={`${item.titulo}-${idx}`} className="p-3 rounded-xl border border-[rgba(var(--warning),0.22)] bg-[rgba(var(--warning),0.10)]">
+                        <p className="font-bold" style={{ color: 'rgb(var(--text))' }}>{item.titulo}</p>
+                        <p className="text-sm text-muted">{item.descricao}</p>
                       </li>
                     ))}
                   </ul>
                 )}
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                <h2 className="font-bold text-gray-800 mb-3">Tendências</h2>
+              <div className="card p-5">
+                <h2 className="font-extrabold tracking-tight mb-3">Tendências</h2>
                 {tendencias.length === 0 ? (
-                  <p className="text-sm text-gray-500">Sem tendências detectadas.</p>
+                  <p className="text-sm text-muted">Sem tendências detectadas.</p>
                 ) : (
                   <ul className="space-y-2">
                     {tendencias.map((item, idx) => (
-                      <li key={`${item.parametro}-${idx}`} className="p-3 rounded-lg bg-blue-50 border border-blue-100">
-                        <p className="font-medium text-blue-800">{item.parametro}</p>
-                        <p className="text-sm text-blue-700">{item.descricao}</p>
+                      <li key={`${item.parametro}-${idx}`} className="p-3 rounded-xl border border-[rgba(var(--primary),0.22)] bg-[rgba(var(--primary),0.08)]">
+                        <p className="font-bold" style={{ color: 'rgb(var(--text))' }}>{item.parametro}</p>
+                        <p className="text-sm text-muted">{item.descricao}</p>
                       </li>
                     ))}
                   </ul>
                 )}
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                <h2 className="font-bold text-gray-800 mb-3">Pendências</h2>
+              <div className="card p-5">
+                <h2 className="font-extrabold tracking-tight mb-3">Pendências</h2>
                 {pendencias.length === 0 ? (
-                  <p className="text-sm text-gray-500">Sem pendências mapeadas.</p>
+                  <p className="text-sm text-muted">Sem pendências mapeadas.</p>
                 ) : (
                   <ul className="space-y-2">
                     {pendencias.map((item, idx) => (
-                      <li key={`${item.tipo}-${idx}`} className="p-3 rounded-lg bg-red-50 border border-red-100">
-                        <p className="text-sm text-red-700">{item.descricao}</p>
+                      <li key={`${item.tipo}-${idx}`} className="p-3 rounded-xl border border-[rgba(var(--danger),0.22)] bg-[rgba(var(--danger),0.08)]">
+                        <p className="text-sm text-danger font-semibold">{item.descricao}</p>
                       </li>
                     ))}
                   </ul>
                 )}
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                <h2 className="font-bold text-gray-800 mb-3">Recomendações de Revisão</h2>
+              <div className="card p-5">
+                <h2 className="font-extrabold tracking-tight mb-3">Recomendações de revisão</h2>
                 {recomendacoes.length === 0 ? (
-                  <p className="text-sm text-gray-500">Sem recomendações.</p>
+                  <p className="text-sm text-muted">Sem recomendações.</p>
                 ) : (
-                  <ul className="space-y-2 list-disc list-inside text-sm text-gray-700">
+                  <ul className="space-y-2 list-disc list-inside text-sm">
                     {recomendacoes.map((item, idx) => (
                       <li key={`${item}-${idx}`}>{item}</li>
                     ))}
@@ -253,24 +253,24 @@ export default function InsightsIA() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-              <h2 className="font-bold text-gray-800 mb-3">Feedback Profissional</h2>
+            <div className="card p-5">
+              <h2 className="font-extrabold tracking-tight mb-3">Feedback profissional</h2>
               <textarea
                 value={feedbackTexto}
                 onChange={(e) => setFeedbackTexto(e.target.value)}
                 placeholder="Ex.: insight útil para triagem, mas faltou detalhe em exames laboratoriais."
-                className="w-full min-h-24 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 outline-none"
+                className="textarea"
               />
               <div className="mt-3 flex gap-2">
                 <button
                   onClick={() => enviarFeedback('REVISADO')}
-                  className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm"
+                  className="btn btn-success"
                 >
                   Marcar como Revisado
                 </button>
                 <button
                   onClick={() => enviarFeedback('DESCARTADO')}
-                  className="px-4 py-2 rounded-lg bg-gray-600 text-white hover:bg-gray-700 text-sm"
+                  className="btn btn-outline"
                 >
                   Marcar como Descartado
                 </button>
@@ -279,28 +279,28 @@ export default function InsightsIA() {
           </>
         )}
 
-        <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-          <h2 className="font-bold text-gray-800 mb-3">Histórico de Gerações</h2>
+        <div className="card p-5">
+          <h2 className="font-extrabold tracking-tight mb-3">Histórico de gerações</h2>
           {historico.length === 0 ? (
-            <p className="text-sm text-gray-500">Sem histórico ainda.</p>
+            <p className="text-sm text-muted">Sem histórico ainda.</p>
           ) : (
             <div className="space-y-2">
               {historico.map((item) => (
-                <div key={item.id} className="p-3 rounded-lg bg-gray-50 border border-gray-200 text-sm flex justify-between gap-3">
+                <div key={item.id} className="p-3 rounded-xl bg-surface-2 border border-[rgb(var(--border))] text-sm flex justify-between gap-3">
                   <div>
-                    <p className="font-medium text-gray-800">{item.resumoClinico}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="font-semibold">{item.resumoClinico}</p>
+                    <p className="text-xs text-muted">
                       {new Date(item.criadoEm).toLocaleString('pt-BR')} • {item.modelo}
                     </p>
                   </div>
-                  <span className="text-xs px-2 py-1 h-fit rounded bg-gray-200 text-gray-700">{item.status}</span>
+                  <span className="pill">{item.status}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted">
           Insight assistivo por IA. Não substitui decisão clínica profissional.
         </p>
       </div>

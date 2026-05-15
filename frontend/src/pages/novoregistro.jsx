@@ -184,7 +184,7 @@ export default function NovoRegistro() {
               />
             </div>
 
-            {/* Metadado: Ã“rgÃ£o/Sistema */}
+            {/* Metadado: Órgão/Sistema */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Órgão / Sistema (Opcional)</label>
               <input 
@@ -218,22 +218,22 @@ export default function NovoRegistro() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Arquivo de Documento (Opcional)</label>
             
               {arquivo ? (
-                <div className="bg-green-50 border-2 border-green-300 rounded-xl p-4 flex items-center justify-between">
+                <div className="alert alert-success flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-8 h-8 text-success" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M8 16.5a1 1 0 01-1-1V4a1 1 0 112 0v11.5a1 1 0 01-1 1z" clipRule="evenodd" />
                     </svg>
                     <div>
-                      <p className="font-medium text-green-800">{nomeArquivo}</p>
-                      <p className="text-xs text-green-700">Arquivo selecionado</p>
+                      <p className="font-semibold">{nomeArquivo}</p>
+                      <p className="text-xs text-muted">Arquivo selecionado</p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={handleRemoverArquivo}
-                    className="text-green-700 hover:text-green-900 font-medium"
+                    className="btn btn-outline"
                   >
-                    × Remover
+                    Remover
                   </button>
                 </div>
               ) : (

@@ -160,7 +160,7 @@ export default function DashboardProfissional() {
         {/* Lista de Pacientes Compartilhados */}
         <div className="card overflow-hidden">
           <div className="card-header">
-            <h2 className="text-lg font-bold text-gray-800">Pacientes com Acesso Concedido</h2>
+            <h2 className="text-lg font-extrabold tracking-tight">Pacientes com Acesso Concedido</h2>
             <div className="relative">
               <input 
                 type="text" 
@@ -173,28 +173,30 @@ export default function DashboardProfissional() {
           </div>
 
           {carregando && (
-            <div className="p-6 text-sm text-gray-500">Carregando dados do dashboard...</div>
+            <div className="p-6 text-sm text-muted">Carregando dados do dashboard...</div>
           )}
 
           {!carregando && erro && (
-            <div className="p-6 text-sm text-red-700 bg-red-50 border-t border-red-100">{erro}</div>
+            <div className="p-6 border-t border-[rgb(var(--border))]">
+              <div className="alert alert-danger">{erro}</div>
+            </div>
           )}
 
           {!carregando && !erro && (
             <div className="overflow-x-auto">
             <table className="table">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-200 text-sm text-gray-600 uppercase tracking-wider">
-                  <th className="p-4 font-semibold">Paciente</th>
-                  <th className="p-4 font-semibold">Nível de Permissão</th>
-                  <th className="p-4 font-semibold">Expiração</th>
-                  <th className="p-4 font-semibold text-center">Ações</th>
+                <tr>
+                  <th>Paciente</th>
+                  <th>Nível de Permissão</th>
+                  <th>Expiração</th>
+                  <th className="text-center">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody>
                 {pacientesFiltrados.length === 0 && (
                   <tr>
-                    <td className="p-4 text-sm text-gray-500" colSpan={4}>
+                    <td className="text-sm text-muted" colSpan={4}>
                       Nenhum paciente encontrado para este profissional.
                     </td>
                   </tr>
@@ -207,16 +209,12 @@ export default function DashboardProfissional() {
                       <p className="text-muted text-xs">{paciente.email}</p>
                     </td>
                     <td>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        paciente.permissao === 'Leitura e Escrita' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                      }`}>
+                      <span className={`pill ${paciente.permissao === 'Leitura e Escrita' ? 'pill-accent' : 'pill-info'}`}>
                         {paciente.permissao}
                       </span>
                     </td>
                     <td>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        paciente.status === 'Inativo' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-                      }`}>
+                      <span className={`pill ${paciente.status === 'Inativo' ? 'pill-danger' : 'pill-success'}`}>
                         {formatarExpiracao(paciente.expiraEm, paciente.status)}
                       </span>
                     </td>

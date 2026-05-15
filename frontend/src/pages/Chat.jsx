@@ -203,10 +203,10 @@ export default function Chat() {
           </div>
           
           <div className="flex-1 overflow-y-auto p-2 space-y-2">
-            {carregandoContatos && <p className="text-sm text-gray-500 p-2">Carregando contatos...</p>}
+            {carregandoContatos && <p className="text-sm text-muted p-2">Carregando contatos...</p>}
 
             {!carregandoContatos && contatos.length === 0 && (
-              <p className="text-sm text-gray-500 p-2">
+              <p className="text-sm text-muted p-2">
                 Nenhum contato disponível. O chat só é liberado com permissão ativa entre paciente e profissional.
               </p>
             )}
@@ -225,11 +225,11 @@ export default function Chat() {
                       : 'bg-white border-transparent hover:bg-[rgba(var(--primary),0.05)]'
                   }`}
                 >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${ativo ? 'bg-blue-200 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
+                  <div className={`avatar ${ativo ? 'avatar-primary' : ''}`}>
                     {iniciais(contato.nome)}
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-800 text-sm">{contato.nome}</p>
+                    <p className="font-semibold text-sm">{contato.nome}</p>
                     <p className={`text-xs ${ativo ? 'text-primary' : 'text-muted'}`}>{contato.subtitulo}</p>
                   </div>
                 </button>
@@ -243,21 +243,21 @@ export default function Chat() {
           
           {/* Cabeçalho da Conversa */}
           <div className="p-4 border-b border-[rgb(var(--border))] flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-200 text-blue-700 rounded-full flex items-center justify-center font-bold">
+            <div className="avatar avatar-primary">
               {iniciais(contatoAtivo?.nome)}
             </div>
             <div>
-              <h3 className="font-bold text-gray-800">{contatoAtivo?.nome || 'Selecione um contato'}</h3>
+              <h3 className="font-bold">{contatoAtivo?.nome || 'Selecione um contato'}</h3>
               <p className="text-xs text-accent font-semibold">{contatoAtivo?.subtitulo || 'Sem conversa selecionada'}</p>
             </div>
           </div>
 
           {/* Histórico de Mensagens */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-surface-2">
-            {erro && <p className="text-sm text-red-700">{erro}</p>}
+            {erro && <p className="text-sm text-danger">{erro}</p>}
 
             {!erro && contatoAtivo && mensagens.length === 0 && (
-              <p className="text-sm text-gray-500">Sem mensagens ainda. Envie a primeira mensagem.</p>
+              <p className="text-sm text-muted">Sem mensagens ainda. Envie a primeira mensagem.</p>
             )}
 
             {mensagens.map((mensagem) => {
@@ -265,9 +265,15 @@ export default function Chat() {
 
               return (
                 <div key={mensagem.id} className={`flex ${mensagemMinha ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`${mensagemMinha ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none'} p-3 rounded-2xl max-w-[70%] shadow-sm`}>
+                  <div
+                    className={`${mensagemMinha ? 'rounded-tr-none' : 'rounded-tl-none border border-[rgb(var(--border))] bg-surface'} p-3 rounded-2xl max-w-[70%] shadow-sm`}
+                    style={mensagemMinha ? { background: 'rgb(var(--primary))', color: 'rgb(var(--primary-contrast))' } : undefined}
+                  >
                     <p className="text-sm">{mensagem.conteudo}</p>
-                    <p className={`text-xs mt-1 text-right ${mensagemMinha ? 'text-blue-200' : 'text-gray-400'}`}>
+                    <p
+                      className="text-xs mt-1 text-right"
+                      style={mensagemMinha ? { color: 'rgba(255, 255, 255, 0.78)' } : { color: 'rgb(var(--muted-2))' }}
+                    >
                       {new Date(mensagem.criadoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
