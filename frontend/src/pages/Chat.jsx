@@ -211,10 +211,10 @@ export default function Chat() {
           </div>
           
           <div className="flex-1 overflow-y-auto px-4 py-5 space-y-3">
-            {carregandoContatos && <p className="text-sm text-gray-500 p-2">Carregando contatos...</p>}
+            {carregandoContatos && <p className="p-2">Carregando contatos...</p>}
 
             {!carregandoContatos && contatos.length === 0 && (
-              <p className="text-sm text-gray-500 p-2">
+              <p className="p-2">
                 Nenhum contato disponível. O chat só é liberado com permissão ativa entre paciente e profissional.
               </p>
             )}
@@ -233,8 +233,8 @@ export default function Chat() {
                     {iniciais(contato.nome)}
                   </div>
                   <div>
-                    <p className="m-0 font-bold text-gray-900 text-sm leading-5">{contato.nome}</p>
-                    <p className={`m-0 mt-0.5 text-xs font-medium ${ativo ? 'text-blue-700' : 'text-gray-500'}`}>{contato.subtitulo}</p>
+                    <p className="m-0 font-bold text-gray-900">{contato.nome}</p>
+                    <p className={`m-0 mt-0.5 font-medium ${ativo ? 'text-blue-600' : 'text-gray-500'}`}>{contato.subtitulo}</p>
                   </div>
                 </button>
               );
@@ -264,17 +264,17 @@ export default function Chat() {
 
           {/* Histórico de Mensagens */}
           <div className="flex-1 overflow-y-auto px-8 py-6 space-y-5 bg-white">
-            {erro && <p className="text-base text-red-600 font-medium">{erro}</p>}
+            {erro && <p className="font-medium text-red-600">{erro}</p>}
 
             {!erro && contatoAtivo && mensagens.length === 0 && (
-              <p className="text-base text-gray-500">Sem mensagens ainda. Envie a primeira mensagem.</p>
+              <p className="text-gray-500">Sem mensagens ainda. Envie a primeira mensagem.</p>
             )}
 
             {!erro && !contatoAtivo && (
               <div className="h-full flex items-center justify-center">
                 <div className="text-center max-w-sm">
-                  <p className="m-0 text-gray-900 font-extrabold text-xl">Selecione um contato</p>
-                  <p className="m-0 mt-3 text-base text-gray-500">Escolha alguém na lista para ver e enviar mensagens.</p>
+                  <p className="m-0 text-gray-900 font-extrabold">Selecione um contato</p>
+                  <p className="m-0 mt-3 text-gray-500">Escolha alguém na lista para ver e enviar mensagens.</p>
                 </div>
               </div>
             )}
@@ -285,8 +285,8 @@ export default function Chat() {
               return (
                 <div key={mensagem.id} className={`flex ${mensagemMinha ? 'justify-end' : 'justify-start'}`}>
                   <div className={`chat-bubble ${mensagemMinha ? 'chat-bubble--mine' : 'chat-bubble--theirs'}`}>
-                    <p className="m-0 text-base leading-6">{mensagem.conteudo}</p>
-                    <p className={`m-0 mt-2 text-xs text-right ${mensagemMinha ? 'text-blue-100/80' : 'text-gray-400'}`}>
+                    <p className="m-0">{mensagem.conteudo}</p>
+                    <p className={`m-0 mt-2 text-right ${mensagemMinha ? 'text-blue-100/80' : 'text-gray-400'}`}>
                       {new Date(mensagem.criadoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
@@ -304,7 +304,7 @@ export default function Chat() {
                 value={texto}
                 onChange={(e) => setTexto(e.target.value)}
                 disabled={!contatoAtivo || enviando}
-                className="chat-input flex-1 text-base"
+                className="chat-input flex-1"
               />
               <button 
                 type="submit"
