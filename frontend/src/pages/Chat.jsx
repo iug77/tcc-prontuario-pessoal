@@ -195,7 +195,7 @@ export default function Chat() {
   return (
     <div className="container-main relative z-10">
       <div className="max-w-6xl mx-auto w-full">
-        <div className="card p-0 overflow-hidden grid grid-cols-1 md:grid-cols-[340px_1fr_320px] min-h-[560px] h-[calc(100vh-10rem)]">
+        <div className="card p-0 overflow-hidden grid grid-cols-1 chat-grid min-h-[560px] h-[calc(100vh-10rem)]">
         
         {/* Barra Lateral: Contatos */}
         <aside className="bg-gray-50/60 border-b md:border-b-0 md:border-r border-gray-200 flex flex-col">
