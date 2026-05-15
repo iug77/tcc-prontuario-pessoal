@@ -24,12 +24,6 @@ export default function Chat() {
 
   const contatoAtivo = contatos.find((item) => item.id === contatoAtivoId) || null;
 
-  const tipoContatoLabel = (tipo) => {
-    if (tipo === 'paciente') return 'Paciente';
-    if (tipo === 'profissional') return 'Profissional';
-    return 'Contato';
-  };
-
   const carregarContatos = async () => {
     const token = localStorage.getItem('token');
 
@@ -193,28 +187,26 @@ export default function Chat() {
   };
 
   return (
-    <div className="container-main relative z-10">
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="card p-0 overflow-hidden grid grid-cols-1 chat-grid min-h-[560px] h-[calc(100vh-10rem)]">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col md:flex-row h-[85vh]">
         
         {/* Barra Lateral: Contatos */}
-        <aside className="bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex flex-col">
-          <div className="px-6 py-7 bg-gradient-to-r from-white via-blue-50 to-white backdrop-blur-md flex justify-between items-center gap-3 shadow-sm">
-            <h2 className="m-0 text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent tracking-tight">Mensagens</h2>
-            <button
-              type="button"
+        <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-gray-200 bg-gray-50 flex flex-col">
+          <div className="p-4 border-b border-gray-200 bg-white flex justify-between items-center">
+            <h2 className="text-lg font-bold text-gray-800">Mensagens</h2>
+            <button 
               onClick={() => navigate(rotaVoltar)}
-              className="btn-link"
+              className="text-sm text-gray-500 hover:text-gray-800"
             >
               ← Voltar
             </button>
           </div>
           
-          <div className="flex-1 overflow-y-auto px-4 py-5 space-y-3">
-            {carregandoContatos && <p className="p-2">Carregando contatos...</p>}
+          <div className="flex-1 overflow-y-auto p-2 space-y-2">
+            {carregandoContatos && <p className="text-sm text-gray-500 p-2">Carregando contatos...</p>}
 
             {!carregandoContatos && contatos.length === 0 && (
-              <p className="p-2">
+              <p className="text-sm text-gray-500 p-2">
                 Nenhum contato disponível. O chat só é liberado com permissão ativa entre paciente e profissional.
               </p>
             )}
@@ -227,56 +219,45 @@ export default function Chat() {
                   key={contato.id}
                   type="button"
                   onClick={() => setContatoAtivoId(contato.id)}
-                  className={`chat-contact ${ativo ? 'chat-contact--active' : ''}`}
+                  className={`w-full text-left p-3 rounded-lg cursor-pointer flex items-center gap-3 transition-colors border ${
+                    ativo
+                      ? 'bg-blue-50 border-blue-100'
+                      : 'bg-white border-transparent hover:bg-gray-100'
+                  }`}
                 >
-                  <div className={`chat-avatar ${ativo ? 'chat-avatar--active' : ''}`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${ativo ? 'bg-blue-200 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
                     {iniciais(contato.nome)}
                   </div>
                   <div>
-                    <p className="m-0 font-bold text-gray-900">{contato.nome}</p>
-                    <p className={`m-0 mt-0.5 font-medium ${ativo ? 'text-blue-600' : 'text-gray-500'}`}>{contato.subtitulo}</p>
+                    <p className="font-semibold text-gray-800 text-sm">{contato.nome}</p>
+                    <p className={`text-xs ${ativo ? 'text-blue-600' : 'text-gray-500'}`}>{contato.subtitulo}</p>
                   </div>
                 </button>
               );
             })}
           </div>
-        </aside>
+        </div>
 
         {/* Área Principal: Conversa */}
-        <main className="flex flex-col bg-white">
+        <div className="w-full md:w-2/3 flex flex-col bg-white">
           
           {/* Cabeçalho da Conversa */}
-          <div className="px-8 py-7 bg-gradient-to-r from-white via-blue-50 to-white shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="chat-avatar chat-avatar--active text-lg">
-                {iniciais(contatoAtivo?.nome)}
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="m-0 font-extrabold text-gray-900 text-lg truncate">{contatoAtivo?.nome || 'Selecione um contato'}</h3>
-                <p className="m-0 mt-1 text-sm text-gray-600 font-medium truncate">{contatoAtivo?.subtitulo || 'Sem conversa selecionada'}</p>
-              </div>
+          <div className="p-4 border-b border-gray-200 flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-200 text-blue-700 rounded-full flex items-center justify-center font-bold">
+              {iniciais(contatoAtivo?.nome)}
             </div>
-            <div className="ml-auto text-right">
-              <div className="text-xs text-gray-400">Layout preview</div>
-              <div className="inline-block mt-1 px-3 py-1 rounded-full bg-primary-50 text-primary-700 font-semibold">commit: 7ffc172</div>
+            <div>
+              <h3 className="font-bold text-gray-800">{contatoAtivo?.nome || 'Selecione um contato'}</h3>
+              <p className="text-xs text-green-500 font-medium">{contatoAtivo?.subtitulo || 'Sem conversa selecionada'}</p>
             </div>
           </div>
 
           {/* Histórico de Mensagens */}
-          <div className="flex-1 overflow-y-auto px-8 py-6 space-y-5 bg-white">
-            {erro && <p className="font-medium text-red-600">{erro}</p>}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
+            {erro && <p className="text-sm text-red-700">{erro}</p>}
 
             {!erro && contatoAtivo && mensagens.length === 0 && (
-              <p className="text-gray-500">Sem mensagens ainda. Envie a primeira mensagem.</p>
-            )}
-
-            {!erro && !contatoAtivo && (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center max-w-sm">
-                  <p className="m-0 text-gray-900 font-extrabold">Selecione um contato</p>
-                  <p className="m-0 mt-3 text-gray-500">Escolha alguém na lista para ver e enviar mensagens.</p>
-                </div>
-              </div>
+              <p className="text-sm text-gray-500">Sem mensagens ainda. Envie a primeira mensagem.</p>
             )}
 
             {mensagens.map((mensagem) => {
@@ -284,9 +265,9 @@ export default function Chat() {
 
               return (
                 <div key={mensagem.id} className={`flex ${mensagemMinha ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`chat-bubble ${mensagemMinha ? 'chat-bubble--mine' : 'chat-bubble--theirs'}`}>
-                    <p className="m-0">{mensagem.conteudo}</p>
-                    <p className={`m-0 mt-2 text-right ${mensagemMinha ? 'text-blue-100/80' : 'text-gray-400'}`}>
+                  <div className={`${mensagemMinha ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none'} p-3 rounded-2xl max-w-[70%] shadow-sm`}>
+                    <p className="text-sm">{mensagem.conteudo}</p>
+                    <p className={`text-xs mt-1 text-right ${mensagemMinha ? 'text-blue-200' : 'text-gray-400'}`}>
                       {new Date(mensagem.criadoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
@@ -296,63 +277,26 @@ export default function Chat() {
           </div>
 
           {/* Campo de Digitação */}
-          <div className="px-8 py-6 bg-gradient-to-r from-white via-blue-50 to-white shadow-md shadow-blue-100/50 backdrop-blur-sm">
-            <form className="flex items-end gap-3" onSubmit={enviarMensagem}>
+          <div className="p-4 border-t border-gray-200 bg-white">
+            <form className="flex gap-2" onSubmit={enviarMensagem}>
               <input 
                 type="text" 
                 placeholder="Digite sua mensagem..." 
                 value={texto}
                 onChange={(e) => setTexto(e.target.value)}
                 disabled={!contatoAtivo || enviando}
-                className="chat-input flex-1"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
               />
               <button 
                 type="submit"
                 disabled={!contatoAtivo || enviando}
-                className="chat-send"
+                className="bg-blue-600 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-700 transition-colors text-sm"
               >
                 {enviando ? 'Enviando...' : 'Enviar'}
               </button>
             </form>
           </div>
 
-        </main>
-
-        {/* Painel de Detalhes */}
-        <aside className="hidden lg:flex flex-col bg-gradient-to-br from-white via-blue-50 to-slate-50 shadow-lg">
-          <div className="px-6 py-7 bg-gradient-to-r from-white via-blue-50 to-white shadow-sm">
-            <h3 className="m-0 text-xl font-extrabold text-gray-900">Detalhes</h3>
-            <p className="m-0 mt-2 text-sm text-gray-600 font-medium">Informações do contato</p>
-          </div>
-
-          <div className="flex-1 overflow-y-auto px-6 py-6">
-            {contatoAtivo ? (
-              <div className="chat-details">
-                <div className="chat-details__header">
-                  <div className="chat-avatar chat-avatar--active chat-details__avatar">
-                    {iniciais(contatoAtivo?.nome)}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="m-0 font-extrabold text-gray-900 text-lg leading-6 truncate">{contatoAtivo.nome}</p>
-                    <p className="m-0 mt-1 text-sm text-gray-500 font-semibold truncate">{contatoAtivo.subtitulo}</p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <span className="chat-badge">{tipoContatoLabel(contatoAtivo.tipo)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="chat-details__section">
-                  <p className="chat-details__label">E-mail</p>
-                  <p className="chat-details__value">{contatoAtivo.email || 'Não informado'}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center text-sm text-gray-500">
-                Selecione um contato para ver detalhes.
-              </div>
-            )}
-          </div>
-        </aside>
         </div>
       </div>
     </div>

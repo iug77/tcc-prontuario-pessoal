@@ -116,14 +116,14 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="container-main relative z-10">
-      <div className="max-w-5xl mx-auto w-full">
+    <div className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-4xl mx-auto">
         
        {/* Cabeçalho do Dashboard */}
-        <div className="card p-6 md:p-8 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-6 flex justify-between items-center flex-wrap gap-4">
           <div>
-            <h1 className="mb-2">Olá, {paciente?.nome || 'Paciente'}</h1>
-            <p className="text-gray-500 font-medium text-lg">Resumo da sua saúde • Permissões ativas: <span className="text-blue-600 font-bold">{totalPermissoesAtivas}</span></p>
+            <h1 className="text-2xl font-bold text-gray-800">Olá, {paciente?.nome || 'Paciente'}</h1>
+            <p className="text-gray-500">Aqui está o resumo da sua saúde. Permissões ativas: {totalPermissoesAtivas}</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <button 
@@ -131,13 +131,13 @@ export default function Dashboard() {
                 setTotalMensagens(0);
                 navigate('/chat');
               }}
-              className="bg-green-50 text-green-700 px-5 py-2.5 rounded-xl font-bold hover:bg-green-100 transition-all transform hover:scale-105 shadow-sm border border-green-200"
+              className="bg-green-50 text-green-700 px-4 py-2 rounded-lg font-medium hover:bg-green-100 transition-colors border border-green-200"
             >
               💬 Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
             </button>
             <button 
               onClick={() => navigate('/auditoria')}
-              className="bg-indigo-50 text-indigo-700 px-5 py-2.5 rounded-xl font-bold hover:bg-indigo-100 transition-all transform hover:scale-105 shadow-sm border border-indigo-200"
+              className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors border border-indigo-200"
             >
               📋 Logs (LGPD)
             </button>
@@ -168,13 +168,12 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <section className="card mt-6 p-6 md:p-8">
-          <div className="flex items-center justify-between gap-4 mb-6">
-            <h2 className="text-xl md:text-2xl font-extrabold text-gray-900 tracking-tight">Registros Recentes</h2>
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-800">Registros Recentes</h2>
             <button
-              type="button"
               onClick={() => navigate('/meus-registros')}
-              className="btn-link"
+              className="text-sm font-medium text-teal-700 hover:text-teal-800"
             >
               Ver todos
             </button>
@@ -187,17 +186,16 @@ export default function Dashboard() {
           )}
 
           {!carregando && !erro && registros.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {registros.slice(0, 3).map((registro) => (
-                <div key={registro.id} className="registro-item">
+                <div key={registro.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-between">
                   <div>
-                    <p className="registro-item__title">{formatarTipoRegistro(registro.tipo)}</p>
-                    <p className="registro-item__meta">{formatarDataRegistro(registro.data)}</p>
+                    <p className="font-semibold text-gray-800">{formatarTipoRegistro(registro.tipo)}</p>
+                    <p className="text-xs text-gray-500">{formatarDataRegistro(registro.data)}</p>
                   </div>
                   <button
-                    type="button"
                     onClick={() => navigate('/meus-registros', { state: { registroId: registro.id } })}
-                    className="btn-link"
+                    className="text-sm text-teal-700 font-medium hover:text-teal-800"
                   >
                     Ver
                   </button>
@@ -205,7 +203,7 @@ export default function Dashboard() {
               ))}
             </div>
           )}
-        </section>
+        </div>
 
       </div>
     </div>

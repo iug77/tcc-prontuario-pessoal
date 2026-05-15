@@ -64,22 +64,22 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-          <Route
-            path="/"
-            element={(
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            )}
-          />
-          <Route
-            path="/dashboard"
-            element={(
-              <PrivateRoute tiposPermitidos={['paciente']}>
-                <Dashboard />
-              </PrivateRoute>
-            )}
-          />
+        <Route
+          path="/"
+          element={(
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          )}
+        />
+        <Route
+          path="/dashboard"
+          element={(
+            <PrivateRoute tiposPermitidos={['paciente']}>
+              <Dashboard />
+            </PrivateRoute>
+          )}
+        />
         <Route
           path="/novo-registro"
           element={(
