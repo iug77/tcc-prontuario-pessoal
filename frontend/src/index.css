@@ -3,9 +3,9 @@
 :root {
 	color-scheme: light;
 
-	--bg: 248 250 252; /* slate-50 */
+	--bg: 245 243 255; /* violet-50 */
 	--surface: 255 255 255;
-	--surface-2: 248 250 252;
+	--surface-2: 250 245 255; /* violet-50 */
 
 	--text: 15 23 42; /* slate-900 */
 	--muted: 71 85 105; /* slate-600 */
@@ -13,19 +13,19 @@
 
 	--border: 226 232 240; /* slate-200 */
 
-	--primary: 37 99 235; /* blue-600 */
-	--primary-hover: 29 78 216; /* blue-700 */
+	--primary: 124 58 237; /* violet-600 */
+	--primary-hover: 109 40 217; /* violet-700 */
 	--primary-contrast: 255 255 255;
 
 	--accent: 13 148 136; /* teal-600 */
 	--accent-contrast: 255 255 255;
 
-	--info: 79 70 229; /* indigo-600 */
+	--info: 236 72 153; /* pink-500 */
 	--success: 22 163 74; /* green-600 */
 	--danger: 220 38 38; /* red-600 */
 	--warning: 245 158 11; /* amber-500 */
 
-	--ring: 59 130 246; /* blue-500 */
+	--ring: 124 58 237; /* violet-600 */
 
 	--radius: 14px;
 	--shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
