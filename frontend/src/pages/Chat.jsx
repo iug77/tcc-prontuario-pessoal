@@ -198,9 +198,9 @@ export default function Chat() {
         <div className="card p-0 overflow-hidden grid grid-cols-1 chat-grid min-h-[560px] h-[calc(100vh-10rem)]">
         
         {/* Barra Lateral: Contatos */}
-        <aside className="bg-gray-50/60 border-b md:border-b-0 md:border-r border-gray-200 flex flex-col">
-          <div className="p-5 border-b border-gray-200 bg-white/70 backdrop-blur-sm flex justify-between items-center gap-3">
-            <h2 className="m-0 text-xl font-extrabold text-gray-900 tracking-tight">Mensagens</h2>
+        <aside className="bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex flex-col">
+          <div className="px-6 py-7 bg-gradient-to-r from-white via-blue-50 to-white backdrop-blur-md flex justify-between items-center gap-3 shadow-sm">
+            <h2 className="m-0 text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent tracking-tight">Mensagens</h2>
             <button
               type="button"
               onClick={() => navigate(rotaVoltar)}
@@ -210,7 +210,7 @@ export default function Chat() {
             </button>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          <div className="flex-1 overflow-y-auto px-4 py-5 space-y-3">
             {carregandoContatos && <p className="text-sm text-gray-500 p-2">Carregando contatos...</p>}
 
             {!carregandoContatos && contatos.length === 0 && (
@@ -246,13 +246,15 @@ export default function Chat() {
         <main className="flex flex-col bg-white">
           
           {/* Cabeçalho da Conversa */}
-          <div className="p-5 border-b border-gray-200 flex items-center gap-3 bg-white/70 backdrop-blur-sm">
-            <div className="chat-avatar chat-avatar--active">
-              {iniciais(contatoAtivo?.nome)}
-            </div>
-            <div className="min-w-0">
-              <h3 className="m-0 font-extrabold text-gray-900 truncate">{contatoAtivo?.nome || 'Selecione um contato'}</h3>
-              <p className="m-0 mt-0.5 text-xs text-gray-500 font-semibold truncate">{contatoAtivo?.subtitulo || 'Sem conversa selecionada'}</p>
+          <div className="px-8 py-7 bg-gradient-to-r from-white via-blue-50 to-white shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="chat-avatar chat-avatar--active text-lg">
+                {iniciais(contatoAtivo?.nome)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="m-0 font-extrabold text-gray-900 text-lg truncate">{contatoAtivo?.nome || 'Selecione um contato'}</h3>
+                <p className="m-0 mt-1 text-sm text-gray-600 font-medium truncate">{contatoAtivo?.subtitulo || 'Sem conversa selecionada'}</p>
+              </div>
             </div>
             <div className="ml-auto text-right">
               <div className="text-xs text-gray-400">Layout preview</div>
@@ -261,7 +263,7 @@ export default function Chat() {
           </div>
 
           {/* Histórico de Mensagens */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-gray-50/40">
+          <div className="flex-1 overflow-y-auto px-8 py-6 space-y-4 bg-white">
             {erro && <p className="text-sm text-red-700">{erro}</p>}
 
             {!erro && contatoAtivo && mensagens.length === 0 && (
@@ -294,7 +296,7 @@ export default function Chat() {
           </div>
 
           {/* Campo de Digitação */}
-          <div className="p-5 border-t border-gray-200 bg-white/70 backdrop-blur-sm">
+          <div className="px-8 py-6 bg-gradient-to-r from-white via-blue-50 to-white shadow-md shadow-blue-100/50 backdrop-blur-sm">
             <form className="flex items-end gap-3" onSubmit={enviarMensagem}>
               <input 
                 type="text" 
@@ -317,13 +319,13 @@ export default function Chat() {
         </main>
 
         {/* Painel de Detalhes */}
-        <aside className="hidden md:flex flex-col bg-white/60 border-l border-gray-200">
-          <div className="p-5 border-b border-gray-200 bg-white/70 backdrop-blur-sm">
-            <h3 className="m-0 text-lg font-extrabold text-gray-900">Detalhes</h3>
-            <p className="m-0 mt-1 text-xs text-gray-500 font-semibold">Informações do contato</p>
+        <aside className="hidden lg:flex flex-col bg-gradient-to-br from-white via-blue-50 to-slate-50 shadow-lg">
+          <div className="px-6 py-7 bg-gradient-to-r from-white via-blue-50 to-white shadow-sm">
+            <h3 className="m-0 text-xl font-extrabold text-gray-900">Detalhes</h3>
+            <p className="m-0 mt-2 text-sm text-gray-600 font-medium">Informações do contato</p>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-5">
+          <div className="flex-1 overflow-y-auto px-6 py-6">
             {contatoAtivo ? (
               <div className="chat-details">
                 <div className="chat-details__header">
