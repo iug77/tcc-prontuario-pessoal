@@ -10,6 +10,9 @@ export default function DashboardProfissional() {
   const [profissional, setProfissional] = useState(null);
   const [pacientes, setPacientes] = useState([]);
   const [totalMensagens, setTotalMensagens] = useState(0);
+  const [pagina, setPagina] = useState(1);
+
+  const TAMANHO_PAGINA = 10;
 
   const primeiroNome = (profissional?.nome || 'Gabriel').trim().split(' ')[0] || 'Gabriel';
 
@@ -103,6 +106,16 @@ export default function DashboardProfissional() {
     );
   }, [busca, pacientes]);
 
+  const totalPaginas = Math.max(1, Math.ceil(pacientesFiltrados.length / TAMANHO_PAGINA));
+  const paginaAtual = Math.min(pagina, totalPaginas);
+  const inicio = (paginaAtual - 1) * TAMANHO_PAGINA;
+  const fim = inicio + TAMANHO_PAGINA;
+  const pacientesPaginados = pacientesFiltrados.slice(inicio, fim);
+
+  useEffect(() => {
+    setPagina(1);
+  }, [busca]);
+
   const formatarExpiracao = (dataIso, status) => {
     if (!dataIso) {
       return 'Sem expiração';
@@ -141,6 +154,21 @@ export default function DashboardProfissional() {
 
     return 'tag tag-success';
   };
+
+  const solicitacoesPendentes = [
+    {
+      id: 'req-1',
+      paciente: 'Ana Souza',
+      dataSolicitacao: '14/05/2026',
+      status: 'Aguardando Liberação'
+    },
+    {
+      id: 'req-2',
+      paciente: 'Marcos Lima',
+      dataSolicitacao: '12/05/2026',
+      status: 'Aguardando Liberação'
+    }
+  ];
 
   return (
     <div className="app-page">
@@ -191,10 +219,25 @@ export default function DashboardProfissional() {
 
         {/* Card de Perfil do Profissional */}
         <section className="card strip-success p-6">
-          <h1 className="text-2xl font-extrabold tracking-tight">Olá, {primeiroNome}</h1>
-          <p className="text-sm text-muted font-medium mt-1">
-            CRM: {profissional?.crm || 'Não informado'} | Especialidade: {profissional?.especialidade || 'Não informada'}
-          </p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-tight">Olá, {primeiroNome}</h1>
+              <p className="text-sm text-muted font-medium mt-1">
+                CRM: {profissional?.crm || 'Não informado'} | Especialidade: {profissional?.especialidade || 'Não informada'}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 w-full md:w-auto">
+              <div className="bg-surface rounded-xl shadow-sm p-4 min-w-[160px]">
+                <p className="text-xs text-muted font-semibold">Pacientes Ativos</p>
+                <p className="text-2xl font-extrabold tracking-tight mt-1">12</p>
+              </div>
+              <div className="bg-surface rounded-xl shadow-sm p-4 min-w-[160px]">
+                <p className="text-xs text-muted font-semibold">Acessos Pendentes</p>
+                <p className="text-2xl font-extrabold tracking-tight mt-1">3</p>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Lista de Pacientes Compartilhados */}
@@ -259,7 +302,7 @@ export default function DashboardProfissional() {
                   </tr>
                 )}
 
-                {pacientesFiltrados.map((paciente) => (
+                {pacientesPaginados.map((paciente) => (
                   <tr
                     key={paciente.permissaoId}
                     className={`${paciente.status === 'Inativo' ? 'opacity-60' : ''}`}
@@ -283,7 +326,7 @@ export default function DashboardProfissional() {
                         <button 
                           onClick={() => paciente.status === 'Ativo' && navigate('/visualizador', { state: { pacienteId: paciente.pacienteId } })}
                           disabled={paciente.status === 'Inativo'}
-                          className="btn btn-primary"
+                          className={`btn ${paciente.status === 'Inativo' ? 'btn-outline' : 'btn-primary'}`}
                         >
                           Prontuário
                         </button>
@@ -295,7 +338,78 @@ export default function DashboardProfissional() {
             </table>
           </div>
           )}
+
+          {/* Rodapé / Paginação */}
+          {!carregando && !erro && pacientesFiltrados.length > 0 && (
+            <div className="bg-surface-2 p-4 border-t border-[rgb(var(--border))] text-sm text-muted flex flex-wrap gap-3 justify-between items-center">
+              <p>
+                Mostrando {Math.min(inicio + 1, pacientesFiltrados.length)}–{Math.min(fim, pacientesFiltrados.length)} de {pacientesFiltrados.length}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                  disabled={paginaAtual <= 1}
+                >
+                  &lt; Anterior
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                  disabled={paginaAtual >= totalPaginas}
+                >
+                  Próximo &gt;
+                </button>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Solicitações de Acesso Pendentes */}
+        <section className="card overflow-hidden">
+          <div className="card-header">
+            <h2 className="text-lg font-extrabold tracking-tight">Solicitações de Acesso Pendentes</h2>
+            <span className="tag tag-warning">{solicitacoesPendentes.length}</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="table table-strong">
+              <thead>
+                <tr>
+                  <th>Paciente</th>
+                  <th>Data da Solicitação</th>
+                  <th>Status</th>
+                  <th className="text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {solicitacoesPendentes.map((solicitacao) => (
+                  <tr key={solicitacao.id}>
+                    <td className="font-semibold">{solicitacao.paciente}</td>
+                    <td>{solicitacao.dataSolicitacao}</td>
+                    <td>
+                      <span className="tag tag-warning">{solicitacao.status}</span>
+                    </td>
+                    <td className="text-right">
+                      <button
+                        type="button"
+                        className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+                      >
+                        Reenviar Solicitação
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="bg-surface-2 p-4 border-t border-[rgb(var(--border))] text-xs text-muted">
+            Itens de exemplo para demonstrar a lógica de autorização (pendente até o paciente aprovar).
+          </div>
+        </section>
 
       </div>
     </div>

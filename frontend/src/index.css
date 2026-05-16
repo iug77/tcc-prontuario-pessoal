@@ -372,6 +372,11 @@
 		color: rgb(var(--danger));
 	}
 
+	.tag-warning {
+		background: rgba(var(--warning), 0.16);
+		color: rgb(var(--warning));
+	}
+
 	.table-strong th {
 		color: rgb(var(--text));
 		font-weight: 700;
