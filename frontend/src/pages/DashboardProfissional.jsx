@@ -11,6 +11,8 @@ export default function DashboardProfissional() {
   const [pacientes, setPacientes] = useState([]);
   const [totalMensagens, setTotalMensagens] = useState(0);
 
+  const primeiroNome = (profissional?.nome || 'Gabriel').trim().split(' ')[0] || 'Gabriel';
+
   useEffect(() => {
     const token = localStorage.getItem('token');
 
@@ -120,54 +122,109 @@ export default function DashboardProfissional() {
     navigate('/');
   };
 
+  const classeTagPermissao = (permissao) => {
+    if (permissao === 'Leitura e Escrita') {
+      return 'tag tag-success';
+    }
+
+    return 'tag';
+  };
+
+  const classeTagExpiracao = (dataIso, status) => {
+    if (!dataIso) {
+      return 'tag';
+    }
+
+    if (status === 'Inativo') {
+      return 'tag tag-danger';
+    }
+
+    return 'tag tag-success';
+  };
+
   return (
     <div className="app-page">
       <div className="app-container max-w-5xl space-y-6">
-        
-        {/* Cabeçalho do Médico */}
-        <div className="card strip-accent p-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Olá, {profissional?.nome || 'Profissional'}</h1>
-            <p className="subtitle">
-              CRM: {profissional?.crm || 'Não informado'} | Especialidade: {profissional?.especialidade || 'Não informada'}
-            </p>
+
+        {/* Top Nav */}
+        <header className="card border-0 shadow-sm">
+          <div className="card-header">
+            <div className="flex items-center gap-3">
+              <div className="avatar avatar-primary">DP</div>
+              <div>
+                <p className="title" style={{ fontSize: 18 }}>Dashboard do Profissional</p>
+                <p className="text-sm text-muted">Gerencie acessos e prontuários</p>
+              </div>
+            </div>
+
+            <nav className="flex items-center gap-2 flex-wrap justify-end">
+              <button
+                type="button"
+                onClick={() => navigate('/auditoria')}
+                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+              >
+                Auditoria
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setTotalMensagens(0);
+                  navigate('/chat');
+                }}
+                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+              >
+                Mensagens
+                {totalMensagens > 0 && <span className="tag tag-primary">{totalMensagens}</span>}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+              >
+                Sair
+              </button>
+            </nav>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => navigate('/auditoria')}
-              className="btn btn-info"
-            >
-              📋 Auditoria
-            </button>
-            <button 
-              onClick={() => {
-                setTotalMensagens(0);
-                navigate('/chat');
-              }}
-              className="btn btn-success"
-            >
-              💬 Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
-            </button>
-            <button 
-              onClick={handleLogout}
-              className="btn btn-outline"
-            >
-              Sair
-            </button>
-          </div>
-        </div>
+        </header>
+
+        {/* Card de Perfil do Profissional */}
+        <section className="card strip-success p-6">
+          <h1 className="text-2xl font-extrabold tracking-tight">Olá, {primeiroNome}</h1>
+          <p className="text-sm text-muted font-medium mt-1">
+            CRM: {profissional?.crm || 'Não informado'} | Especialidade: {profissional?.especialidade || 'Não informada'}
+          </p>
+        </section>
 
         {/* Lista de Pacientes Compartilhados */}
         <div className="card overflow-hidden">
           <div className="card-header">
             <h2 className="text-lg font-extrabold tracking-tight">Pacientes com Acesso Concedido</h2>
             <div className="relative">
+              <svg
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Zm10 2-4.35-4.35"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
               <input 
                 type="text" 
                 placeholder="Buscar paciente..." 
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                className="input w-64"
+                className="input w-72 pl-10"
               />
             </div>
           </div>
@@ -184,7 +241,7 @@ export default function DashboardProfissional() {
 
           {!carregando && !erro && (
             <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table table-strong">
               <thead>
                 <tr>
                   <th>Paciente</th>
@@ -203,18 +260,21 @@ export default function DashboardProfissional() {
                 )}
 
                 {pacientesFiltrados.map((paciente) => (
-                  <tr key={paciente.permissaoId} className={`${paciente.status === 'Inativo' ? 'opacity-60' : ''}`}>
+                  <tr
+                    key={paciente.permissaoId}
+                    className={`${paciente.status === 'Inativo' ? 'opacity-60' : ''}`}
+                  >
                     <td>
                       <p className="font-extrabold tracking-tight">{paciente.nome}</p>
                       <p className="text-muted text-xs">{paciente.email}</p>
                     </td>
                     <td>
-                      <span className={`pill ${paciente.permissao === 'Leitura e Escrita' ? 'pill-accent' : 'pill-info'}`}>
+                      <span className={classeTagPermissao(paciente.permissao)}>
                         {paciente.permissao}
                       </span>
                     </td>
                     <td>
-                      <span className={`pill ${paciente.status === 'Inativo' ? 'pill-danger' : 'pill-success'}`}>
+                      <span className={classeTagExpiracao(paciente.expiraEm, paciente.status)}>
                         {formatarExpiracao(paciente.expiraEm, paciente.status)}
                       </span>
                     </td>
@@ -223,7 +283,7 @@ export default function DashboardProfissional() {
                         <button 
                           onClick={() => paciente.status === 'Ativo' && navigate('/visualizador', { state: { pacienteId: paciente.pacienteId } })}
                           disabled={paciente.status === 'Inativo'}
-                          className={`btn ${paciente.status === 'Inativo' ? 'btn-outline' : 'btn-primary'}`}
+                          className="btn btn-primary"
                         >
                           Prontuário
                         </button>
