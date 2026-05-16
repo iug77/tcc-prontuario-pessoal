@@ -10,6 +10,7 @@ export default function Dashboard() {
   const [registros, setRegistros] = useState([]);
   const [totalPermissoesAtivas, setTotalPermissoesAtivas] = useState(0);
   const [totalMensagens, setTotalMensagens] = useState(0);
+  const [filtroRapido, setFiltroRapido] = useState('Todos');
 
   const primeiroNome = (paciente?.nome || 'Guilherme').trim().split(' ')[0] || 'Guilherme';
 
@@ -117,6 +118,28 @@ export default function Dashboard() {
     });
   };
 
+  const registrosFiltrados = registros.filter((registro) => {
+    if (filtroRapido === 'Todos') {
+      return true;
+    }
+
+    const tipo = (registro?.tipo || '').toLowerCase();
+
+    if (filtroRapido === 'Exames') {
+      return tipo.includes('exame');
+    }
+
+    if (filtroRapido === 'Receitas') {
+      return tipo.includes('receita');
+    }
+
+    if (filtroRapido === 'Prontuários') {
+      return tipo.includes('prontuario') || tipo.includes('prontuário');
+    }
+
+    return true;
+  });
+
   return (
     <div className="app-page">
       <div className="app-container max-w-6xl">
@@ -166,7 +189,7 @@ export default function Dashboard() {
           </p>
 
           <div className="mt-3">
-            <span className="pill pill-success">Permissões ativas: {totalPermissoesAtivas}</span>
+            <span className="tag tag-success">Permissões ativas: {totalPermissoesAtivas}</span>
           </div>
 
           <div className="mt-5 flex flex-wrap gap-3">
@@ -218,15 +241,65 @@ export default function Dashboard() {
                 </button>
               </div>
 
+              {/* Filtros rápidos */}
+              <div className="flex items-center gap-2 flex-wrap mb-5">
+                {['Todos', 'Exames', 'Receitas', 'Prontuários'].map((opcao) => {
+                  const ativo = filtroRapido === opcao;
+
+                  return (
+                    <button
+                      key={opcao}
+                      type="button"
+                      onClick={() => setFiltroRapido(opcao)}
+                      aria-pressed={ativo}
+                      className={
+                        ativo
+                          ? 'px-3 py-1.5 rounded-full text-sm font-semibold bg-[rgb(var(--primary))] text-white'
+                          : 'px-3 py-1.5 rounded-full text-sm font-semibold bg-[rgba(var(--text),0.06)] text-[rgb(var(--muted))] hover:bg-[rgba(var(--text),0.09)]'
+                      }
+                    >
+                      {opcao}
+                    </button>
+                  );
+                })}
+              </div>
+
               {carregando && <p className="text-sm text-muted">Carregando registros...</p>}
 
-              {!carregando && !erro && registros.length === 0 && (
-                <p className="text-sm text-muted">Você ainda não adicionou registros.</p>
+              {!carregando && !erro && registrosFiltrados.length === 0 && (
+                <div className="bg-surface rounded-xl shadow-sm p-8 text-center">
+                  <div className="mx-auto w-12 h-12 text-muted" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                      <path d="M7 14h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                  </div>
+                  <p className="font-extrabold tracking-tight mt-3">Nenhum registro encontrado</p>
+                  <p className="text-sm text-muted mt-1">
+                    Tente trocar o filtro ou adicione seu primeiro documento.
+                  </p>
+                  <div className="mt-5">
+                    <button
+                      type="button"
+                      onClick={() => navigate('/novo-registro')}
+                      className="btn btn-outline"
+                    >
+                      Adicionar primeiro documento
+                    </button>
+                  </div>
+
+                  {/**
+                   * Empty State (referência):
+                   * - Ícone suave
+                   * - Texto amigável
+                   * - CTA secundário
+                   */}
+                </div>
               )}
 
-              {!carregando && !erro && registros.length > 0 && (
+              {!carregando && !erro && registrosFiltrados.length > 0 && (
                 <div className="space-y-3">
-                  {registros.slice(0, 5).map((registro) => (
+                  {registrosFiltrados.slice(0, 5).map((registro) => (
                     <div
                       key={registro.id}
                       className="bg-surface rounded-xl shadow-sm p-4 flex items-center justify-between gap-4"
@@ -274,13 +347,41 @@ export default function Dashboard() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted">Total de Registros</span>
-                  <span className="pill pill-primary">{registros.length}</span>
+                  <span className="tag tag-primary">{registros.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted">Compartilhamento de Dados</span>
-                  <span className={`pill ${totalPermissoesAtivas > 0 ? 'pill-success' : 'pill-danger'}`}>
+                  <span className={`tag ${totalPermissoesAtivas > 0 ? 'tag-success' : 'tag-danger'}`}>
                     {totalPermissoesAtivas > 0 ? 'Ativo' : 'Desativado'}
                   </span>
+                </div>
+
+                {totalPermissoesAtivas > 0 && (
+                  <div className="mt-2 bg-surface rounded-xl shadow-sm p-4">
+                    <p className="text-sm font-extrabold tracking-tight">Quem tem acesso agora</p>
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="avatar">DG</div>
+                        <div>
+                          <p className="text-sm font-semibold">Dr. Gabriel</p>
+                          <p className="text-xs text-muted">Cardiologia</p>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted mt-3">
+                      (Exemplo) Lista baseada nas permissões ativas.
+                    </p>
+                  </div>
+                )}
+
+                <div className="mt-2 bg-surface rounded-xl shadow-sm p-4">
+                  <p className="text-sm font-extrabold tracking-tight">Últimos Acessos</p>
+                  <div className="mt-2 space-y-1">
+                    <p className="text-sm text-muted">Visualizado há 2h por Dr. Gabriel</p>
+                  </div>
+                  <p className="text-xs text-muted mt-3">
+                    (Exemplo) Em breve: auditoria real de acessos.
+                  </p>
                 </div>
               </div>
             </div>
