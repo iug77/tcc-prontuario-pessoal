@@ -11,6 +11,8 @@ export default function Dashboard() {
   const [totalPermissoesAtivas, setTotalPermissoesAtivas] = useState(0);
   const [totalMensagens, setTotalMensagens] = useState(0);
 
+  const primeiroNome = (paciente?.nome || 'Guilherme').trim().split(' ')[0] || 'Guilherme';
+
   useEffect(() => {
     const token = localStorage.getItem('token');
 
@@ -117,94 +119,173 @@ export default function Dashboard() {
 
   return (
     <div className="app-page">
-      <div className="app-container max-w-4xl">
-        
-       {/* Cabeçalho do Dashboard */}
-        <div className="card p-6 mb-6 flex justify-between items-center flex-wrap gap-4">
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Olá, {paciente?.nome || 'Paciente'}</h1>
-            <p className="subtitle">Aqui está o resumo da sua saúde. Permissões ativas: {totalPermissoesAtivas}</p>
+      <div className="app-container max-w-6xl">
+
+        {/* Header / Nav */}
+        <header className="card border-0 shadow-sm mb-6">
+          <div className="card-header">
+            <div className="flex items-center gap-3">
+              <div className="avatar avatar-primary">PP</div>
+              <div>
+                <p className="title" style={{ fontSize: 18 }}>Painel de Saúde</p>
+                <p className="text-sm text-muted">Acompanhe seus registros e status da conta</p>
+              </div>
+            </div>
+
+            <nav className="flex items-center gap-2 flex-wrap justify-end">
+              <button
+                type="button"
+                onClick={() => navigate('/permissoes')}
+                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+              >
+                Permissões
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/auditoria')}
+                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+              >
+                Logs (LGPD)
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+              >
+                Sair
+              </button>
+            </nav>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <button 
-              onClick={() => {
-                setTotalMensagens(0);
-                navigate('/chat');
-              }}
-              className="btn btn-success"
-            >
-              💬 Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
-            </button>
-            <button 
-              onClick={() => navigate('/auditoria')}
-              className="btn btn-info"
-            >
-              📋 Logs (LGPD)
-            </button>
-            <button 
-              onClick={() => navigate('/permissoes')}
-              className="btn btn-outline"
-            >
-              📝 Permissões
-            </button>
-            <button 
+        </header>
+
+        {/* Saudação + ações principais */}
+        <section className="card border-0 shadow-sm p-6 mb-6">
+          <h1 className="text-2xl font-extrabold tracking-tight">Olá, {primeiroNome}</h1>
+          <p className="text-sm text-muted font-medium mt-1">
+            Aqui está o resumo da sua saúde.
+          </p>
+
+          <div className="mt-3">
+            <span className="pill pill-success">Permissões ativas: {totalPermissoesAtivas}</span>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              type="button"
               onClick={() => navigate('/novo-registro')}
               className="btn btn-primary"
             >
               + Novo Registro
             </button>
             <button
-              onClick={() => navigate('/meus-registros')}
-              className="btn btn-accent"
+              type="button"
+              onClick={() => {
+                setTotalMensagens(0);
+                navigate('/chat');
+              }}
+              className="btn btn-outline"
             >
-              🧾 Ver Registros
+              Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
             </button>
             <button
-              onClick={handleLogout}
-              className="btn btn-danger"
-            >
-              Sair
-            </button>
-          </div>
-        </div>
-
-        <div className="card p-6 mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-800">Registros Recentes</h2>
-            <button
+              type="button"
               onClick={() => navigate('/meus-registros')}
-              className="text-sm font-bold text-accent hover:underline"
+              className="btn btn-outline"
             >
-              Ver todos
+              Ver Registros
             </button>
           </div>
 
-          {carregando && <p className="text-sm text-gray-500">Carregando registros...</p>}
-
-          {!carregando && !erro && registros.length === 0 && (
-            <p className="text-sm text-gray-500">Você ainda não adicionou registros.</p>
-          )}
-
-          {!carregando && !erro && registros.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {registros.slice(0, 3).map((registro) => (
-                <div key={registro.id} className="p-4 bg-surface-2 rounded-xl border border-[rgb(var(--border))] flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-gray-800">{formatarTipoRegistro(registro.tipo)}</p>
-                    <p className="text-xs text-gray-500">{formatarDataRegistro(registro.data)}</p>
-                  </div>
-                  <button
-                    onClick={() => navigate('/meus-registros', { state: { registroId: registro.id } })}
-                    className="text-sm font-bold text-accent hover:underline"
-                  >
-                    Ver
-                  </button>
-                </div>
-              ))}
+          {erro && (
+            <div className="mt-4">
+              <div className="alert alert-danger">{erro}</div>
             </div>
           )}
-        </div>
+        </section>
 
+        {/* Conteúdo principal (2/3 + 1/3) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <main className="lg:col-span-2">
+            <div className="card border-0 shadow-sm p-6">
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <h2 className="text-lg font-extrabold tracking-tight">Registros Recentes</h2>
+                <button
+                  type="button"
+                  onClick={() => navigate('/meus-registros')}
+                  className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+                >
+                  Ver todos
+                </button>
+              </div>
+
+              {carregando && <p className="text-sm text-muted">Carregando registros...</p>}
+
+              {!carregando && !erro && registros.length === 0 && (
+                <p className="text-sm text-muted">Você ainda não adicionou registros.</p>
+              )}
+
+              {!carregando && !erro && registros.length > 0 && (
+                <div className="space-y-3">
+                  {registros.slice(0, 5).map((registro) => (
+                    <div
+                      key={registro.id}
+                      className="bg-surface rounded-xl shadow-sm p-4 flex items-center justify-between gap-4"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 text-muted" aria-hidden="true">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 3h6a2 2 0 0 1 2 2v16H7V5a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                            <path d="M9 7h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            <path d="M9 11h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            <path d="M9 15h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="font-semibold">{formatarTipoRegistro(registro.tipo)}</p>
+                          <p className="text-xs text-muted">{formatarDataRegistro(registro.data)}</p>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => navigate('/meus-registros', { state: { registroId: registro.id } })}
+                        className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+                        aria-label="Abrir registro"
+                        title="Abrir"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </main>
+
+          <aside className="lg:col-span-1">
+            <div className="card border-0 shadow-sm p-6">
+              <h2 className="text-lg font-extrabold tracking-tight">Resumo da Conta</h2>
+              <p className="text-sm text-muted mt-1">Indicadores rápidos do seu acesso</p>
+
+              <div className="divider my-4" />
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted">Total de Registros</span>
+                  <span className="pill pill-primary">{registros.length}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted">Compartilhamento de Dados</span>
+                  <span className={`pill ${totalPermissoesAtivas > 0 ? 'pill-success' : 'pill-danger'}`}>
+                    {totalPermissoesAtivas > 0 ? 'Ativo' : 'Desativado'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
     </div>
   );
