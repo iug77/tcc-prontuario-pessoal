@@ -8,6 +8,7 @@ import Chat from './pages/Chat';
 import DashboardProfissional from './pages/DashboardProfissional';
 import Visualizador from './pages/Visualizador';
 import MeusRegistros from './pages/MeusRegistros';
+import AdminDashboard from './pages/AdminDashboard';
 
 const obterSessao = () => {
   const token = localStorage.getItem('token');
@@ -39,6 +40,10 @@ function PublicRoute({ children }) {
 
   if (sessao?.usuario?.tipo === 'profissional') {
     return <Navigate to="/dashboard-profissional" replace />;
+  }
+
+  if (sessao?.usuario?.tipo === 'admin') {
+    return <Navigate to="/admin" replace />;
   }
 
   return children;
@@ -133,6 +138,14 @@ function App() {
           element={(
             <PrivateRoute tiposPermitidos={['profissional']}>
               <DashboardProfissional />
+            </PrivateRoute>
+          )}
+        />
+        <Route
+          path="/admin"
+          element={(
+            <PrivateRoute tiposPermitidos={['admin', 'profissional']}>
+              <AdminDashboard />
             </PrivateRoute>
           )}
         />
