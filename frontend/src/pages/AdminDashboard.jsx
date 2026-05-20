@@ -26,6 +26,17 @@ const formatarDataHora = (dataIso) => {
   return data.toLocaleString('pt-BR');
 };
 
+const formatarHashCurto = (valor, inicio = 8, fim = 4) => {
+  if (!valor) return '-';
+
+  const texto = String(valor);
+  if (texto.length <= inicio + fim + 3) {
+    return texto;
+  }
+
+  return `${texto.slice(0, inicio)}...${texto.slice(-fim)}`;
+};
+
 const tagStatus = (status) => {
   if (status === 'Ativo') return 'tag tag-success';
   if (status === 'Inativo') return 'tag tag-danger';
@@ -501,28 +512,42 @@ export default function AdminDashboard() {
         </header>
 
         <section className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="card border-0 shadow-sm p-5">
-            <p className="text-xs text-muted font-semibold">Total de Usuários</p>
-            <p className="text-2xl font-extrabold tracking-tight mt-1">{totalUsuarios}</p>
+          <div className="card border-0 shadow-sm p-5 flex flex-col">
+            <div>
+              <p className="text-xs text-muted font-semibold">Total de Usuários</p>
+              <p className="text-2xl font-extrabold tracking-tight mt-1 leading-none">{totalUsuarios}</p>
+            </div>
+            <p className="text-xs text-muted mt-2 min-h-[16px]" aria-hidden="true">&nbsp;</p>
           </div>
-          <div className="card border-0 shadow-sm p-5">
-            <p className="text-xs text-muted font-semibold">Pacientes</p>
-            <p className="text-2xl font-extrabold tracking-tight mt-1">{totalPacientes}</p>
+          <div className="card border-0 shadow-sm p-5 flex flex-col">
+            <div>
+              <p className="text-xs text-muted font-semibold">Pacientes</p>
+              <p className="text-2xl font-extrabold tracking-tight mt-1 leading-none">{totalPacientes}</p>
+            </div>
+            <p className="text-xs text-muted mt-2 min-h-[16px]" aria-hidden="true">&nbsp;</p>
           </div>
-          <div className="card border-0 shadow-sm p-5">
-            <p className="text-xs text-muted font-semibold">Profissionais</p>
-            <p className="text-2xl font-extrabold tracking-tight mt-1">{totalProfissionais}</p>
+          <div className="card border-0 shadow-sm p-5 flex flex-col">
+            <div>
+              <p className="text-xs text-muted font-semibold">Profissionais</p>
+              <p className="text-2xl font-extrabold tracking-tight mt-1 leading-none">{totalProfissionais}</p>
+            </div>
+            <p className="text-xs text-muted mt-2 min-h-[16px]" aria-hidden="true">&nbsp;</p>
           </div>
-          <div className="card border-0 shadow-sm p-5">
-            <p className="text-xs text-muted font-semibold">Ativos</p>
-            <p className="text-2xl font-extrabold tracking-tight mt-1">{totalAtivos}</p>
+          <div className="card border-0 shadow-sm p-5 flex flex-col">
+            <div>
+              <p className="text-xs text-muted font-semibold">Ativos</p>
+              <p className="text-2xl font-extrabold tracking-tight mt-1 leading-none">{totalAtivos}</p>
+            </div>
+            <p className="text-xs text-muted mt-2 min-h-[16px]" aria-hidden="true">&nbsp;</p>
           </div>
-          <div className="card border-0 shadow-sm p-5">
-            <p className="text-xs text-muted font-semibold">Requisições API</p>
-            <p className="text-2xl font-extrabold tracking-tight mt-1">
-              {carregandoInfra ? '…' : erroInfra ? '-' : infra?.requisicoesApi ?? 0}
-            </p>
-            <p className="text-xs text-muted mt-2">
+          <div className="card border-0 shadow-sm p-5 flex flex-col">
+            <div>
+              <p className="text-xs text-muted font-semibold">Requisições API</p>
+              <p className="text-2xl font-extrabold tracking-tight mt-1 leading-none">
+                {carregandoInfra ? '…' : erroInfra ? '-' : infra?.requisicoesApi ?? 0}
+              </p>
+            </div>
+            <p className="text-xs text-muted mt-2 min-h-[16px]">
               {erroInfra ? erroInfra : 'Desde o start do servidor'}
             </p>
           </div>
@@ -708,9 +733,27 @@ export default function AdminDashboard() {
                 {logsAuditoria.map((log) => (
                   <tr key={log.id}>
                     <td className="text-sm text-muted">{formatarDataHora(log.data)}</td>
-                    <td className="text-sm font-semibold">{log.usuarioId}</td>
+                    <td className="text-sm font-semibold">
+                      <span
+                        className="inline-block align-middle font-mono text-xs max-w-[150px] truncate"
+                        title={log.usuarioId}
+                      >
+                        {formatarHashCurto(log.usuarioId)}
+                      </span>
+                    </td>
                     <td className="text-sm">{log.acao}</td>
-                    <td className="text-sm text-muted">{log.documentoId || '-'}</td>
+                    <td className="text-sm text-muted">
+                      {log.documentoId ? (
+                        <span
+                          className="inline-block align-middle font-mono text-xs max-w-[150px] truncate"
+                          title={log.documentoId}
+                        >
+                          {formatarHashCurto(log.documentoId)}
+                        </span>
+                      ) : (
+                        '-'
+                      )}
+                    </td>
                     <td className="text-sm font-semibold">{log.status}</td>
                   </tr>
                 ))}
