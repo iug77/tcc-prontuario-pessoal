@@ -37,6 +37,7 @@ model Profissional {
   especialidade String?
   criadoEm      DateTime @default(now())
   ativo         Boolean  @default(true)
+  crmValidado   Boolean  @default(false)
 
   // Relacionamentos
   permissoesRecebidas Permissao[]

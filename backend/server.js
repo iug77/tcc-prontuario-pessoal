@@ -36,6 +36,18 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' })); // Permite payload maior para upload base64
 
+// Métrica simples em memória (desde o start do processo)
+app.locals.apiRequestCount = 0;
+app.locals.serverStartedAt = Date.now();
+app.use((req, res, next) => {
+  const caminho = String(req.path || '');
+  if (caminho.startsWith('/api')) {
+    req.app.locals.apiRequestCount = (req.app.locals.apiRequestCount || 0) + 1;
+  }
+
+  next();
+});
+
 // Garantir UTF-8 em todas as respostas
 app.use((req, res, next) => {
   res.set('Content-Type', 'application/json; charset=utf-8');
@@ -97,11 +109,15 @@ app.use('/api', async (req, res, next) => {
     if (payload?.tipo === 'profissional' && payload?.id) {
       const profissional = await prisma.profissional.findUnique({
         where: { id: payload.id },
-        select: { ativo: true }
+        select: { ativo: true, crmValidado: true }
       });
 
       if (!profissional?.ativo) {
         return res.status(403).json({ erro: 'Conta desativada. Contate o administrador.' });
+      }
+
+      if (profissional?.crmValidado === false) {
+        return res.status(403).json({ erro: 'Conta pendente de validação de CRM. Contate o administrador.' });
       }
     }
   } catch {

@@ -7,6 +7,18 @@ const prisma = new PrismaClient();
 // (Ideal: mover para process.env.JWT_SECRET)
 const JWT_SECRET = 'segredo_do_tcc_123';
 
+const statusContaProfissional = (profissional) => {
+  if (!profissional?.ativo) {
+    return 'Inativo';
+  }
+
+  if (profissional?.crmValidado === false) {
+    return 'Pendente';
+  }
+
+  return 'Ativo';
+};
+
 const obterTokenBearer = (authHeader = '') => {
   const [tipo, token] = String(authHeader || '').split(' ');
 
@@ -99,7 +111,8 @@ exports.listarUsuarios = async (req, res) => {
           crm: true,
           especialidade: true,
           criadoEm: true,
-          ativo: true
+          ativo: true,
+          crmValidado: true
         },
         orderBy: {
           nome: 'asc'
@@ -121,10 +134,11 @@ exports.listarUsuarios = async (req, res) => {
         tipo: 'profissional',
         nome: p.nome,
         email: p.email,
-        status: p.ativo ? 'Ativo' : 'Inativo',
+        status: statusContaProfissional(p),
         criadoEm: p.criadoEm,
         crm: p.crm || null,
-        especialidade: p.especialidade || null
+        especialidade: p.especialidade || null,
+        crmValidado: p.crmValidado
       }))
     ].sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR'));
 
@@ -199,6 +213,7 @@ exports.obterUsuario = async (req, res) => {
           especialidade: true,
           criadoEm: true,
           ativo: true,
+          crmValidado: true,
           _count: {
             select: {
               permissoesRecebidas: true,
@@ -220,9 +235,10 @@ exports.obterUsuario = async (req, res) => {
           nome: profissional.nome,
           email: profissional.email,
           criadoEm: profissional.criadoEm,
-          status: profissional.ativo ? 'Ativo' : 'Inativo',
+          status: statusContaProfissional(profissional),
           crm: profissional.crm,
           especialidade: profissional.especialidade,
+          crmValidado: profissional.crmValidado,
           contagens: profissional._count
         }
       });
@@ -274,7 +290,7 @@ exports.atualizarStatusUsuario = async (req, res) => {
       const atualizado = await prisma.profissional.update({
         where: { id },
         data: { ativo },
-        select: { id: true, ativo: true }
+        select: { id: true, ativo: true, crmValidado: true }
       });
 
       return res.status(200).json({
@@ -282,7 +298,7 @@ exports.atualizarStatusUsuario = async (req, res) => {
         usuario: {
           id: atualizado.id,
           tipo: 'profissional',
-          status: atualizado.ativo ? 'Ativo' : 'Inativo'
+          status: statusContaProfissional(atualizado)
         }
       });
     }
@@ -295,5 +311,98 @@ exports.atualizarStatusUsuario = async (req, res) => {
 
     console.error(error);
     return res.status(500).json({ erro: 'Erro interno no servidor ao atualizar status.' });
+  }
+};
+
+exports.aprovarProfissional = async (req, res) => {
+  try {
+    const payload = autenticarAdmin(req, res);
+    if (!payload) {
+      return;
+    }
+
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ erro: 'Parâmetros inválidos.' });
+    }
+
+    const atualizado = await prisma.profissional.update({
+      where: { id },
+      data: { crmValidado: true },
+      select: { id: true, ativo: true, crmValidado: true }
+    });
+
+    return res.status(200).json({
+      mensagem: 'Profissional aprovado com sucesso.',
+      usuario: {
+        id: atualizado.id,
+        tipo: 'profissional',
+        status: statusContaProfissional(atualizado),
+        crmValidado: atualizado.crmValidado
+      }
+    });
+  } catch (error) {
+    if (error?.code === 'P2025') {
+      return res.status(404).json({ erro: 'Profissional não encontrado.' });
+    }
+
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno no servidor ao aprovar profissional.' });
+  }
+};
+
+exports.listarAuditoriaGlobal = async (req, res) => {
+  try {
+    const payload = autenticarAdmin(req, res);
+    if (!payload) {
+      return;
+    }
+
+    const limiteBruto = Number(req.query?.limit);
+    const limite = Number.isFinite(limiteBruto) ? Math.max(1, Math.min(100, limiteBruto)) : 20;
+
+    const logs = await prisma.logAuditoria.findMany({
+      orderBy: { data: 'desc' },
+      take: limite,
+      select: {
+        id: true,
+        data: true,
+        usuarioId: true,
+        acao: true,
+        documentoId: true,
+        status: true
+      }
+    });
+
+    return res.status(200).json({
+      logs,
+      total: logs.length
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno no servidor ao listar auditoria.' });
+  }
+};
+
+exports.obterInfra = async (req, res) => {
+  try {
+    const payload = autenticarAdmin(req, res);
+    if (!payload) {
+      return;
+    }
+
+    const requisicoesApi = Number(req.app?.locals?.apiRequestCount || 0);
+    const startedAt = Number(req.app?.locals?.serverStartedAt || 0);
+    const uptimeMs = startedAt ? Date.now() - startedAt : Math.round(process.uptime() * 1000);
+
+    return res.status(200).json({
+      status: 'OK',
+      requisicoesApi,
+      uptimeMs,
+      servidorEm: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno no servidor ao obter métricas de infraestrutura.' });
   }
 };

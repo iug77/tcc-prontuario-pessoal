@@ -1,5 +1,5 @@
 import { API_URL } from '../config';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const ADMIN_TOKEN_KEY = 'admin_token_v1';
@@ -15,9 +15,21 @@ const formatarData = (dataIso) => {
   return data.toLocaleDateString('pt-BR');
 };
 
+const formatarDataHora = (dataIso) => {
+  if (!dataIso) return '-';
+
+  const data = dataIso instanceof Date ? dataIso : new Date(dataIso);
+  if (Number.isNaN(data.getTime())) {
+    return '-';
+  }
+
+  return data.toLocaleString('pt-BR');
+};
+
 const tagStatus = (status) => {
   if (status === 'Ativo') return 'tag tag-success';
   if (status === 'Inativo') return 'tag tag-danger';
+  if (status === 'Pendente') return 'tag tag-warning';
   return 'tag';
 };
 
@@ -36,10 +48,19 @@ export default function AdminDashboard() {
   const [carregandoUsuarios, setCarregandoUsuarios] = useState(false);
   const [erroUsuarios, setErroUsuarios] = useState('');
 
+  const [infra, setInfra] = useState(null);
+  const [carregandoInfra, setCarregandoInfra] = useState(false);
+  const [erroInfra, setErroInfra] = useState('');
+
+  const [logsAuditoria, setLogsAuditoria] = useState([]);
+  const [carregandoAuditoria, setCarregandoAuditoria] = useState(false);
+  const [erroAuditoria, setErroAuditoria] = useState('');
+
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
   const [carregandoDetalhes, setCarregandoDetalhes] = useState(false);
   const [erroDetalhes, setErroDetalhes] = useState('');
   const [atualizandoStatus, setAtualizandoStatus] = useState(false);
+  const [aprovandoProfissional, setAprovandoProfissional] = useState(false);
 
   const [adminLogin, setAdminLogin] = useState('');
   const [adminSenha, setAdminSenha] = useState('');
@@ -47,6 +68,7 @@ export default function AdminDashboard() {
   const [adminToken, setAdminToken] = useState(() => sessionStorage.getItem(ADMIN_TOKEN_KEY) || '');
 
   const adminAutenticado = Boolean(adminToken);
+  const drawerAberto = Boolean(carregandoDetalhes || erroDetalhes || usuarioSelecionado);
 
   const handleAdminSubmit = async (evento) => {
     evento.preventDefault();
@@ -98,9 +120,32 @@ export default function AdminDashboard() {
     setErroDetalhes('');
     setCarregandoDetalhes(false);
     setAtualizandoStatus(false);
+    setAprovandoProfissional(false);
   };
 
-  const carregarUsuariosAdmin = async () => {
+  useEffect(() => {
+    if (!drawerAberto) {
+      return;
+    }
+
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onKeyDown = (evento) => {
+      if (evento.key === 'Escape') {
+        handleFecharDetalhes();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.body.style.overflow = overflowAnterior;
+    };
+  }, [drawerAberto]);
+
+  const carregarUsuariosAdmin = useCallback(async () => {
     try {
       setCarregandoUsuarios(true);
       setErroUsuarios('');
@@ -132,7 +177,75 @@ export default function AdminDashboard() {
     } finally {
       setCarregandoUsuarios(false);
     }
-  };
+  }, [adminToken]);
+
+  const carregarInfraAdmin = useCallback(async () => {
+    try {
+      setCarregandoInfra(true);
+      setErroInfra('');
+
+      const resposta = await fetch(`${API_URL}/api/admin/infra`, {
+        headers: {
+          Authorization: `Bearer ${adminToken}`
+        }
+      });
+
+      const dados = await resposta.json().catch(() => ({}));
+
+      if (!resposta.ok) {
+        const erroApi = dados.erro || 'Não foi possível carregar a infraestrutura.';
+        setErroInfra(erroApi);
+
+        if (resposta.status === 401 || resposta.status === 403) {
+          sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+          setAdminToken('');
+        }
+
+        return;
+      }
+
+      setInfra(dados || null);
+    } catch (error) {
+      console.error('Erro ao carregar infra admin:', error);
+      setErroInfra('Erro de conexão com o servidor.');
+    } finally {
+      setCarregandoInfra(false);
+    }
+  }, [adminToken]);
+
+  const carregarAuditoriaAdmin = useCallback(async () => {
+    try {
+      setCarregandoAuditoria(true);
+      setErroAuditoria('');
+
+      const resposta = await fetch(`${API_URL}/api/admin/auditoria?limit=20`, {
+        headers: {
+          Authorization: `Bearer ${adminToken}`
+        }
+      });
+
+      const dados = await resposta.json().catch(() => ({}));
+
+      if (!resposta.ok) {
+        const erroApi = dados.erro || 'Não foi possível carregar a auditoria.';
+        setErroAuditoria(erroApi);
+
+        if (resposta.status === 401 || resposta.status === 403) {
+          sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+          setAdminToken('');
+        }
+
+        return;
+      }
+
+      setLogsAuditoria(Array.isArray(dados.logs) ? dados.logs : []);
+    } catch (error) {
+      console.error('Erro ao carregar auditoria admin:', error);
+      setErroAuditoria('Erro de conexão com o servidor.');
+    } finally {
+      setCarregandoAuditoria(false);
+    }
+  }, [adminToken]);
 
   const handleGerenciar = async (usuarioBase) => {
     if (!usuarioBase?.id || !usuarioBase?.tipo) {
@@ -178,20 +291,28 @@ export default function AdminDashboard() {
       setUsuarios([]);
       setErroUsuarios('');
       setCarregandoUsuarios(false);
+      setInfra(null);
+      setErroInfra('');
+      setCarregandoInfra(false);
+      setLogsAuditoria([]);
+      setErroAuditoria('');
+      setCarregandoAuditoria(false);
       handleFecharDetalhes();
       return;
     }
 
-    carregarUsuariosAdmin();
-  }, [adminAutenticado, adminToken]);
+    Promise.all([carregarUsuariosAdmin(), carregarInfraAdmin(), carregarAuditoriaAdmin()]).catch(() => {
+      // Erros são tratados em cada função
+    });
+  }, [adminAutenticado, carregarAuditoriaAdmin, carregarInfraAdmin, carregarUsuariosAdmin]);
 
   const atualizarStatusSelecionado = async () => {
     if (!usuarioSelecionado?.id || !usuarioSelecionado?.tipo) {
       return;
     }
 
-    const statusAtual = usuarioSelecionado.status === 'Ativo';
-    const proximoAtivo = !statusAtual;
+    const ativoAtual = usuarioSelecionado.status !== 'Inativo';
+    const proximoAtivo = !ativoAtual;
 
     setAtualizandoStatus(true);
     setErroDetalhes('');
@@ -233,6 +354,49 @@ export default function AdminDashboard() {
       setErroDetalhes('Erro de conexão com o servidor.');
     } finally {
       setAtualizandoStatus(false);
+    }
+  };
+
+  const aprovarProfissionalSelecionado = async () => {
+    if (usuarioSelecionado?.tipo !== 'profissional' || !usuarioSelecionado?.id) {
+      return;
+    }
+
+    setAprovandoProfissional(true);
+    setErroDetalhes('');
+
+    try {
+      const resposta = await fetch(`${API_URL}/api/admin/profissionais/${usuarioSelecionado.id}/aprovar`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${adminToken}`
+        }
+      });
+
+      const dados = await resposta.json().catch(() => ({}));
+
+      if (!resposta.ok) {
+        const erroApi = dados.erro || 'Não foi possível aprovar o profissional.';
+        setErroDetalhes(erroApi);
+
+        if (resposta.status === 401 || resposta.status === 403) {
+          sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+          setAdminToken('');
+        }
+
+        return;
+      }
+
+      await Promise.all([
+        carregarUsuariosAdmin(),
+        handleGerenciar({ id: usuarioSelecionado.id, tipo: usuarioSelecionado.tipo })
+      ]);
+    } catch (error) {
+      console.error('Erro ao aprovar profissional:', error);
+      setErroDetalhes('Erro de conexão com o servidor.');
+    } finally {
+      setAprovandoProfissional(false);
     }
   };
 
@@ -336,7 +500,7 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <section className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="card border-0 shadow-sm p-5">
             <p className="text-xs text-muted font-semibold">Total de Usuários</p>
             <p className="text-2xl font-extrabold tracking-tight mt-1">{totalUsuarios}</p>
@@ -353,153 +517,16 @@ export default function AdminDashboard() {
             <p className="text-xs text-muted font-semibold">Ativos</p>
             <p className="text-2xl font-extrabold tracking-tight mt-1">{totalAtivos}</p>
           </div>
+          <div className="card border-0 shadow-sm p-5">
+            <p className="text-xs text-muted font-semibold">Requisições API</p>
+            <p className="text-2xl font-extrabold tracking-tight mt-1">
+              {carregandoInfra ? '…' : erroInfra ? '-' : infra?.requisicoesApi ?? 0}
+            </p>
+            <p className="text-xs text-muted mt-2">
+              {erroInfra ? erroInfra : 'Desde o start do servidor'}
+            </p>
+          </div>
         </section>
-
-        {(carregandoDetalhes || erroDetalhes || usuarioSelecionado) && (
-          <section className="card border-0 shadow-sm p-5">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-extrabold tracking-tight">Gerenciar Usuário</h2>
-                <p className="text-sm text-muted">Detalhes e métricas do usuário selecionado.</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleFecharDetalhes}
-                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
-              >
-                Fechar
-              </button>
-            </div>
-
-            {carregandoDetalhes && (
-              <div className="mt-4 text-sm text-muted">Carregando detalhes...</div>
-            )}
-
-            {!carregandoDetalhes && erroDetalhes && (
-              <div className="mt-4 alert alert-danger">
-                <p className="text-sm font-semibold">{erroDetalhes}</p>
-              </div>
-            )}
-
-            {!carregandoDetalhes && !erroDetalhes && usuarioSelecionado && (
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-surface rounded-xl shadow-sm p-4">
-                  <p className="text-xs text-muted font-semibold">Nome</p>
-                  <p className="text-base font-extrabold tracking-tight mt-1">{usuarioSelecionado.nome}</p>
-                  <div className="mt-2 flex items-center gap-2 flex-wrap">
-                    <span className={tagTipo(usuarioSelecionado.tipo)}>
-                      {usuarioSelecionado.tipo === 'paciente' ? 'Paciente' : 'Profissional'}
-                    </span>
-                    {usuarioSelecionado.tipo === 'profissional' && usuarioSelecionado.crm && (
-                      <span className="tag">CRM: {usuarioSelecionado.crm}</span>
-                    )}
-                    {usuarioSelecionado.tipo === 'profissional' && usuarioSelecionado.especialidade && (
-                      <span className="tag">{usuarioSelecionado.especialidade}</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="bg-surface rounded-xl shadow-sm p-4">
-                  <p className="text-xs text-muted font-semibold">E-mail</p>
-                  <p className="text-sm font-semibold mt-1 break-all">{usuarioSelecionado.email}</p>
-                  <div className="mt-3">
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        try {
-                          await navigator.clipboard.writeText(usuarioSelecionado.email);
-                        } catch {
-                          // Sem permissão de clipboard
-                        }
-                      }}
-                      className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
-                    >
-                      Copiar e-mail
-                    </button>
-                  </div>
-                </div>
-
-                <div className="bg-surface rounded-xl shadow-sm p-4">
-                  <p className="text-xs text-muted font-semibold">Criado em</p>
-                  <p className="text-sm font-semibold mt-1">{formatarData(usuarioSelecionado.criadoEm)}</p>
-                </div>
-
-                <div className="bg-surface rounded-xl shadow-sm p-4 md:col-span-3">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                    <div>
-                      <p className="text-xs text-muted font-semibold">Status da Conta</p>
-                      <div className="mt-2">
-                        <span className={tagStatus(usuarioSelecionado.status)}>{usuarioSelecionado.status}</span>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={atualizarStatusSelecionado}
-                      disabled={atualizandoStatus}
-                      className="btn btn-primary"
-                    >
-                      {atualizandoStatus
-                        ? 'Salvando...'
-                        : usuarioSelecionado.status === 'Ativo'
-                          ? 'Desativar conta'
-                          : 'Ativar conta'}
-                    </button>
-                  </div>
-
-                  <p className="text-xs text-muted mt-3">
-                    Ao desativar, o usuário não consegue mais acessar a API (mesmo com token).
-                  </p>
-                </div>
-
-                <div className="bg-surface rounded-xl shadow-sm p-4 md:col-span-3">
-                  <p className="text-xs text-muted font-semibold">Métricas</p>
-                  <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {usuarioSelecionado.tipo === 'paciente' ? (
-                      <>
-                        <div>
-                          <p className="text-xs text-muted font-semibold">Registros</p>
-                          <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.registros ?? 0}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted font-semibold">Permissões</p>
-                          <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.permissoes ?? 0}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted font-semibold">Mensagens</p>
-                          <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.mensagens ?? 0}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted font-semibold">Insights IA</p>
-                          <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.insightsIA ?? 0}</p>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div>
-                          <p className="text-xs text-muted font-semibold">Permissões</p>
-                          <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.permissoesRecebidas ?? 0}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted font-semibold">Mensagens</p>
-                          <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.mensagens ?? 0}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted font-semibold">Insights Gerados</p>
-                          <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.insightsGerados ?? 0}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted font-semibold">-</p>
-                          <p className="text-sm text-muted mt-2">Ações (bloquear/reativar) podem ser adicionadas depois.</p>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-          </section>
-        )}
 
         <section className="card border-0 shadow-sm overflow-hidden">
           <div className="card-header">
@@ -631,7 +658,261 @@ export default function AdminDashboard() {
             Dados carregados via API: <span className="font-semibold">/api/admin/usuarios</span>.
           </div>
         </section>
+
+        <section className="card border-0 shadow-sm overflow-hidden">
+          <div className="card-header">
+            <div>
+              <h2 className="text-lg font-extrabold tracking-tight">Auditoria de Segurança (Global)</h2>
+              <p className="text-sm text-muted">Eventos recentes registrados pelo sistema.</p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="table table-strong">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Usuário</th>
+                  <th>Ação</th>
+                  <th>Documento</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {carregandoAuditoria && (
+                  <tr>
+                    <td className="text-sm text-muted" colSpan={5}>
+                      Carregando auditoria...
+                    </td>
+                  </tr>
+                )}
+
+                {!carregandoAuditoria && erroAuditoria && (
+                  <tr>
+                    <td className="text-sm" colSpan={5}>
+                      <div className="alert alert-danger">
+                        <p className="text-sm font-semibold">{erroAuditoria}</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+
+                {!carregandoAuditoria && !erroAuditoria && logsAuditoria.length === 0 && (
+                  <tr>
+                    <td className="text-sm text-muted" colSpan={5}>
+                      Nenhum evento registrado.
+                    </td>
+                  </tr>
+                )}
+
+                {logsAuditoria.map((log) => (
+                  <tr key={log.id}>
+                    <td className="text-sm text-muted">{formatarDataHora(log.data)}</td>
+                    <td className="text-sm font-semibold">{log.usuarioId}</td>
+                    <td className="text-sm">{log.acao}</td>
+                    <td className="text-sm text-muted">{log.documentoId || '-'}</td>
+                    <td className="text-sm font-semibold">{log.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="bg-surface-2 p-4 border-t border-[rgb(var(--border))] text-xs text-muted">
+            Dados carregados via API: <span className="font-semibold">/api/admin/auditoria</span>.
+          </div>
+        </section>
       </div>
+
+      {drawerAberto && (
+        <div className="fixed inset-0 z-50">
+          <button
+            type="button"
+            aria-label="Fechar"
+            onClick={handleFecharDetalhes}
+            className="absolute inset-0 w-full h-full bg-[rgba(var(--text),0.35)]"
+          />
+
+          <aside className="absolute inset-y-0 right-0 w-full max-w-xl bg-[rgb(var(--bg))] border-l border-[rgb(var(--border))] shadow-xl">
+            <div className="h-full overflow-y-auto">
+              <div className="p-5 border-b border-[rgb(var(--border))] bg-[rgba(var(--text),0.02)]">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-extrabold tracking-tight">Gerenciar Usuário</h2>
+                    <p className="text-sm text-muted">Detalhes e métricas do usuário selecionado.</p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleFecharDetalhes}
+                    className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+                    aria-label="Fechar painel"
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M18 6 6 18M6 6l12 12"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-5">
+                {carregandoDetalhes && (
+                  <div className="text-sm text-muted">Carregando detalhes...</div>
+                )}
+
+                {!carregandoDetalhes && erroDetalhes && (
+                  <div className="alert alert-danger">
+                    <p className="text-sm font-semibold">{erroDetalhes}</p>
+                  </div>
+                )}
+
+                {!carregandoDetalhes && !erroDetalhes && usuarioSelecionado && (
+                  <div className="space-y-4">
+                    <div className="bg-surface rounded-xl shadow-sm p-4">
+                      <p className="text-xs text-muted font-semibold">Nome</p>
+                      <p className="text-base font-extrabold tracking-tight mt-1">{usuarioSelecionado.nome}</p>
+                      <div className="mt-2 flex items-center gap-2 flex-wrap">
+                        <span className={tagTipo(usuarioSelecionado.tipo)}>
+                          {usuarioSelecionado.tipo === 'paciente' ? 'Paciente' : 'Profissional'}
+                        </span>
+                        {usuarioSelecionado.tipo === 'profissional' && usuarioSelecionado.crm && (
+                          <span className="tag">CRM: {usuarioSelecionado.crm}</span>
+                        )}
+                        {usuarioSelecionado.tipo === 'profissional' && usuarioSelecionado.especialidade && (
+                          <span className="tag">{usuarioSelecionado.especialidade}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="bg-surface rounded-xl shadow-sm p-4">
+                      <p className="text-xs text-muted font-semibold">E-mail</p>
+                      <p className="text-sm font-semibold mt-1 break-all">{usuarioSelecionado.email}</p>
+                      <div className="mt-3">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(usuarioSelecionado.email);
+                            } catch {
+                              // Sem permissão de clipboard
+                            }
+                          }}
+                          className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+                        >
+                          Copiar e-mail
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-surface rounded-xl shadow-sm p-4">
+                      <p className="text-xs text-muted font-semibold">Criado em</p>
+                      <p className="text-sm font-semibold mt-1">{formatarData(usuarioSelecionado.criadoEm)}</p>
+                    </div>
+
+                    <div className="bg-surface rounded-xl shadow-sm p-4">
+                      <p className="text-xs text-muted font-semibold">Status da Conta</p>
+                      <div className="mt-2 flex items-center gap-2 flex-wrap">
+                        <span className={tagStatus(usuarioSelecionado.status)}>{usuarioSelecionado.status}</span>
+                        {usuarioSelecionado.tipo === 'profissional' && usuarioSelecionado.crmValidado === false && (
+                          <span className="tag tag-warning">CRM pendente</span>
+                        )}
+                      </div>
+
+                      <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-end">
+                        {usuarioSelecionado.tipo === 'profissional' && usuarioSelecionado.status === 'Pendente' && (
+                          <button
+                            type="button"
+                            onClick={aprovarProfissionalSelecionado}
+                            disabled={aprovandoProfissional || atualizandoStatus}
+                            className="btn btn-success"
+                          >
+                            {aprovandoProfissional ? 'Aprovando...' : 'Aprovar profissional'}
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={atualizarStatusSelecionado}
+                          disabled={atualizandoStatus || aprovandoProfissional}
+                          className="btn btn-primary"
+                        >
+                          {atualizandoStatus
+                            ? 'Salvando...'
+                            : usuarioSelecionado.status === 'Inativo'
+                              ? 'Ativar conta'
+                              : 'Desativar conta'}
+                        </button>
+                      </div>
+
+                      <p className="text-xs text-muted mt-3">
+                        Ao desativar, o usuário não consegue mais acessar a API (mesmo com token).
+                      </p>
+                    </div>
+
+                    <div className="bg-surface rounded-xl shadow-sm p-4">
+                      <p className="text-xs text-muted font-semibold">Métricas</p>
+                      <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {usuarioSelecionado.tipo === 'paciente' ? (
+                          <>
+                            <div>
+                              <p className="text-xs text-muted font-semibold">Registros</p>
+                              <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.registros ?? 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted font-semibold">Permissões</p>
+                              <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.permissoes ?? 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted font-semibold">Mensagens</p>
+                              <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.mensagens ?? 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted font-semibold">Insights IA</p>
+                              <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.insightsIA ?? 0}</p>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div>
+                              <p className="text-xs text-muted font-semibold">Permissões</p>
+                              <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.permissoesRecebidas ?? 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted font-semibold">Mensagens</p>
+                              <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.mensagens ?? 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted font-semibold">Insights Gerados</p>
+                              <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.insightsGerados ?? 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted font-semibold">-</p>
+                              <p className="text-sm text-muted mt-2">&nbsp;</p>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </aside>
+        </div>
+      )}
     </div>
   );
 }

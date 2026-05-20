@@ -829,6 +829,10 @@ exports.loginProfissional = async (req, res) => {
       return res.status(403).json({ erro: 'Conta desativada. Contate o administrador.' });
     }
 
+    if (profissional.crmValidado === false) {
+      return res.status(403).json({ erro: 'Conta pendente de validação de CRM. Contate o administrador.' });
+    }
+
     const senhaValida = await bcrypt.compare(senha, profissional.senha);
 
     if (!senhaValida) {
