@@ -34,6 +34,7 @@ model Profissional {
   senha         String
   crm           String?
   especialidade String?
+  criadoEm      DateTime @default(now())
 
   // Relacionamentos
   permissoesRecebidas Permissao[]

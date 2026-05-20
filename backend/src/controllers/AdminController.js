@@ -96,7 +96,8 @@ exports.listarUsuarios = async (req, res) => {
           nome: true,
           email: true,
           crm: true,
-          especialidade: true
+          especialidade: true,
+          criadoEm: true
         },
         orderBy: {
           nome: 'asc'
@@ -119,7 +120,7 @@ exports.listarUsuarios = async (req, res) => {
         nome: p.nome,
         email: p.email,
         status: 'Ativo',
-        criadoEm: null,
+        criadoEm: p.criadoEm,
         crm: p.crm || null,
         especialidade: p.especialidade || null
       }))
@@ -192,6 +193,7 @@ exports.obterUsuario = async (req, res) => {
           email: true,
           crm: true,
           especialidade: true,
+          criadoEm: true,
           _count: {
             select: {
               permissoesRecebidas: true,
@@ -212,7 +214,7 @@ exports.obterUsuario = async (req, res) => {
           tipo: 'profissional',
           nome: profissional.nome,
           email: profissional.email,
-          criadoEm: null,
+          criadoEm: profissional.criadoEm,
           crm: profissional.crm,
           especialidade: profissional.especialidade,
           contagens: profissional._count

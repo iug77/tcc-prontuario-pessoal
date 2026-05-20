@@ -385,11 +385,6 @@ export default function AdminDashboard() {
                 <div className="bg-surface rounded-xl shadow-sm p-4">
                   <p className="text-xs text-muted font-semibold">Criado em</p>
                   <p className="text-sm font-semibold mt-1">{formatarData(usuarioSelecionado.criadoEm)}</p>
-                  {usuarioSelecionado.tipo === 'profissional' && (
-                    <p className="text-xs text-muted mt-2">
-                      Profissional ainda não tem "criadoEm" no banco (por isso aparece "-").
-                    </p>
-                  )}
                 </div>
 
                 <div className="bg-surface rounded-xl shadow-sm p-4 md:col-span-3">
