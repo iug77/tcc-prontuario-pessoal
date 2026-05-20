@@ -1,55 +1,18 @@
-import { useMemo, useState } from 'react';
+import { API_URL } from '../config';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const ADMIN_SESSION_KEY = 'admin_session_authed_v1';
-
-const usuariosExemplo = [
-  {
-    id: 'p-1',
-    tipo: 'paciente',
-    nome: 'Guilherme Souza',
-    email: 'guilherme@email.com',
-    status: 'Ativo',
-    criadoEm: '2026-05-10'
-  },
-  {
-    id: 'p-2',
-    tipo: 'paciente',
-    nome: 'Ana Pereira',
-    email: 'ana@email.com',
-    status: 'Ativo',
-    criadoEm: '2026-05-02'
-  },
-  {
-    id: 'p-3',
-    tipo: 'paciente',
-    nome: 'Marcos Lima',
-    email: 'marcos@email.com',
-    status: 'Inativo',
-    criadoEm: '2026-04-28'
-  },
-  {
-    id: 'm-1',
-    tipo: 'profissional',
-    nome: 'Dr. Gabriel',
-    email: 'gabriel@clinica.com',
-    status: 'Ativo',
-    criadoEm: '2026-04-15'
-  },
-  {
-    id: 'm-2',
-    tipo: 'profissional',
-    nome: 'Dra. Camila Rocha',
-    email: 'camila@clinica.com',
-    status: 'Ativo',
-    criadoEm: '2026-04-01'
-  }
-];
+const ADMIN_TOKEN_KEY = 'admin_token_v1';
 
 const formatarData = (dataIso) => {
   if (!dataIso) return '-';
 
-  return new Date(`${dataIso}T00:00:00`).toLocaleDateString('pt-BR');
+  const data = dataIso instanceof Date ? dataIso : new Date(dataIso);
+  if (Number.isNaN(data.getTime())) {
+    return '-';
+  }
+
+  return data.toLocaleDateString('pt-BR');
 };
 
 const tagStatus = (status) => {
@@ -69,42 +32,127 @@ export default function AdminDashboard() {
   const [busca, setBusca] = useState('');
   const [aba, setAba] = useState('Todos');
 
+  const [usuarios, setUsuarios] = useState([]);
+  const [carregandoUsuarios, setCarregandoUsuarios] = useState(false);
+  const [erroUsuarios, setErroUsuarios] = useState('');
+
   const [adminLogin, setAdminLogin] = useState('');
   const [adminSenha, setAdminSenha] = useState('');
   const [adminErro, setAdminErro] = useState('');
-  const [adminAutenticado, setAdminAutenticado] = useState(
-    sessionStorage.getItem(ADMIN_SESSION_KEY) === '1'
-  );
+  const [adminToken, setAdminToken] = useState(() => sessionStorage.getItem(ADMIN_TOKEN_KEY) || '');
 
-  const handleAdminSubmit = (evento) => {
+  const adminAutenticado = Boolean(adminToken);
+
+  const handleAdminSubmit = async (evento) => {
     evento.preventDefault();
     setAdminErro('');
 
-    const login = adminLogin.trim();
-    const senha = adminSenha;
+    try {
+      const resposta = await fetch(`${API_URL}/api/admin/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          login: adminLogin.trim(),
+          senha: adminSenha
+        })
+      });
 
-    if (login === 'admin' && senha === 'admin') {
-      sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
-      setAdminAutenticado(true);
+      const dados = await resposta.json().catch(() => ({}));
+
+      if (!resposta.ok) {
+        setAdminErro(dados.erro || 'Não foi possível autenticar no admin.');
+        return;
+      }
+
+      if (!dados?.token) {
+        setAdminErro('Resposta inválida do servidor (token ausente).');
+        return;
+      }
+
+      sessionStorage.setItem(ADMIN_TOKEN_KEY, dados.token);
+      setAdminToken(dados.token);
       setAdminLogin('');
       setAdminSenha('');
-      return;
+    } catch (error) {
+      console.error('Erro ao autenticar admin:', error);
+      setAdminErro('Erro de conexão com o servidor.');
     }
-
-    setAdminErro('Login ou senha inválidos.');
   };
 
   const handleAdminSair = () => {
-    sessionStorage.removeItem(ADMIN_SESSION_KEY);
-    setAdminAutenticado(false);
+    sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+    setAdminToken('');
     setAdminErro('');
     navigate('/');
   };
 
+  useEffect(() => {
+    if (!adminAutenticado) {
+      setUsuarios([]);
+      setErroUsuarios('');
+      setCarregandoUsuarios(false);
+      return;
+    }
+
+    let cancelado = false;
+
+    const carregarUsuarios = async () => {
+      try {
+        setCarregandoUsuarios(true);
+        setErroUsuarios('');
+
+        const resposta = await fetch(`${API_URL}/api/admin/usuarios`, {
+          headers: {
+            Authorization: `Bearer ${adminToken}`
+          }
+        });
+
+        const dados = await resposta.json().catch(() => ({}));
+
+        if (!resposta.ok) {
+          const erroApi = dados.erro || 'Não foi possível carregar os usuários.';
+          if (!cancelado) {
+            setErroUsuarios(erroApi);
+          }
+
+          if (resposta.status === 401 || resposta.status === 403) {
+            sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+            if (!cancelado) {
+              setAdminToken('');
+            }
+          }
+
+          return;
+        }
+
+        if (!cancelado) {
+          setUsuarios(Array.isArray(dados.usuarios) ? dados.usuarios : []);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar usuários admin:', error);
+        if (!cancelado) {
+          setErroUsuarios('Erro de conexão com o servidor.');
+        }
+      } finally {
+        if (!cancelado) {
+          setCarregandoUsuarios(false);
+        }
+      }
+    };
+
+    carregarUsuarios();
+
+    return () => {
+      cancelado = true;
+    };
+  }, [adminAutenticado, adminToken]);
+
   const usuariosFiltrados = useMemo(() => {
     const texto = busca.trim().toLowerCase();
 
-    return usuariosExemplo.filter((usuario) => {
+    return usuarios.filter((usuario) => {
       if (aba === 'Pacientes' && usuario.tipo !== 'paciente') return false;
       if (aba === 'Profissionais' && usuario.tipo !== 'profissional') return false;
 
@@ -115,12 +163,12 @@ export default function AdminDashboard() {
         usuario.email.toLowerCase().includes(texto)
       );
     });
-  }, [aba, busca]);
+  }, [aba, busca, usuarios]);
 
-  const totalUsuarios = usuariosExemplo.length;
-  const totalPacientes = usuariosExemplo.filter((u) => u.tipo === 'paciente').length;
-  const totalProfissionais = usuariosExemplo.filter((u) => u.tipo === 'profissional').length;
-  const totalAtivos = usuariosExemplo.filter((u) => u.status === 'Ativo').length;
+  const totalUsuarios = usuarios.length;
+  const totalPacientes = usuarios.filter((u) => u.tipo === 'paciente').length;
+  const totalProfissionais = usuarios.filter((u) => u.tipo === 'profissional').length;
+  const totalAtivos = usuarios.filter((u) => u.status === 'Ativo').length;
 
   if (!adminAutenticado) {
     return (
@@ -224,7 +272,7 @@ export default function AdminDashboard() {
           <div className="card-header">
             <div>
               <h2 className="text-lg font-extrabold tracking-tight">Usuários</h2>
-              <p className="text-sm text-muted">(Dados de exemplo) Pronto para integrar com o backend.</p>
+              <p className="text-sm text-muted">Pacientes e profissionais cadastrados no sistema.</p>
             </div>
 
             <div className="flex items-center gap-3 flex-wrap justify-end">
@@ -292,7 +340,25 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {usuariosFiltrados.length === 0 && (
+                {carregandoUsuarios && (
+                  <tr>
+                    <td className="text-sm text-muted" colSpan={6}>
+                      Carregando usuários...
+                    </td>
+                  </tr>
+                )}
+
+                {!carregandoUsuarios && erroUsuarios && (
+                  <tr>
+                    <td className="text-sm" colSpan={6}>
+                      <div className="alert alert-danger">
+                        <p className="text-sm font-semibold">{erroUsuarios}</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+
+                {!carregandoUsuarios && !erroUsuarios && usuariosFiltrados.length === 0 && (
                   <tr>
                     <td className="text-sm text-muted" colSpan={6}>
                       Nenhum usuário encontrado.
@@ -328,7 +394,7 @@ export default function AdminDashboard() {
           </div>
 
           <div className="bg-surface-2 p-4 border-t border-[rgb(var(--border))] text-xs text-muted">
-            Para integrar: criar endpoint de admin no backend (listar usuários + ações de bloqueio/reativação).
+            Dados carregados via API: <span className="font-semibold">/api/admin/usuarios</span>.
           </div>
         </section>
       </div>

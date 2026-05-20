@@ -1,6 +1,9 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const pacienteRoutes = require('./src/routes/pacienteRoutes'); // Importa as rotas de paciente
+const adminRoutes = require('./src/routes/adminRoutes');
 
 const app = express();
 
@@ -31,6 +34,9 @@ app.get('/api/status', (req, res) => {
 
 // Conectando as rotas de paciente na nossa API principal
 app.use('/api', pacienteRoutes); 
+
+// Rotas de admin
+app.use('/api/admin', adminRoutes);
 
 // Definindo a porta em que o servidor vai rodar
 const PORT = process.env.PORT || 3000;
