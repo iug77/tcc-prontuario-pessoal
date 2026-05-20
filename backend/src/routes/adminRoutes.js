@@ -5,5 +5,6 @@ const AdminController = require('../controllers/AdminController');
 
 router.post('/login', AdminController.loginAdmin);
 router.get('/usuarios', AdminController.listarUsuarios);
+router.get('/usuarios/:tipo/:id', AdminController.obterUsuario);
 
 module.exports = router;

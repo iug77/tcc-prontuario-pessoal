@@ -134,3 +134,95 @@ exports.listarUsuarios = async (req, res) => {
     return res.status(500).json({ erro: 'Erro interno no servidor ao listar usuários.' });
   }
 };
+
+exports.obterUsuario = async (req, res) => {
+  try {
+    const payload = autenticarAdmin(req, res);
+    if (!payload) {
+      return;
+    }
+
+    const { tipo, id } = req.params;
+
+    if (!tipo || !id) {
+      return res.status(400).json({ erro: 'Parâmetros inválidos.' });
+    }
+
+    if (tipo === 'paciente') {
+      const paciente = await prisma.paciente.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          nome: true,
+          email: true,
+          criadoEm: true,
+          _count: {
+            select: {
+              registros: true,
+              permissoes: true,
+              mensagens: true,
+              insightsIA: true
+            }
+          }
+        }
+      });
+
+      if (!paciente) {
+        return res.status(404).json({ erro: 'Paciente não encontrado.' });
+      }
+
+      return res.status(200).json({
+        usuario: {
+          id: paciente.id,
+          tipo: 'paciente',
+          nome: paciente.nome,
+          email: paciente.email,
+          criadoEm: paciente.criadoEm,
+          contagens: paciente._count
+        }
+      });
+    }
+
+    if (tipo === 'profissional') {
+      const profissional = await prisma.profissional.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          nome: true,
+          email: true,
+          crm: true,
+          especialidade: true,
+          _count: {
+            select: {
+              permissoesRecebidas: true,
+              mensagens: true,
+              insightsGerados: true
+            }
+          }
+        }
+      });
+
+      if (!profissional) {
+        return res.status(404).json({ erro: 'Profissional não encontrado.' });
+      }
+
+      return res.status(200).json({
+        usuario: {
+          id: profissional.id,
+          tipo: 'profissional',
+          nome: profissional.nome,
+          email: profissional.email,
+          criadoEm: null,
+          crm: profissional.crm,
+          especialidade: profissional.especialidade,
+          contagens: profissional._count
+        }
+      });
+    }
+
+    return res.status(400).json({ erro: 'Tipo inválido. Use "paciente" ou "profissional".' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno no servidor ao obter usuário.' });
+  }
+};

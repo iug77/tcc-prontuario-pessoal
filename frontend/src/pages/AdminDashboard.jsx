@@ -36,6 +36,10 @@ export default function AdminDashboard() {
   const [carregandoUsuarios, setCarregandoUsuarios] = useState(false);
   const [erroUsuarios, setErroUsuarios] = useState('');
 
+  const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
+  const [carregandoDetalhes, setCarregandoDetalhes] = useState(false);
+  const [erroDetalhes, setErroDetalhes] = useState('');
+
   const [adminLogin, setAdminLogin] = useState('');
   const [adminSenha, setAdminSenha] = useState('');
   const [adminErro, setAdminErro] = useState('');
@@ -88,11 +92,57 @@ export default function AdminDashboard() {
     navigate('/');
   };
 
+  const handleFecharDetalhes = () => {
+    setUsuarioSelecionado(null);
+    setErroDetalhes('');
+    setCarregandoDetalhes(false);
+  };
+
+  const handleGerenciar = async (usuarioBase) => {
+    if (!usuarioBase?.id || !usuarioBase?.tipo) {
+      return;
+    }
+
+    setErroDetalhes('');
+    setCarregandoDetalhes(true);
+    setUsuarioSelecionado(null);
+
+    try {
+      const resposta = await fetch(`${API_URL}/api/admin/usuarios/${usuarioBase.tipo}/${usuarioBase.id}`, {
+        headers: {
+          Authorization: `Bearer ${adminToken}`
+        }
+      });
+
+      const dados = await resposta.json().catch(() => ({}));
+
+      if (!resposta.ok) {
+        const erroApi = dados.erro || 'Não foi possível carregar os detalhes do usuário.';
+        setErroDetalhes(erroApi);
+
+        if (resposta.status === 401 || resposta.status === 403) {
+          sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+          setAdminToken('');
+        }
+
+        return;
+      }
+
+      setUsuarioSelecionado(dados?.usuario || null);
+    } catch (error) {
+      console.error('Erro ao carregar detalhes do usuário:', error);
+      setErroDetalhes('Erro de conexão com o servidor.');
+    } finally {
+      setCarregandoDetalhes(false);
+    }
+  };
+
   useEffect(() => {
     if (!adminAutenticado) {
       setUsuarios([]);
       setErroUsuarios('');
       setCarregandoUsuarios(false);
+      handleFecharDetalhes();
       return;
     }
 
@@ -268,6 +318,129 @@ export default function AdminDashboard() {
           </div>
         </section>
 
+        {(carregandoDetalhes || erroDetalhes || usuarioSelecionado) && (
+          <section className="card border-0 shadow-sm p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-extrabold tracking-tight">Gerenciar Usuário</h2>
+                <p className="text-sm text-muted">Detalhes e métricas do usuário selecionado.</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleFecharDetalhes}
+                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+              >
+                Fechar
+              </button>
+            </div>
+
+            {carregandoDetalhes && (
+              <div className="mt-4 text-sm text-muted">Carregando detalhes...</div>
+            )}
+
+            {!carregandoDetalhes && erroDetalhes && (
+              <div className="mt-4 alert alert-danger">
+                <p className="text-sm font-semibold">{erroDetalhes}</p>
+              </div>
+            )}
+
+            {!carregandoDetalhes && !erroDetalhes && usuarioSelecionado && (
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-surface rounded-xl shadow-sm p-4">
+                  <p className="text-xs text-muted font-semibold">Nome</p>
+                  <p className="text-base font-extrabold tracking-tight mt-1">{usuarioSelecionado.nome}</p>
+                  <div className="mt-2 flex items-center gap-2 flex-wrap">
+                    <span className={tagTipo(usuarioSelecionado.tipo)}>
+                      {usuarioSelecionado.tipo === 'paciente' ? 'Paciente' : 'Profissional'}
+                    </span>
+                    {usuarioSelecionado.tipo === 'profissional' && usuarioSelecionado.crm && (
+                      <span className="tag">CRM: {usuarioSelecionado.crm}</span>
+                    )}
+                    {usuarioSelecionado.tipo === 'profissional' && usuarioSelecionado.especialidade && (
+                      <span className="tag">{usuarioSelecionado.especialidade}</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-surface rounded-xl shadow-sm p-4">
+                  <p className="text-xs text-muted font-semibold">E-mail</p>
+                  <p className="text-sm font-semibold mt-1 break-all">{usuarioSelecionado.email}</p>
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(usuarioSelecionado.email);
+                        } catch {
+                          // Sem permissão de clipboard
+                        }
+                      }}
+                      className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+                    >
+                      Copiar e-mail
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-surface rounded-xl shadow-sm p-4">
+                  <p className="text-xs text-muted font-semibold">Criado em</p>
+                  <p className="text-sm font-semibold mt-1">{formatarData(usuarioSelecionado.criadoEm)}</p>
+                  {usuarioSelecionado.tipo === 'profissional' && (
+                    <p className="text-xs text-muted mt-2">
+                      Profissional ainda não tem "criadoEm" no banco (por isso aparece "-").
+                    </p>
+                  )}
+                </div>
+
+                <div className="bg-surface rounded-xl shadow-sm p-4 md:col-span-3">
+                  <p className="text-xs text-muted font-semibold">Métricas</p>
+                  <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {usuarioSelecionado.tipo === 'paciente' ? (
+                      <>
+                        <div>
+                          <p className="text-xs text-muted font-semibold">Registros</p>
+                          <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.registros ?? 0}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted font-semibold">Permissões</p>
+                          <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.permissoes ?? 0}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted font-semibold">Mensagens</p>
+                          <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.mensagens ?? 0}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted font-semibold">Insights IA</p>
+                          <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.insightsIA ?? 0}</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <p className="text-xs text-muted font-semibold">Permissões</p>
+                          <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.permissoesRecebidas ?? 0}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted font-semibold">Mensagens</p>
+                          <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.mensagens ?? 0}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted font-semibold">Insights Gerados</p>
+                          <p className="text-2xl font-extrabold tracking-tight mt-1">{usuarioSelecionado?.contagens?.insightsGerados ?? 0}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted font-semibold">-</p>
+                          <p className="text-sm text-muted mt-2">Ações (bloquear/reativar) podem ser adicionadas depois.</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
         <section className="card border-0 shadow-sm overflow-hidden">
           <div className="card-header">
             <div>
@@ -382,6 +555,7 @@ export default function AdminDashboard() {
                     <td className="text-right">
                       <button
                         type="button"
+                        onClick={() => handleGerenciar(usuario)}
                         className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
                       >
                         Gerenciar
