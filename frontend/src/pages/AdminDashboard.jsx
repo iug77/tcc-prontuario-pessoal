@@ -101,6 +101,27 @@ export default function AdminDashboard() {
     navigate('/');
   };
 
+  const usuariosFiltrados = useMemo(() => {
+    const texto = busca.trim().toLowerCase();
+
+    return usuariosExemplo.filter((usuario) => {
+      if (aba === 'Pacientes' && usuario.tipo !== 'paciente') return false;
+      if (aba === 'Profissionais' && usuario.tipo !== 'profissional') return false;
+
+      if (!texto) return true;
+
+      return (
+        usuario.nome.toLowerCase().includes(texto) ||
+        usuario.email.toLowerCase().includes(texto)
+      );
+    });
+  }, [aba, busca]);
+
+  const totalUsuarios = usuariosExemplo.length;
+  const totalPacientes = usuariosExemplo.filter((u) => u.tipo === 'paciente').length;
+  const totalProfissionais = usuariosExemplo.filter((u) => u.tipo === 'profissional').length;
+  const totalAtivos = usuariosExemplo.filter((u) => u.status === 'Ativo').length;
+
   if (!adminAutenticado) {
     return (
       <div className="app-page">
@@ -154,27 +175,6 @@ export default function AdminDashboard() {
       </div>
     );
   }
-
-  const usuariosFiltrados = useMemo(() => {
-    const texto = busca.trim().toLowerCase();
-
-    return usuariosExemplo.filter((usuario) => {
-      if (aba === 'Pacientes' && usuario.tipo !== 'paciente') return false;
-      if (aba === 'Profissionais' && usuario.tipo !== 'profissional') return false;
-
-      if (!texto) return true;
-
-      return (
-        usuario.nome.toLowerCase().includes(texto) ||
-        usuario.email.toLowerCase().includes(texto)
-      );
-    });
-  }, [aba, busca]);
-
-  const totalUsuarios = usuariosExemplo.length;
-  const totalPacientes = usuariosExemplo.filter((u) => u.tipo === 'paciente').length;
-  const totalProfissionais = usuariosExemplo.filter((u) => u.tipo === 'profissional').length;
-  const totalAtivos = usuariosExemplo.filter((u) => u.status === 'Ativo').length;
 
   return (
     <div className="app-page">
