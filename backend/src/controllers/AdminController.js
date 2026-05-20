@@ -84,7 +84,8 @@ exports.listarUsuarios = async (req, res) => {
           id: true,
           nome: true,
           email: true,
-          criadoEm: true
+          criadoEm: true,
+          ativo: true
         },
         orderBy: {
           criadoEm: 'desc'
@@ -97,7 +98,8 @@ exports.listarUsuarios = async (req, res) => {
           email: true,
           crm: true,
           especialidade: true,
-          criadoEm: true
+          criadoEm: true,
+          ativo: true
         },
         orderBy: {
           nome: 'asc'
@@ -111,7 +113,7 @@ exports.listarUsuarios = async (req, res) => {
         tipo: 'paciente',
         nome: p.nome,
         email: p.email,
-        status: 'Ativo',
+        status: p.ativo ? 'Ativo' : 'Inativo',
         criadoEm: p.criadoEm
       })),
       ...profissionais.map((p) => ({
@@ -119,7 +121,7 @@ exports.listarUsuarios = async (req, res) => {
         tipo: 'profissional',
         nome: p.nome,
         email: p.email,
-        status: 'Ativo',
+        status: p.ativo ? 'Ativo' : 'Inativo',
         criadoEm: p.criadoEm,
         crm: p.crm || null,
         especialidade: p.especialidade || null
@@ -157,6 +159,7 @@ exports.obterUsuario = async (req, res) => {
           nome: true,
           email: true,
           criadoEm: true,
+          ativo: true,
           _count: {
             select: {
               registros: true,
@@ -179,6 +182,7 @@ exports.obterUsuario = async (req, res) => {
           nome: paciente.nome,
           email: paciente.email,
           criadoEm: paciente.criadoEm,
+          status: paciente.ativo ? 'Ativo' : 'Inativo',
           contagens: paciente._count
         }
       });
@@ -194,6 +198,7 @@ exports.obterUsuario = async (req, res) => {
           crm: true,
           especialidade: true,
           criadoEm: true,
+          ativo: true,
           _count: {
             select: {
               permissoesRecebidas: true,
@@ -215,6 +220,7 @@ exports.obterUsuario = async (req, res) => {
           nome: profissional.nome,
           email: profissional.email,
           criadoEm: profissional.criadoEm,
+          status: profissional.ativo ? 'Ativo' : 'Inativo',
           crm: profissional.crm,
           especialidade: profissional.especialidade,
           contagens: profissional._count
@@ -226,5 +232,68 @@ exports.obterUsuario = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ erro: 'Erro interno no servidor ao obter usuário.' });
+  }
+};
+
+exports.atualizarStatusUsuario = async (req, res) => {
+  try {
+    const payload = autenticarAdmin(req, res);
+    if (!payload) {
+      return;
+    }
+
+    const { tipo, id } = req.params;
+    const { ativo } = req.body || {};
+
+    if (!tipo || !id) {
+      return res.status(400).json({ erro: 'Parâmetros inválidos.' });
+    }
+
+    if (typeof ativo !== 'boolean') {
+      return res.status(400).json({ erro: 'Informe "ativo" como boolean.' });
+    }
+
+    if (tipo === 'paciente') {
+      const atualizado = await prisma.paciente.update({
+        where: { id },
+        data: { ativo },
+        select: { id: true, ativo: true }
+      });
+
+      return res.status(200).json({
+        mensagem: 'Status atualizado com sucesso.',
+        usuario: {
+          id: atualizado.id,
+          tipo: 'paciente',
+          status: atualizado.ativo ? 'Ativo' : 'Inativo'
+        }
+      });
+    }
+
+    if (tipo === 'profissional') {
+      const atualizado = await prisma.profissional.update({
+        where: { id },
+        data: { ativo },
+        select: { id: true, ativo: true }
+      });
+
+      return res.status(200).json({
+        mensagem: 'Status atualizado com sucesso.',
+        usuario: {
+          id: atualizado.id,
+          tipo: 'profissional',
+          status: atualizado.ativo ? 'Ativo' : 'Inativo'
+        }
+      });
+    }
+
+    return res.status(400).json({ erro: 'Tipo inválido. Use "paciente" ou "profissional".' });
+  } catch (error) {
+    if (error?.code === 'P2025') {
+      return res.status(404).json({ erro: 'Usuário não encontrado.' });
+    }
+
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno no servidor ao atualizar status.' });
   }
 };

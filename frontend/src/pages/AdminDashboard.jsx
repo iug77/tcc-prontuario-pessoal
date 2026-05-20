@@ -39,6 +39,7 @@ export default function AdminDashboard() {
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
   const [carregandoDetalhes, setCarregandoDetalhes] = useState(false);
   const [erroDetalhes, setErroDetalhes] = useState('');
+  const [atualizandoStatus, setAtualizandoStatus] = useState(false);
 
   const [adminLogin, setAdminLogin] = useState('');
   const [adminSenha, setAdminSenha] = useState('');
@@ -96,6 +97,41 @@ export default function AdminDashboard() {
     setUsuarioSelecionado(null);
     setErroDetalhes('');
     setCarregandoDetalhes(false);
+    setAtualizandoStatus(false);
+  };
+
+  const carregarUsuariosAdmin = async () => {
+    try {
+      setCarregandoUsuarios(true);
+      setErroUsuarios('');
+
+      const resposta = await fetch(`${API_URL}/api/admin/usuarios`, {
+        headers: {
+          Authorization: `Bearer ${adminToken}`
+        }
+      });
+
+      const dados = await resposta.json().catch(() => ({}));
+
+      if (!resposta.ok) {
+        const erroApi = dados.erro || 'Não foi possível carregar os usuários.';
+        setErroUsuarios(erroApi);
+
+        if (resposta.status === 401 || resposta.status === 403) {
+          sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+          setAdminToken('');
+        }
+
+        return;
+      }
+
+      setUsuarios(Array.isArray(dados.usuarios) ? dados.usuarios : []);
+    } catch (error) {
+      console.error('Erro ao carregar usuários admin:', error);
+      setErroUsuarios('Erro de conexão com o servidor.');
+    } finally {
+      setCarregandoUsuarios(false);
+    }
   };
 
   const handleGerenciar = async (usuarioBase) => {
@@ -146,58 +182,59 @@ export default function AdminDashboard() {
       return;
     }
 
-    let cancelado = false;
-
-    const carregarUsuarios = async () => {
-      try {
-        setCarregandoUsuarios(true);
-        setErroUsuarios('');
-
-        const resposta = await fetch(`${API_URL}/api/admin/usuarios`, {
-          headers: {
-            Authorization: `Bearer ${adminToken}`
-          }
-        });
-
-        const dados = await resposta.json().catch(() => ({}));
-
-        if (!resposta.ok) {
-          const erroApi = dados.erro || 'Não foi possível carregar os usuários.';
-          if (!cancelado) {
-            setErroUsuarios(erroApi);
-          }
-
-          if (resposta.status === 401 || resposta.status === 403) {
-            sessionStorage.removeItem(ADMIN_TOKEN_KEY);
-            if (!cancelado) {
-              setAdminToken('');
-            }
-          }
-
-          return;
-        }
-
-        if (!cancelado) {
-          setUsuarios(Array.isArray(dados.usuarios) ? dados.usuarios : []);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar usuários admin:', error);
-        if (!cancelado) {
-          setErroUsuarios('Erro de conexão com o servidor.');
-        }
-      } finally {
-        if (!cancelado) {
-          setCarregandoUsuarios(false);
-        }
-      }
-    };
-
-    carregarUsuarios();
-
-    return () => {
-      cancelado = true;
-    };
+    carregarUsuariosAdmin();
   }, [adminAutenticado, adminToken]);
+
+  const atualizarStatusSelecionado = async () => {
+    if (!usuarioSelecionado?.id || !usuarioSelecionado?.tipo) {
+      return;
+    }
+
+    const statusAtual = usuarioSelecionado.status === 'Ativo';
+    const proximoAtivo = !statusAtual;
+
+    setAtualizandoStatus(true);
+    setErroDetalhes('');
+
+    try {
+      const resposta = await fetch(
+        `${API_URL}/api/admin/usuarios/${usuarioSelecionado.tipo}/${usuarioSelecionado.id}/status`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${adminToken}`
+          },
+          body: JSON.stringify({ ativo: proximoAtivo })
+        }
+      );
+
+      const dados = await resposta.json().catch(() => ({}));
+
+      if (!resposta.ok) {
+        const erroApi = dados.erro || 'Não foi possível atualizar o status.';
+        setErroDetalhes(erroApi);
+
+        if (resposta.status === 401 || resposta.status === 403) {
+          sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+          setAdminToken('');
+        }
+
+        return;
+      }
+
+      // Recarrega detalhes e lista para refletir o novo status
+      await Promise.all([
+        carregarUsuariosAdmin(),
+        handleGerenciar({ id: usuarioSelecionado.id, tipo: usuarioSelecionado.tipo })
+      ]);
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error);
+      setErroDetalhes('Erro de conexão com o servidor.');
+    } finally {
+      setAtualizandoStatus(false);
+    }
+  };
 
   const usuariosFiltrados = useMemo(() => {
     const texto = busca.trim().toLowerCase();
@@ -385,6 +422,34 @@ export default function AdminDashboard() {
                 <div className="bg-surface rounded-xl shadow-sm p-4">
                   <p className="text-xs text-muted font-semibold">Criado em</p>
                   <p className="text-sm font-semibold mt-1">{formatarData(usuarioSelecionado.criadoEm)}</p>
+                </div>
+
+                <div className="bg-surface rounded-xl shadow-sm p-4 md:col-span-3">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div>
+                      <p className="text-xs text-muted font-semibold">Status da Conta</p>
+                      <div className="mt-2">
+                        <span className={tagStatus(usuarioSelecionado.status)}>{usuarioSelecionado.status}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={atualizarStatusSelecionado}
+                      disabled={atualizandoStatus}
+                      className="btn btn-primary"
+                    >
+                      {atualizandoStatus
+                        ? 'Salvando...'
+                        : usuarioSelecionado.status === 'Ativo'
+                          ? 'Desativar conta'
+                          : 'Ativar conta'}
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-muted mt-3">
+                    Ao desativar, o usuário não consegue mais acessar a API (mesmo com token).
+                  </p>
                 </div>
 
                 <div className="bg-surface rounded-xl shadow-sm p-4 md:col-span-3">

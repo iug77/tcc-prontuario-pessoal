@@ -109,6 +109,10 @@ exports.loginPaciente = async (req, res) => {
       return res.status(404).json({ erro: 'Paciente não encontrado.' });
     }
 
+    if (paciente.ativo === false) {
+      return res.status(403).json({ erro: 'Conta desativada. Contate o administrador.' });
+    }
+
     // 2. Compara a senha digitada com a senha criptografada do banco
     const senhaValida = await bcrypt.compare(senha, paciente.senha);
 

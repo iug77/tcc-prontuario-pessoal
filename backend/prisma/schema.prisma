@@ -18,6 +18,7 @@ model Paciente {
   email     String   @unique
   senha     String   
   criadoEm  DateTime @default(now())
+  ativo     Boolean  @default(true)
 
   // Relacionamentos
   registros  Registro[]
@@ -35,6 +36,7 @@ model Profissional {
   crm           String?
   especialidade String?
   criadoEm      DateTime @default(now())
+  ativo         Boolean  @default(true)
 
   // Relacionamentos
   permissoesRecebidas Permissao[]

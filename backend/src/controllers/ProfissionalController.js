@@ -825,6 +825,10 @@ exports.loginProfissional = async (req, res) => {
       return res.status(404).json({ erro: 'Profissional não encontrado.' });
     }
 
+    if (profissional.ativo === false) {
+      return res.status(403).json({ erro: 'Conta desativada. Contate o administrador.' });
+    }
+
     const senhaValida = await bcrypt.compare(senha, profissional.senha);
 
     if (!senhaValida) {

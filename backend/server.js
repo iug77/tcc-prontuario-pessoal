@@ -2,8 +2,23 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('@prisma/client');
 const pacienteRoutes = require('./src/routes/pacienteRoutes'); // Importa as rotas de paciente
 const adminRoutes = require('./src/routes/adminRoutes');
+
+const prisma = new PrismaClient();
+const JWT_SECRET = 'segredo_do_tcc_123';
+
+const obterTokenBearer = (authHeader = '') => {
+  const [tipo, token] = String(authHeader || '').split(' ');
+
+  if (tipo !== 'Bearer' || !token) {
+    return null;
+  }
+
+  return token;
+};
 
 const app = express();
 
@@ -30,6 +45,70 @@ app.use((req, res, next) => {
 // Rota de teste simples para ver se o servidor está online
 app.get('/api/status', (req, res) => {
   res.json({ mensagem: 'Servidor do Prontuário Pessoal rodando perfeitamente!' });
+});
+
+// Bloqueia o uso de token para contas desativadas (vale para todas as rotas /api)
+app.use('/api', async (req, res, next) => {
+  const caminho = req.path || '';
+
+  // Rotas públicas
+  const rotasPublicas = new Set([
+    '/status',
+    '/pacientes',
+    '/pacientes/login',
+    '/profissionais',
+    '/profissionais/login',
+    '/admin/login'
+  ]);
+
+  if (rotasPublicas.has(caminho)) {
+    return next();
+  }
+
+  const token = obterTokenBearer(req.headers.authorization || '');
+  if (!token) {
+    return next();
+  }
+
+  let payload;
+  try {
+    payload = jwt.verify(token, JWT_SECRET);
+  } catch {
+    // Token inválido: deixa o controller responder corretamente
+    return next();
+  }
+
+  if (payload?.tipo === 'admin') {
+    return next();
+  }
+
+  try {
+    if (payload?.tipo === 'paciente' && payload?.id) {
+      const paciente = await prisma.paciente.findUnique({
+        where: { id: payload.id },
+        select: { ativo: true }
+      });
+
+      if (!paciente?.ativo) {
+        return res.status(403).json({ erro: 'Conta desativada. Contate o administrador.' });
+      }
+    }
+
+    if (payload?.tipo === 'profissional' && payload?.id) {
+      const profissional = await prisma.profissional.findUnique({
+        where: { id: payload.id },
+        select: { ativo: true }
+      });
+
+      if (!profissional?.ativo) {
+        return res.status(403).json({ erro: 'Conta desativada. Contate o administrador.' });
+      }
+    }
+  } catch {
+    // Se der erro no DB, não bloqueia aqui; deixa o controller tratar.
+  }
+
+  return next();
 });
 
 // Conectando as rotas de paciente na nossa API principal
