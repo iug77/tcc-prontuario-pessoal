@@ -42,10 +42,6 @@ function PublicRoute({ children }) {
     return <Navigate to="/dashboard-profissional" replace />;
   }
 
-  if (sessao?.usuario?.tipo === 'admin') {
-    return <Navigate to="/admin" replace />;
-  }
-
   return children;
 }
 
@@ -143,11 +139,7 @@ function App() {
         />
         <Route
           path="/admin"
-          element={(
-            <PrivateRoute tiposPermitidos={['admin', 'profissional']}>
-              <AdminDashboard />
-            </PrivateRoute>
-          )}
+          element={<AdminDashboard />}
         />
         <Route
           path="/visualizador"

@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const ADMIN_SESSION_KEY = 'admin_session_authed_v1';
+
 const usuariosExemplo = [
   {
     id: 'p-1',
@@ -67,6 +69,92 @@ export default function AdminDashboard() {
   const [busca, setBusca] = useState('');
   const [aba, setAba] = useState('Todos');
 
+  const [adminLogin, setAdminLogin] = useState('');
+  const [adminSenha, setAdminSenha] = useState('');
+  const [adminErro, setAdminErro] = useState('');
+  const [adminAutenticado, setAdminAutenticado] = useState(
+    sessionStorage.getItem(ADMIN_SESSION_KEY) === '1'
+  );
+
+  const handleAdminSubmit = (evento) => {
+    evento.preventDefault();
+    setAdminErro('');
+
+    const login = adminLogin.trim();
+    const senha = adminSenha;
+
+    if (login === 'admin' && senha === 'admin') {
+      sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
+      setAdminAutenticado(true);
+      setAdminLogin('');
+      setAdminSenha('');
+      return;
+    }
+
+    setAdminErro('Login ou senha inválidos.');
+  };
+
+  const handleAdminSair = () => {
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    setAdminAutenticado(false);
+    setAdminErro('');
+    navigate('/');
+  };
+
+  if (!adminAutenticado) {
+    return (
+      <div className="app-page">
+        <div className="app-container max-w-xl">
+          <section className="card border-0 shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="avatar avatar-primary">AD</div>
+              <div>
+                <p className="title" style={{ fontSize: 18 }}>Acesso ao Painel Admin</p>
+                <p className="text-sm text-muted">Área restrita ao dono do aplicativo</p>
+              </div>
+            </div>
+
+            {adminErro && (
+              <div className="alert alert-danger mb-4">
+                <p className="text-sm font-semibold">{adminErro}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleAdminSubmit} className="space-y-4">
+              <div>
+                <label className="text-sm font-semibold">Login</label>
+                <input
+                  type="text"
+                  value={adminLogin}
+                  onChange={(e) => setAdminLogin(e.target.value)}
+                  placeholder="admin"
+                  autoComplete="username"
+                  className="input mt-2"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold">Senha</label>
+                <input
+                  type="password"
+                  value={adminSenha}
+                  onChange={(e) => setAdminSenha(e.target.value)}
+                  placeholder="admin"
+                  autoComplete="current-password"
+                  className="input mt-2"
+                />
+              </div>
+
+              <button type="submit" className="btn btn-primary w-full">
+                Entrar
+              </button>
+            </form>
+          </section>
+        </div>
+      </div>
+    );
+  }
+
   const usuariosFiltrados = useMemo(() => {
     const texto = busca.trim().toLowerCase();
 
@@ -104,10 +192,10 @@ export default function AdminDashboard() {
             <nav className="flex items-center gap-2 flex-wrap justify-end">
               <button
                 type="button"
-                onClick={() => navigate('/dashboard-profissional')}
+                onClick={handleAdminSair}
                 className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
               >
-                Voltar
+                Sair do Admin
               </button>
             </nav>
           </div>

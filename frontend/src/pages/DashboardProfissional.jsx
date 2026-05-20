@@ -188,13 +188,6 @@ export default function DashboardProfissional() {
             <nav className="flex items-center gap-2 flex-wrap justify-end">
               <button
                 type="button"
-                onClick={() => navigate('/admin')}
-                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
-              >
-                Admin
-              </button>
-              <button
-                type="button"
                 onClick={() => navigate('/auditoria')}
                 className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
               >
