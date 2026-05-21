@@ -221,9 +221,69 @@ export default function Visualizador() {
     }
   };
 
-  const handleAmpliar = () => {
-    if (!registroSelecionado?.arquivoUrl) return;
-    window.open(registroSelecionado.arquivoUrl, '_blank', 'noopener,noreferrer');
+  const handleAmpliar = async () => {
+    const url = registroSelecionado?.arquivoUrl;
+    if (!url) return;
+
+    let urlFinal = url;
+    let objectUrlParaRevogar = '';
+
+    try {
+      // Para data URLs grandes, abrir diretamente em nova aba pode falhar.
+      // Convertemos para Blob + object URL para garantir renderização.
+      if (String(url).startsWith('data:')) {
+        const resposta = await fetch(url);
+        const blob = await resposta.blob();
+        urlFinal = URL.createObjectURL(blob);
+        objectUrlParaRevogar = urlFinal;
+      }
+
+      const novaAba = window.open('', '_blank');
+      if (!novaAba) {
+        if (objectUrlParaRevogar) {
+          URL.revokeObjectURL(objectUrlParaRevogar);
+        }
+        return;
+      }
+
+      novaAba.opener = null;
+
+      novaAba.document.open();
+      novaAba.document.write('<!doctype html><html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /></head><body style="margin:0"></body></html>');
+      novaAba.document.close();
+
+      novaAba.document.title = nomeArquivo || 'Documento';
+
+      if (ehImagem) {
+        const img = novaAba.document.createElement('img');
+        img.src = urlFinal;
+        img.alt = nomeArquivo || 'Documento';
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = '100vh';
+        img.style.display = 'block';
+        img.style.margin = '0 auto';
+        novaAba.document.body.appendChild(img);
+      } else {
+        const iframe = novaAba.document.createElement('iframe');
+        iframe.src = urlFinal;
+        iframe.title = nomeArquivo || 'Documento';
+        iframe.style.border = '0';
+        iframe.style.width = '100%';
+        iframe.style.height = '100vh';
+        novaAba.document.body.appendChild(iframe);
+      }
+
+      if (objectUrlParaRevogar) {
+        setTimeout(() => {
+          URL.revokeObjectURL(objectUrlParaRevogar);
+        }, 60_000);
+      }
+    } catch (error) {
+      console.error('Erro ao ampliar documento:', error);
+      if (objectUrlParaRevogar) {
+        URL.revokeObjectURL(objectUrlParaRevogar);
+      }
+    }
   };
 
   const hashDocumento = registroSelecionado?.hashDocumento || '';
