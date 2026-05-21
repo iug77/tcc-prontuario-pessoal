@@ -180,7 +180,7 @@ export default function Dashboard() {
       <div className="app-container max-w-6xl">
 
         {/* Header / Nav */}
-        <header className="card border-0 shadow-sm mb-6">
+        <header className="card border-0 shadow-sm mb-6 animate-fade-in-up">
           <div className="card-header">
             <div className="flex items-center gap-3">
               <div className="avatar avatar-primary">PP</div>
@@ -194,21 +194,21 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => navigate('/permissoes')}
-                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2 transition-all duration-200 ease-in-out active:scale-95"
               >
                 Permissões
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/auditoria')}
-                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2 transition-all duration-200 ease-in-out active:scale-95"
               >
                 Logs (LGPD)
               </button>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2 transition-all duration-200 ease-in-out active:scale-95"
               >
                 Sair
               </button>
@@ -217,7 +217,7 @@ export default function Dashboard() {
         </header>
 
         {/* Saudação + ações principais */}
-        <section className="card border-0 shadow-sm p-6 mb-6">
+        <section className="card border-0 shadow-sm p-6 mb-6 animate-fade-in-up animate-delay-100">
           <h1 className="text-2xl font-extrabold tracking-tight">Olá, {primeiroNome}</h1>
           <p className="text-sm text-muted font-medium mt-1">
             Aqui está o resumo da sua saúde.
@@ -231,7 +231,7 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => navigate('/novo-registro')}
-              className="btn btn-primary"
+              className="btn btn-primary transition-all duration-200 ease-in-out hover:scale-[1.02] hover:brightness-110 active:scale-95"
             >
               + Novo Registro
             </button>
@@ -241,14 +241,14 @@ export default function Dashboard() {
                 setTotalMensagens(0);
                 navigate('/chat');
               }}
-              className="btn btn-outline"
+              className="btn btn-outline transition-all duration-200 ease-in-out active:scale-95"
             >
               Mensagens {totalMensagens > 0 && `(${totalMensagens})`}
             </button>
             <button
               type="button"
               onClick={() => navigate('/meus-registros')}
-              className="btn btn-outline"
+              className="btn btn-outline transition-all duration-200 ease-in-out active:scale-95"
             >
               Ver Registros
             </button>
@@ -264,13 +264,13 @@ export default function Dashboard() {
         {/* Conteúdo principal (2/3 + 1/3) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <main className="lg:col-span-2">
-            <div className="card border-0 shadow-sm p-6">
+            <div className="card border-0 shadow-sm p-6 animate-fade-in-up animate-delay-200">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <h2 className="text-lg font-extrabold tracking-tight">Registros Recentes</h2>
                 <button
                   type="button"
                   onClick={() => navigate('/meus-registros')}
-                  className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+                  className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2 transition-all duration-200 ease-in-out active:scale-95"
                 >
                   Ver todos
                 </button>
@@ -289,8 +289,8 @@ export default function Dashboard() {
                       aria-pressed={ativo}
                       className={
                         ativo
-                          ? 'px-3 py-1.5 rounded-full text-sm font-semibold bg-[rgb(var(--primary))] text-white'
-                          : 'px-3 py-1.5 rounded-full text-sm font-semibold bg-[rgba(var(--text),0.06)] text-[rgb(var(--muted))] hover:bg-[rgba(var(--text),0.09)]'
+                          ? 'px-3 py-1.5 rounded-full text-sm font-semibold bg-[rgb(var(--primary))] text-white transition-all duration-200 ease-in-out'
+                          : 'px-3 py-1.5 rounded-full text-sm font-semibold bg-[rgba(var(--text),0.06)] text-[rgb(var(--muted))] transition-all duration-200 ease-in-out hover:text-[rgb(var(--primary))] hover:bg-[rgba(var(--primary),0.10)]'
                       }
                     >
                       {opcao}
@@ -317,7 +317,7 @@ export default function Dashboard() {
                     <button
                       type="button"
                       onClick={() => navigate('/novo-registro')}
-                      className="btn btn-outline"
+                      className="btn btn-outline transition-all duration-200 ease-in-out active:scale-95"
                     >
                       Adicionar primeiro documento
                     </button>
@@ -335,9 +335,11 @@ export default function Dashboard() {
               {!carregando && !erro && registrosFiltrados.length > 0 && (
                 <div className="space-y-3">
                   {registrosFiltrados.slice(0, 5).map((registro) => (
-                    <div
+                    <button
                       key={registro.id}
-                      className="bg-surface rounded-xl shadow-sm p-4 flex items-center justify-between gap-4"
+                      type="button"
+                      onClick={() => navigate('/meus-registros', { state: { registroId: registro.id } })}
+                      className="bg-surface rounded-xl shadow-sm p-4 w-full text-left flex items-center justify-between gap-4 cursor-pointer group transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-md"
                     >
                       <div className="flex items-start gap-3">
                         <div className="mt-0.5 text-muted" aria-hidden="true">
@@ -354,18 +356,15 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => navigate('/meus-registros', { state: { registroId: registro.id } })}
-                        className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
-                        aria-label="Abrir registro"
-                        title="Abrir"
+                      <span
+                        className="text-muted transition-transform duration-300 ease-out group-hover:translate-x-1"
+                        aria-hidden="true"
                       >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
-                      </button>
-                    </div>
+                      </span>
+                    </button>
                   ))}
                 </div>
               )}
@@ -373,7 +372,7 @@ export default function Dashboard() {
           </main>
 
           <aside className="lg:col-span-1">
-            <div className="card border-0 shadow-sm p-6">
+            <div className="card border-0 shadow-sm p-6 animate-fade-in-up animate-delay-300">
               <h2 className="text-lg font-extrabold tracking-tight">Resumo da Conta</h2>
               <p className="text-sm text-muted mt-1">Indicadores rápidos do seu acesso</p>
 
@@ -399,7 +398,10 @@ export default function Dashboard() {
                         <p className="text-sm text-muted">Nenhum profissional com permissão ativa no momento.</p>
                       ) : (
                         acessosAtuais.slice(0, 3).map((permissao) => (
-                          <div key={permissao.id} className="flex items-center gap-3">
+                          <div
+                            key={permissao.id}
+                            className="flex items-center gap-3 rounded-md px-2 py-2 transition-colors duration-200 hover:bg-[rgba(var(--text),0.04)]"
+                          >
                             <div className="avatar">{iniciaisNome(permissao?.profissional?.nome)}</div>
                             <div>
                               <p className="text-sm font-semibold">{permissao?.profissional?.nome || 'Profissional'}</p>
@@ -422,9 +424,12 @@ export default function Dashboard() {
                       <p className="text-sm text-muted">Nenhum acesso recente por profissionais.</p>
                     ) : (
                       ultimosAcessos.slice(0, 3).map((acesso) => (
-                        <p key={acesso.id} className="text-sm text-muted">
+                        <div
+                          key={acesso.id}
+                          className="text-sm text-muted rounded-md px-2 py-1 transition-colors duration-200 hover:bg-[rgba(var(--text),0.04)]"
+                        >
                           Visualizado {formatarTempoRelativo(acesso.data)} por {acesso?.profissional?.nome || 'Profissional'}
-                        </p>
+                        </div>
                       ))
                     )}
                   </div>
