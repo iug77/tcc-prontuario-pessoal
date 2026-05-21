@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const Tesseract = require('tesseract.js');
 const { createCanvas } = require('@napi-rs/canvas');
 
@@ -47,6 +48,40 @@ const limparTextoClinico = (texto = '') => {
     .replace(/\s+/g, ' ')
     .replace(/\u0000/g, '')
     .trim();
+};
+
+const calcularHashSha256Documento = async (arquivoUrl = '') => {
+  const valor = String(arquivoUrl || '').trim();
+
+  if (!valor) {
+    return null;
+  }
+
+  try {
+    if (valor.startsWith('data:')) {
+      const base64 = valor.split(',')[1] || '';
+      if (!base64) {
+        return null;
+      }
+
+      const buffer = Buffer.from(base64, 'base64');
+      return crypto.createHash('sha256').update(buffer).digest('hex');
+    }
+
+    if (/^https?:\/\//i.test(valor) && typeof fetch === 'function') {
+      const resposta = await fetch(valor);
+      if (!resposta.ok) {
+        return null;
+      }
+
+      const arrayBuffer = await resposta.arrayBuffer();
+      return crypto.createHash('sha256').update(Buffer.from(arrayBuffer)).digest('hex');
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
 };
 
 const extrairNomeItemClinico = (texto = '') => {
@@ -994,22 +1029,33 @@ exports.listarRegistrosPaciente = async (req, res) => {
     }
 
     // Buscar registros do paciente
+    const paciente = await prisma.paciente.findUnique({
+      where: { id: pacienteId },
+      select: {
+        id: true,
+        nome: true,
+        email: true
+      }
+    });
+
+    if (!paciente) {
+      return res.status(404).json({ erro: 'Paciente não encontrado.' });
+    }
+
     const registros = await prisma.registro.findMany({
       where: { pacienteId },
       select: {
         id: true,
         tipo: true,
         data: true,
-        orgao: true,
-        descricaoClinica: true,
-        arquivoUrl: true
+        orgao: true
       },
       orderBy: {
         data: 'desc'
       }
     });
 
-    return res.status(200).json({ registros });
+    return res.status(200).json({ paciente, registros });
 
   } catch (error) {
     console.error(error);
@@ -1080,7 +1126,15 @@ exports.obterRegistro = async (req, res) => {
       }
     });
 
-    return res.status(200).json({ registro });
+    const hashDocumento = await calcularHashSha256Documento(registro.arquivoUrl);
+
+    return res.status(200).json({
+      registro: {
+        ...registro,
+        hashDocumento: hashDocumento,
+        hashAlgoritmo: hashDocumento ? 'SHA-256' : null
+      }
+    });
 
   } catch (error) {
     console.error(error);

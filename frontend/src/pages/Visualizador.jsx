@@ -7,6 +7,7 @@ export default function Visualizador() {
   const location = useLocation();
   const pacienteId = location.state?.pacienteId;
 
+  const [paciente, setPaciente] = useState(null);
   const [registros, setRegistros] = useState([]);
   const [registroSelecionado, setRegistroSelecionado] = useState(null);
   const [insightRegistro, setInsightRegistro] = useState(null);
@@ -53,6 +54,7 @@ export default function Visualizador() {
           return;
         }
 
+        setPaciente(dados.paciente || null);
         setRegistros(dados.registros || []);
         if (dados.registros && dados.registros.length > 0) {
           carregarRegistroDetalhes(dados.registros[0].id);
@@ -219,6 +221,14 @@ export default function Visualizador() {
     }
   };
 
+  const handleAmpliar = () => {
+    if (!registroSelecionado?.arquivoUrl) return;
+    window.open(registroSelecionado.arquivoUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const hashDocumento = registroSelecionado?.hashDocumento || '';
+  const statusHash = hashDocumento ? 'Verificado' : 'Indisponível';
+
   const { mimeType, nomeArquivo } = extrairMetaArquivo(registroSelecionado?.arquivoUrl || '');
   const ehImagem = mimeType.startsWith('image/');
 
@@ -231,33 +241,49 @@ export default function Visualizador() {
       <div className="app-container max-w-5xl space-y-4">
         
         {/* Cabeçalho de Ações */}
-        <div className="card p-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => navigate('/dashboard-profissional')}
-              className="btn btn-outline"
-            >
-              ← Voltar
-            </button>
-            <h1 className="text-xl font-extrabold tracking-tight">
-              {registroSelecionado ? formatarTipo(registroSelecionado.tipo) : 'Registros'}
-            </h1>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleDownload}
-              disabled={!registroSelecionado?.arquivoUrl}
-              className="btn btn-soft"
-            >
-              ↓ Download
-            </button>
-            <button
-              onClick={handlePrint}
-              disabled={!registroSelecionado?.arquivoUrl}
-              className="btn btn-outline"
-            >
-              🖨 Imprimir
-            </button>
+        <div className="card p-4 border-b border-[rgb(var(--border))]">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start gap-4">
+              <button 
+                onClick={() => navigate('/dashboard-profissional')}
+                className="btn btn-outline"
+              >
+                ← Voltar
+              </button>
+
+              <div>
+                <h1 className="text-xl font-extrabold tracking-tight">
+                  {registroSelecionado ? formatarTipo(registroSelecionado.tipo) : 'Registros'}
+                </h1>
+                <p className="text-sm text-muted">
+                  {paciente?.nome ? (
+                    <>
+                      Paciente: <span className="font-semibold">{paciente.nome}</span>
+                      {paciente.email ? ` • ${paciente.email}` : ''}
+                    </>
+                  ) : (
+                    <>Paciente: {pacienteId}</>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={handleDownload}
+                disabled={!registroSelecionado?.arquivoUrl}
+                className="btn btn-soft"
+              >
+                ↓ Download
+              </button>
+              <button
+                onClick={handlePrint}
+                disabled={!registroSelecionado?.arquivoUrl}
+                className="btn btn-outline"
+              >
+                🖨 Imprimir
+              </button>
+            </div>
           </div>
         </div>
 
@@ -284,7 +310,11 @@ export default function Visualizador() {
                     <button
                       key={registro.id}
                       onClick={() => carregarRegistroDetalhes(registro.id)}
-                      className={`list-item font-semibold ${registroSelecionado?.id === registro.id ? 'list-item-active' : ''}`}
+                      className={`w-full text-left rounded-xl p-3 border border-[rgb(var(--border))] font-semibold transition-colors ${
+                        registroSelecionado?.id === registro.id
+                          ? 'bg-surface border-l-4 border-l-[rgb(var(--primary))]'
+                          : 'bg-surface-2 hover:bg-surface'
+                      }`}
                     >
                       <p className="text-sm">{formatarTipo(registro.tipo)}</p>
                       <p className="text-xs text-muted mt-1">{formatarData(registro.data)}</p>
@@ -321,6 +351,20 @@ export default function Visualizador() {
                       <p className="text-sm text-muted mb-1">ID do documento</p>
                       <p className="font-semibold text-xs">#{registroSelecionado.id.substring(0, 8)}</p>
                     </div>
+
+                    <div className="col-span-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm text-muted mb-1">Integridade / Hash do Documento</p>
+                        <span className={`tag ${hashDocumento ? 'tag-success' : 'tag'}`} title={hashDocumento ? 'Hash SHA-256 calculado no servidor a partir do conteúdo do documento.' : 'Hash não disponível para este tipo de arquivo.'}>
+                          {statusHash}
+                        </span>
+                      </div>
+                      {hashDocumento ? (
+                        <p className="font-mono text-xs break-all">{hashDocumento}</p>
+                      ) : (
+                        <p className="text-sm text-muted">Não foi possível calcular o hash deste documento.</p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="mt-5 border-t border-[rgb(var(--border))] pt-4">
@@ -337,15 +381,18 @@ export default function Visualizador() {
               )}
 
               {registroSelecionado && (
-                <div className="card p-6">
+                <div className="card p-6 bg-surface-2">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted">Insight do registro</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted">Insight do registro</h3>
+                      <span className="tag tag-info">IA</span>
+                    </div>
                     <button
                       onClick={gerarInsightRegistro}
                       disabled={carregandoInsight}
-                      className="btn btn-accent"
+                      className="btn btn-outline"
                     >
-                      {carregandoInsight ? 'Gerando...' : (insightRegistro ? 'Atualizar Insight IA' : 'Gerar Insight IA')}
+                      {carregandoInsight ? 'Gerando...' : (insightRegistro ? 'Atualizar' : 'Gerar')}
                     </button>
                   </div>
 
@@ -375,30 +422,43 @@ export default function Visualizador() {
               )}
 
               {/* Visualização do Documento */}
-              <div className="viewer-panel flex items-center justify-center h-[50vh]">
-                {registroSelecionado?.arquivoUrl ? (
-                  ehImagem ? (
-                    <img
-                      src={registroSelecionado.arquivoUrl}
-                      alt={nomeArquivo || 'Imagem do exame'}
-                      className="max-h-full max-w-full object-contain"
-                    />
+              <div className="card p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted">Documento Original</h3>
+                  <button
+                    onClick={handleAmpliar}
+                    disabled={!registroSelecionado?.arquivoUrl}
+                    className="btn btn-outline"
+                  >
+                    ↗ Ampliar
+                  </button>
+                </div>
+
+                <div className="viewer-panel flex items-center justify-center h-[45vh] md:h-[55vh]">
+                  {registroSelecionado?.arquivoUrl ? (
+                    ehImagem ? (
+                      <img
+                        src={registroSelecionado.arquivoUrl}
+                        alt={nomeArquivo || 'Imagem do exame'}
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    ) : (
+                      <iframe
+                        src={registroSelecionado.arquivoUrl}
+                        title={nomeArquivo || 'Visualização do documento'}
+                        className="w-full h-full bg-white"
+                      />
+                    )
                   ) : (
-                    <iframe
-                      src={registroSelecionado.arquivoUrl}
-                      title={nomeArquivo || 'Visualização do documento'}
-                      className="w-full h-full bg-white"
-                    />
-                  )
-                ) : (
-                  <div className="text-center">
-                    <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <p className="text-muted font-semibold">Visualização do documento</p>
-                    <p className="text-sm text-muted">Arquivo não disponível</p>
-                  </div>
-                )}
+                    <div className="text-center">
+                      <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <p className="text-muted font-semibold">Visualização do documento</p>
+                      <p className="text-sm text-muted">Arquivo não disponível</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
