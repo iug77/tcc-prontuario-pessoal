@@ -155,20 +155,25 @@ export default function DashboardProfissional() {
     return 'tag tag-success';
   };
 
-  const solicitacoesPendentes = [
-    {
-      id: 'req-1',
-      paciente: 'Ana Souza',
-      dataSolicitacao: '14/05/2026',
-      status: 'Aguardando Liberação'
-    },
-    {
-      id: 'req-2',
-      paciente: 'Marcos Lima',
-      dataSolicitacao: '12/05/2026',
-      status: 'Aguardando Liberação'
-    }
-  ];
+  const totalPacientesAtivos = pacientes.filter((p) => p.status === 'Ativo').length;
+
+  const limiteExpirando = useMemo(() => {
+    const agora = new Date();
+    const limite = new Date(agora);
+    limite.setDate(limite.getDate() + 7);
+    return limite;
+  }, []);
+
+  const permissoesExpirandoEmBreve = useMemo(() => {
+    return pacientes
+      .filter((p) => p.status === 'Ativo' && p.expiraEm)
+      .filter((p) => {
+        const data = new Date(p.expiraEm);
+        return !Number.isNaN(data.getTime()) && data <= limiteExpirando;
+      })
+      .sort((a, b) => new Date(a.expiraEm).getTime() - new Date(b.expiraEm).getTime())
+      .slice(0, 5);
+  }, [limiteExpirando, pacientes]);
 
   return (
     <div className="app-page">
@@ -230,11 +235,11 @@ export default function DashboardProfissional() {
             <div className="grid grid-cols-2 gap-3 w-full md:w-auto">
               <div className="bg-surface rounded-xl shadow-sm p-4 min-w-[160px]">
                 <p className="text-xs text-muted font-semibold">Pacientes Ativos</p>
-                <p className="text-2xl font-extrabold tracking-tight mt-1">12</p>
+                <p className="text-2xl font-extrabold tracking-tight mt-1">{totalPacientesAtivos}</p>
               </div>
               <div className="bg-surface rounded-xl shadow-sm p-4 min-w-[160px]">
-                <p className="text-xs text-muted font-semibold">Acessos Pendentes</p>
-                <p className="text-2xl font-extrabold tracking-tight mt-1">3</p>
+                <p className="text-xs text-muted font-semibold">Expirando em 7 dias</p>
+                <p className="text-2xl font-extrabold tracking-tight mt-1">{permissoesExpirandoEmBreve.length}</p>
               </div>
             </div>
           </div>
@@ -367,11 +372,14 @@ export default function DashboardProfissional() {
           )}
         </div>
 
-        {/* Solicitações de Acesso Pendentes */}
+        {/* Permissões expirando em breve */}
         <section className="card overflow-hidden">
           <div className="card-header">
-            <h2 className="text-lg font-extrabold tracking-tight">Solicitações de Acesso Pendentes</h2>
-            <span className="tag tag-warning">{solicitacoesPendentes.length}</span>
+            <div>
+              <h2 className="text-lg font-extrabold tracking-tight">Permissões expirando em breve</h2>
+              <p className="text-sm text-muted">Acessos concedidos pelos pacientes (sem etapa de aceite).</p>
+            </div>
+            <span className="tag tag-warning">{permissoesExpirandoEmBreve.length}</span>
           </div>
 
           <div className="overflow-x-auto">
@@ -379,26 +387,38 @@ export default function DashboardProfissional() {
               <thead>
                 <tr>
                   <th>Paciente</th>
-                  <th>Data da Solicitação</th>
+                  <th>Permissão</th>
+                  <th>Expiração</th>
                   <th>Status</th>
-                  <th className="text-right">Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {solicitacoesPendentes.map((solicitacao) => (
-                  <tr key={solicitacao.id}>
-                    <td className="font-semibold">{solicitacao.paciente}</td>
-                    <td>{solicitacao.dataSolicitacao}</td>
-                    <td>
-                      <span className="tag tag-warning">{solicitacao.status}</span>
+                {permissoesExpirandoEmBreve.length === 0 && (
+                  <tr>
+                    <td className="text-sm text-muted" colSpan={4}>
+                      Nenhuma permissão expira nos próximos 7 dias.
                     </td>
-                    <td className="text-right">
-                      <button
-                        type="button"
-                        className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
-                      >
-                        Reenviar Solicitação
-                      </button>
+                  </tr>
+                )}
+
+                {permissoesExpirandoEmBreve.map((permissao) => (
+                  <tr key={permissao.permissaoId}>
+                    <td>
+                      <p className="font-semibold">{permissao.nome}</p>
+                      <p className="text-xs text-muted">{permissao.email}</p>
+                    </td>
+                    <td>
+                      <span className={classeTagPermissao(permissao.permissao)}>{permissao.permissao}</span>
+                    </td>
+                    <td>
+                      <span className={classeTagExpiracao(permissao.expiraEm, permissao.status)}>
+                        {formatarExpiracao(permissao.expiraEm, permissao.status)}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={permissao.status === 'Ativo' ? 'tag tag-success' : 'tag tag-danger'}>
+                        {permissao.status}
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -407,7 +427,7 @@ export default function DashboardProfissional() {
           </div>
 
           <div className="bg-surface-2 p-4 border-t border-[rgb(var(--border))] text-xs text-muted">
-            Itens de exemplo para demonstrar a lógica de autorização (pendente até o paciente aprovar).
+            Lista baseada em permissões ativas com expiração próxima.
           </div>
         </section>
 
