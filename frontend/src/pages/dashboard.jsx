@@ -9,6 +9,8 @@ export default function Dashboard() {
   const [paciente, setPaciente] = useState(null);
   const [registros, setRegistros] = useState([]);
   const [totalPermissoesAtivas, setTotalPermissoesAtivas] = useState(0);
+  const [acessosAtuais, setAcessosAtuais] = useState([]);
+  const [ultimosAcessos, setUltimosAcessos] = useState([]);
   const [totalMensagens, setTotalMensagens] = useState(0);
   const [filtroRapido, setFiltroRapido] = useState('Todos');
 
@@ -58,6 +60,8 @@ export default function Dashboard() {
         setPaciente(dadosDashboard.paciente);
         setRegistros(dadosDashboard.registros || []);
         setTotalPermissoesAtivas(dadosDashboard.totalPermissoesAtivas || 0);
+        setAcessosAtuais(Array.isArray(dadosDashboard.acessosAtuais) ? dadosDashboard.acessosAtuais : []);
+        setUltimosAcessos(Array.isArray(dadosDashboard.ultimosAcessos) ? dadosDashboard.ultimosAcessos : []);
         setTotalMensagens(dadosMensagens.totalMensagens || 0);
       } catch (error) {
         console.error('Erro ao carregar dashboard do paciente:', error);
@@ -116,6 +120,37 @@ export default function Dashboard() {
       month: 'long',
       year: 'numeric'
     });
+  };
+
+  const iniciaisNome = (nome = '') => {
+    const partes = String(nome).trim().split(' ').filter(Boolean);
+    if (partes.length === 0) return '??';
+
+    const iniciais = partes
+      .slice(0, 2)
+      .map((parte) => parte.charAt(0).toUpperCase())
+      .join('');
+
+    return iniciais || '??';
+  };
+
+  const formatarTempoRelativo = (dataIso) => {
+    if (!dataIso) return '-';
+
+    const data = new Date(dataIso);
+    if (Number.isNaN(data.getTime())) return '-';
+
+    const diffMs = Date.now() - data.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+
+    if (diffMin < 1) return 'agora';
+    if (diffMin < 60) return `há ${diffMin}min`;
+
+    const diffH = Math.floor(diffMin / 60);
+    if (diffH < 24) return `há ${diffH}h`;
+
+    const diffD = Math.floor(diffH / 24);
+    return `há ${diffD}d`;
   };
 
   const registrosFiltrados = registros.filter((registro) => {
@@ -360,28 +395,42 @@ export default function Dashboard() {
                   <div className="mt-2 bg-surface rounded-xl shadow-sm p-4">
                     <p className="text-sm font-extrabold tracking-tight">Quem tem acesso agora</p>
                     <div className="mt-3 space-y-2">
-                      <div className="flex items-center gap-3">
-                        <div className="avatar">DG</div>
-                        <div>
-                          <p className="text-sm font-semibold">Dr. Gabriel</p>
-                          <p className="text-xs text-muted">Cardiologia</p>
-                        </div>
-                      </div>
+                      {acessosAtuais.length === 0 ? (
+                        <p className="text-sm text-muted">Nenhum profissional com permissão ativa no momento.</p>
+                      ) : (
+                        acessosAtuais.slice(0, 3).map((permissao) => (
+                          <div key={permissao.id} className="flex items-center gap-3">
+                            <div className="avatar">{iniciaisNome(permissao?.profissional?.nome)}</div>
+                            <div>
+                              <p className="text-sm font-semibold">{permissao?.profissional?.nome || 'Profissional'}</p>
+                              <p className="text-xs text-muted">{permissao?.profissional?.especialidade || 'Acesso autorizado'}</p>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
-                    <p className="text-xs text-muted mt-3">
-                      (Exemplo) Lista baseada nas permissões ativas.
-                    </p>
+                    {acessosAtuais.length > 3 && (
+                      <p className="text-xs text-muted mt-3">Mostrando 3 de {acessosAtuais.length} profissionais.</p>
+                    )}
                   </div>
                 )}
 
                 <div className="mt-2 bg-surface rounded-xl shadow-sm p-4">
                   <p className="text-sm font-extrabold tracking-tight">Últimos Acessos</p>
                   <div className="mt-2 space-y-1">
-                    <p className="text-sm text-muted">Visualizado há 2h por Dr. Gabriel</p>
+                    {ultimosAcessos.length === 0 ? (
+                      <p className="text-sm text-muted">Nenhum acesso recente por profissionais.</p>
+                    ) : (
+                      ultimosAcessos.slice(0, 3).map((acesso) => (
+                        <p key={acesso.id} className="text-sm text-muted">
+                          Visualizado {formatarTempoRelativo(acesso.data)} por {acesso?.profissional?.nome || 'Profissional'}
+                        </p>
+                      ))
+                    )}
                   </div>
-                  <p className="text-xs text-muted mt-3">
-                    (Exemplo) Em breve: auditoria real de acessos.
-                  </p>
+                  {ultimosAcessos.length > 3 && (
+                    <p className="text-xs text-muted mt-3">Mostrando 3 de {ultimosAcessos.length} acessos.</p>
+                  )}
                 </div>
               </div>
             </div>

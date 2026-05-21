@@ -152,6 +152,8 @@ exports.dashboardPaciente = async (req, res) => {
       return;
     }
 
+    const agora = new Date();
+
     const paciente = await prisma.paciente.findUnique({
       where: { id: payload.id },
       select: {
@@ -173,10 +175,20 @@ exports.dashboardPaciente = async (req, res) => {
         },
         permissoes: {
           where: {
-            ativo: true
+            ativo: true,
+            OR: [{ expiraEm: null }, { expiraEm: { gt: agora } }]
           },
           select: {
-            id: true
+            id: true,
+            nivelAcesso: true,
+            expiraEm: true,
+            profissional: {
+              select: {
+                id: true,
+                nome: true,
+                especialidade: true
+              }
+            }
           }
         }
       }
@@ -195,6 +207,62 @@ exports.dashboardPaciente = async (req, res) => {
       }
     });
 
+    const registroIdsRecentes = await prisma.registro.findMany({
+      where: { pacienteId: paciente.id },
+      select: { id: true },
+      orderBy: { data: 'desc' },
+      take: 200
+    });
+
+    const registroIds = registroIdsRecentes.map((item) => item.id);
+
+    let ultimosAcessos = [];
+    if (registroIds.length > 0) {
+      const logs = await prisma.logAuditoria.findMany({
+        where: {
+          acao: 'REGISTRO_VISUALIZADO',
+          documentoId: { in: registroIds }
+        },
+        orderBy: { data: 'desc' },
+        take: 5,
+        select: {
+          id: true,
+          data: true,
+          usuarioId: true,
+          documentoId: true,
+          status: true
+        }
+      });
+
+      const profissionalIds = [...new Set(logs.map((log) => log.usuarioId))];
+      const profissionais = profissionalIds.length
+        ? await prisma.profissional.findMany({
+            where: { id: { in: profissionalIds } },
+            select: { id: true, nome: true, especialidade: true }
+          })
+        : [];
+
+      const profissionaisMap = new Map(profissionais.map((item) => [item.id, item]));
+
+      ultimosAcessos = logs.map((log) => {
+        const profissional = profissionaisMap.get(log.usuarioId);
+
+        return {
+          id: log.id,
+          data: log.data,
+          registroId: log.documentoId,
+          status: log.status,
+          profissional: profissional
+            ? {
+                id: profissional.id,
+                nome: profissional.nome,
+                especialidade: profissional.especialidade
+              }
+            : null
+        };
+      });
+    }
+
     return res.status(200).json({
       paciente: {
         id: paciente.id,
@@ -202,6 +270,8 @@ exports.dashboardPaciente = async (req, res) => {
         email: paciente.email
       },
       totalPermissoesAtivas: paciente.permissoes.length,
+      acessosAtuais: paciente.permissoes,
+      ultimosAcessos,
       registros: paciente.registros
     });
   } catch (error) {
