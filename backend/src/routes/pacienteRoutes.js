@@ -28,6 +28,9 @@ router.get('/profissionais/registros/:pacienteId/:registroId', ProfissionalContr
 router.get('/profissionais/registros/:pacienteId/:registroId/insight', ProfissionalController.obterInsightRegistro);
 router.post('/profissionais/registros/:pacienteId/:registroId/insight/gerar', ProfissionalController.gerarInsightRegistro);
 
+// Parecer Médico Contextualizado (profissional)
+router.put('/registros/:id/parecer', ProfissionalController.atualizarParecerRegistro);
+
 // Rotas de chat
 router.get('/chat/contatos', ChatController.listarContatos);
 router.get('/chat/mensagens/:contatoId', ChatController.listarMensagensContato);

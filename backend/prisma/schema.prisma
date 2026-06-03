@@ -1,5 +1,11 @@
 // backend/prisma/schema.prisma
 
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../ERD.svg"
+  theme    = "neutral"
+}
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -43,6 +49,8 @@ model Profissional {
   permissoesRecebidas Permissao[]
   mensagens          Mensagem[]
   insightsGerados    InsightIA[]
+
+  pareceresAssinados Registro[] @relation("ParecerProfissional")
 }
 
 // Tabela de Registros (Exames, Receitas, etc) 
@@ -53,6 +61,13 @@ model Registro {
   orgao       String?  // metadado [cite: 12]
   descricaoClinica String? // resumo textual do laudo/achados
   arquivoUrl  String?  // link do S3/Upload [cite: 12]
+
+  // Parecer Médico Contextualizado (assinado pelo profissional)
+  parecerMedico          String?
+  dataParecer            DateTime?
+  parecerProfissionalId  String?
+  parecerProfissional    Profissional? @relation("ParecerProfissional", fields: [parecerProfissionalId], references: [id])
+
   insightRegistro InsightRegistro?
   
   pacienteId  String

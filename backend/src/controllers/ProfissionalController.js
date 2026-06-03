@@ -1105,7 +1105,17 @@ exports.obterRegistro = async (req, res) => {
 
     // Buscar registro específico
     const registro = await prisma.registro.findUnique({
-      where: { id: registroId }
+      where: { id: registroId },
+      include: {
+        parecerProfissional: {
+          select: {
+            id: true,
+            nome: true,
+            crm: true,
+            especialidade: true
+          }
+        }
+      }
     });
 
     if (!registro) {
@@ -1139,6 +1149,118 @@ exports.obterRegistro = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ erro: 'Erro interno no servidor ao obter registro.' });
+  }
+};
+
+exports.atualizarParecerRegistro = async (req, res) => {
+  try {
+    const token = obterTokenBearer(req.headers.authorization || '');
+
+    if (!token) {
+      return res.status(401).json({ erro: 'Token não informado.' });
+    }
+
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch {
+      return res.status(401).json({ erro: 'Token inválido ou expirado.' });
+    }
+
+    if (payload.tipo !== 'profissional') {
+      return res.status(403).json({ erro: 'Acesso permitido apenas para profissionais.' });
+    }
+
+    const { id } = req.params;
+    const parecerMedico = String(req.body?.parecerMedico || '').trim();
+
+    if (!id) {
+      return res.status(400).json({ erro: 'ID do registro não informado.' });
+    }
+
+    if (!parecerMedico) {
+      return res.status(400).json({ erro: 'Parecer médico não pode ser vazio.' });
+    }
+
+    if (parecerMedico.length > 8000) {
+      return res.status(400).json({ erro: 'Parecer médico muito longo (máx. 8000 caracteres).' });
+    }
+
+    const registro = await prisma.registro.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        pacienteId: true
+      }
+    });
+
+    if (!registro) {
+      return res.status(404).json({ erro: 'Registro não encontrado.' });
+    }
+
+    const permissao = await prisma.permissao.findFirst({
+      where: {
+        pacienteId: registro.pacienteId,
+        profissionalId: payload.id,
+        ativo: true
+      },
+      select: {
+        id: true,
+        nivelAcesso: true,
+        expiraEm: true,
+        ativo: true
+      }
+    });
+
+    if (!permissao) {
+      return res.status(403).json({ erro: 'Você não possui permissão para adicionar parecer neste registro.' });
+    }
+
+    const agora = new Date();
+    if (permissao.expiraEm && permissao.expiraEm < agora) {
+      return res.status(403).json({ erro: 'Sua permissão de acesso expirou.' });
+    }
+
+    const nivel = String(permissao.nivelAcesso || '').toLowerCase();
+    if (nivel !== 'escrita') {
+      return res.status(403).json({ erro: 'Sua permissão é apenas de leitura. Não é possível adicionar parecer.' });
+    }
+
+    const registroAtualizado = await prisma.registro.update({
+      where: { id },
+      data: {
+        parecerMedico,
+        dataParecer: agora,
+        parecerProfissionalId: payload.id
+      },
+      include: {
+        parecerProfissional: {
+          select: {
+            id: true,
+            nome: true,
+            crm: true,
+            especialidade: true
+          }
+        }
+      }
+    });
+
+    await prisma.logAuditoria.create({
+      data: {
+        usuarioId: payload.id,
+        acao: 'PARECER_ADICIONADO_AO_REGISTRO',
+        documentoId: registroAtualizado.id,
+        status: 'Sucesso'
+      }
+    });
+
+    return res.status(200).json({
+      mensagem: 'Parecer médico salvo com sucesso.',
+      registro: registroAtualizado
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno no servidor ao salvar parecer médico.' });
   }
 };
 

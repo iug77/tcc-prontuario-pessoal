@@ -577,6 +577,16 @@ exports.obterRegistroPaciente = async (req, res) => {
       where: {
         id: registroId,
         pacienteId: payload.id
+      },
+      include: {
+        parecerProfissional: {
+          select: {
+            id: true,
+            nome: true,
+            crm: true,
+            especialidade: true
+          }
+        }
       }
     });
 

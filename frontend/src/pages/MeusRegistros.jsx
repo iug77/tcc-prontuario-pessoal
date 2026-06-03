@@ -78,6 +78,13 @@ export default function MeusRegistros() {
     return new Date(dataIso).toLocaleDateString('pt-BR');
   };
 
+  const formatarDataHora = (dataIso) => {
+    if (!dataIso) return '-';
+    const data = new Date(dataIso);
+    if (Number.isNaN(data.getTime())) return '-';
+    return data.toLocaleString('pt-BR');
+  };
+
   const formatarTipo = (tipo) => {
     const tipos = {
       exame: 'Exame',
@@ -236,6 +243,33 @@ export default function MeusRegistros() {
               ) : (
                 <div className="card p-6 text-muted text-center">
                   Selecione um registro para ver os detalhes
+                </div>
+              )}
+
+              {registroSelecionado && (
+                <div className="card p-6">
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted">Parecer Médico</h3>
+                    {registroSelecionado?.dataParecer && (
+                      <span className="tag tag-primary" title="Data do parecer">
+                        {formatarDataHora(registroSelecionado.dataParecer)}
+                      </span>
+                    )}
+                  </div>
+
+                  {registroSelecionado?.parecerMedico ? (
+                    <div className="space-y-2">
+                      <p className="text-sm whitespace-pre-wrap">{registroSelecionado.parecerMedico}</p>
+                      {registroSelecionado?.parecerProfissional?.nome && (
+                        <p className="text-xs text-muted">
+                          Assinado por {registroSelecionado.parecerProfissional.nome}
+                          {registroSelecionado.parecerProfissional.crm ? ` • CRM: ${registroSelecionado.parecerProfissional.crm}` : ''}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted">Nenhum parecer médico adicionado para este registro.</p>
+                  )}
                 </div>
               )}
 

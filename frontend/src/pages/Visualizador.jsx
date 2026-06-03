@@ -13,8 +13,23 @@ export default function Visualizador() {
   const [insightRegistro, setInsightRegistro] = useState(null);
   const [carregandoInsight, setCarregandoInsight] = useState(false);
   const [erroInsight, setErroInsight] = useState('');
+  const [parecerTexto, setParecerTexto] = useState('');
+  const [salvandoParecer, setSalvandoParecer] = useState(false);
+  const [erroParecer, setErroParecer] = useState('');
+  const [sucessoParecer, setSucessoParecer] = useState('');
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
+
+  const tipoUsuario = (() => {
+    try {
+      const raw = localStorage.getItem('usuario');
+      if (!raw) return '';
+      const parsed = JSON.parse(raw);
+      return String(parsed?.tipo || '');
+    } catch {
+      return '';
+    }
+  })();
 
   useEffect(() => {
     if (!pacienteId) {
@@ -75,6 +90,8 @@ export default function Visualizador() {
       const token = localStorage.getItem('token');
       setErroInsight('');
       setInsightRegistro(null);
+      setErroParecer('');
+      setSucessoParecer('');
 
       const respostaRegistro = await fetch(`${API_URL}/api/profissionais/registros/${pacienteId}/${registroId}`, {
         headers: {
@@ -86,6 +103,7 @@ export default function Visualizador() {
 
       if (respostaRegistro.ok) {
         setRegistroSelecionado(dadosRegistro.registro || null);
+        setParecerTexto(String(dadosRegistro.registro?.parecerMedico || ''));
 
         const respostaInsight = await fetch(
           `${API_URL}/api/profissionais/registros/${pacienteId}/${registroId}/insight`,
@@ -107,6 +125,65 @@ export default function Visualizador() {
       }
     } catch (error) {
       console.error('Erro ao carregar detalhes do registro:', error);
+    }
+  };
+
+  const salvarParecer = async () => {
+    if (!registroSelecionado?.id) {
+      return;
+    }
+
+    try {
+      setErroParecer('');
+      setSucessoParecer('');
+
+      const texto = String(parecerTexto || '').trim();
+      if (!texto) {
+        setErroParecer('O parecer não pode ser vazio.');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/');
+        return;
+      }
+
+      setSalvandoParecer(true);
+
+      const resposta = await fetch(`${API_URL}/api/registros/${registroSelecionado.id}/parecer`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ parecerMedico: texto })
+      });
+
+      const dados = await resposta.json();
+      if (!resposta.ok) {
+        setErroParecer(dados.erro || 'Não foi possível salvar o parecer.');
+
+        if (resposta.status === 401 || resposta.status === 403) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('usuario');
+          navigate('/');
+        }
+
+        return;
+      }
+
+      if (dados.registro) {
+        setRegistroSelecionado(dados.registro);
+        setParecerTexto(String(dados.registro?.parecerMedico || texto));
+      }
+
+      setSucessoParecer('Parecer salvo com sucesso.');
+    } catch (error) {
+      console.error('Erro ao salvar parecer:', error);
+      setErroParecer('Erro de conexão ao salvar parecer.');
+    } finally {
+      setSalvandoParecer(false);
     }
   };
 
@@ -291,6 +368,13 @@ export default function Visualizador() {
 
   const { mimeType, nomeArquivo } = extrairMetaArquivo(registroSelecionado?.arquivoUrl || '');
   const ehImagem = mimeType.startsWith('image/');
+
+  const formatarDataHora = (dataIso) => {
+    if (!dataIso) return '';
+    const data = new Date(dataIso);
+    if (Number.isNaN(data.getTime())) return '';
+    return data.toLocaleString('pt-BR');
+  };
 
   if (!pacienteId) {
     return null;
@@ -477,6 +561,68 @@ export default function Visualizador() {
                     </div>
                   ) : (
                     <p className="text-sm text-muted">Clique em "Gerar Insight IA" para analisar este registro.</p>
+                  )}
+                </div>
+              )}
+
+              {registroSelecionado && (
+                <div className="card p-6">
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted">Parecer Médico</h3>
+                    {registroSelecionado?.dataParecer && (
+                      <span className="tag tag-primary" title="Data do parecer">
+                        {formatarDataHora(registroSelecionado.dataParecer)}
+                      </span>
+                    )}
+                  </div>
+
+                  {tipoUsuario === 'paciente' ? (
+                    <div className="space-y-2">
+                      {registroSelecionado?.parecerMedico ? (
+                        <>
+                          <p className="text-sm whitespace-pre-wrap">{registroSelecionado.parecerMedico}</p>
+                          {registroSelecionado?.parecerProfissional?.nome && (
+                            <p className="text-xs text-muted">
+                              Assinado por {registroSelecionado.parecerProfissional.nome}
+                              {registroSelecionado.parecerProfissional.crm ? ` • CRM: ${registroSelecionado.parecerProfissional.crm}` : ''}
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted">Nenhum parecer médico adicionado para este registro.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <textarea
+                        value={parecerTexto}
+                        onChange={(e) => setParecerTexto(e.target.value)}
+                        rows={5}
+                        placeholder="Escreva sua conclusão clínica oficial para este exame/registro..."
+                        className="input w-full resize-y font-medium"
+                      />
+
+                      {erroParecer && <p className="text-sm text-danger font-semibold">{erroParecer}</p>}
+                      {sucessoParecer && <p className="text-sm text-success font-semibold">{sucessoParecer}</p>}
+
+                      {registroSelecionado?.parecerProfissional?.nome && (
+                        <p className="text-xs text-muted">
+                          Última assinatura: {registroSelecionado.parecerProfissional.nome}
+                          {registroSelecionado.parecerProfissional.crm ? ` • CRM: ${registroSelecionado.parecerProfissional.crm}` : ''}
+                        </p>
+                      )}
+
+                      <div className="flex items-center justify-end">
+                        <button
+                          type="button"
+                          onClick={salvarParecer}
+                          disabled={salvandoParecer}
+                          className="btn btn-primary"
+                        >
+                          {salvandoParecer ? 'Salvando...' : 'Salvar Parecer Médico'}
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
