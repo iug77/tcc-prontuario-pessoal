@@ -1221,8 +1221,9 @@ exports.atualizarParecerRegistro = async (req, res) => {
       return res.status(403).json({ erro: 'Sua permissão de acesso expirou.' });
     }
 
-    const nivel = String(permissao.nivelAcesso || '').toLowerCase();
-    if (nivel !== 'escrita') {
+    const nivel = String(permissao.nivelAcesso || '').trim().toLowerCase();
+    const podeEscrever = nivel === 'leitura e escrita' || nivel === 'escrita';
+    if (!podeEscrever) {
       return res.status(403).json({ erro: 'Sua permissão é apenas de leitura. Não é possível adicionar parecer.' });
     }
 

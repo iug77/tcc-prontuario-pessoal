@@ -60,7 +60,7 @@ export default function Visualizador() {
         if (!resposta.ok) {
           setErro(dados.erro || 'Não foi possível carregar os registros.');
 
-          if (resposta.status === 401 || resposta.status === 403) {
+          if (resposta.status === 401) {
             localStorage.removeItem('token');
             localStorage.removeItem('usuario');
             navigate('/');
@@ -164,7 +164,7 @@ export default function Visualizador() {
       if (!resposta.ok) {
         setErroParecer(dados.erro || 'Não foi possível salvar o parecer.');
 
-        if (resposta.status === 401 || resposta.status === 403) {
+        if (resposta.status === 401) {
           localStorage.removeItem('token');
           localStorage.removeItem('usuario');
           navigate('/');
