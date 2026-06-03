@@ -1,11 +1,5 @@
 // backend/prisma/schema.prisma
 
-generator erd {
-  provider = "prisma-erd-generator"
-  output   = "../ERD.svg"
-  theme    = "neutral"
-}
-
 generator client {
   provider = "prisma-client-js"
 }
