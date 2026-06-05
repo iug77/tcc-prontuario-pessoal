@@ -808,7 +808,7 @@ const salvarInsightRegistro = async (registroId, insight) => {
 
 exports.cadastrarProfissional = async (req, res) => {
   try {
-    const { nome, email, senha, crm, especialidade } = req.body;
+    const { nome, email, senha, crm, especialidade, telefone } = req.body;
 
     const profissionalExiste = await prisma.profissional.findUnique({
       where: { email }
@@ -827,7 +827,8 @@ exports.cadastrarProfissional = async (req, res) => {
         email,
         senha: senhaHash,
         crm: crm || null,
-        especialidade: especialidade || null
+        especialidade: especialidade || null,
+        telefone: telefone || null
       }
     });
 
@@ -931,7 +932,8 @@ exports.dashboardProfissional = async (req, res) => {
               select: {
                 id: true,
                 nome: true,
-                email: true
+                email: true,
+                telefone: true
               }
             }
           },
@@ -965,6 +967,7 @@ exports.dashboardProfissional = async (req, res) => {
         pacienteId: permissao.paciente.id,
         nome: permissao.paciente.nome,
         email: permissao.paciente.email,
+        telefone: permissao.paciente.telefone || null,
         permissao: permissao.nivelAcesso,
         expiraEm: permissao.expiraEm,
         status

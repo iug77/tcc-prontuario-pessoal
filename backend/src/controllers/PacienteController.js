@@ -56,7 +56,7 @@ const autenticarPaciente = (req, res) => {
 exports.cadastrarPaciente = async (req, res) => {
   try {
     // 1. Pega os dados que vieram do Frontend (Tela de Login/Cadastro)
-    const { nome, email, senha } = req.body;
+    const { nome, email, senha, telefone } = req.body;
 
     // 2. Verifica se o paciente já existe no banco
     const pacienteExiste = await prisma.paciente.findUnique({
@@ -76,7 +76,8 @@ exports.cadastrarPaciente = async (req, res) => {
       data: {
         nome,
         email,
-        senha: senhaHash
+        senha: senhaHash,
+        telefone: telefone || null
       }
     });
 
@@ -186,7 +187,8 @@ exports.dashboardPaciente = async (req, res) => {
               select: {
                 id: true,
                 nome: true,
-                especialidade: true
+                especialidade: true,
+                telefone: true
               }
             }
           }

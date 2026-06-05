@@ -16,6 +16,7 @@ export default function Login() {
   const [senha, setSenha] = useState('');
   const [crm, setCrm] = useState('');
   const [especialidade, setEspecialidade] = useState('');
+  const [telefone, setTelefone] = useState('');
 
   // Função que é chamada quando o usuário clica no botão principal
   const handleSubmit = async (e) => {
@@ -33,6 +34,7 @@ export default function Login() {
           nome,
           email,
           senha,
+          ...(telefone ? { telefone } : {}),
           ...(tipoUsuario === 'profissional' ? { crm, especialidade } : {})
         };
 
@@ -52,6 +54,7 @@ export default function Login() {
           setSenha('');
           setCrm('');
           setEspecialidade('');
+          setTelefone('');
         } else {
           setMensagem(dados.erro || 'Erro ao realizar cadastro.');
         }
@@ -139,13 +142,26 @@ export default function Login() {
           {isCadastro && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 required
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 className="input"
                 placeholder="Ex: João da Silva"
+              />
+            </div>
+          )}
+
+          {isCadastro && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp (Opcional)</label>
+              <input
+                type="tel"
+                value={telefone}
+                onChange={(e) => setTelefone(e.target.value)}
+                className="input"
+                placeholder="Ex: (11) 99999-9999"
               />
             </div>
           )}

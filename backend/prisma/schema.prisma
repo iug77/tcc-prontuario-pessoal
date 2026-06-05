@@ -16,7 +16,8 @@ model Paciente {
   id        String   @id @default(uuid())
   nome      String
   email     String   @unique
-  senha     String   
+  senha     String
+  telefone  String?
   criadoEm  DateTime @default(now())
   ativo     Boolean  @default(true)
 
@@ -35,6 +36,7 @@ model Profissional {
   senha         String
   crm           String?
   especialidade String?
+  telefone      String?
   criadoEm      DateTime @default(now())
   ativo         Boolean  @default(true)
   crmValidado   Boolean  @default(false)
