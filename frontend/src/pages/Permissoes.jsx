@@ -1,6 +1,7 @@
 import { API_URL } from '../config';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AppLayout from '../components/AppLayout';
 
 export default function Permissoes() {
   const navigate = useNavigate();
@@ -15,43 +16,27 @@ export default function Permissoes() {
   const obterToken = () => localStorage.getItem('token');
 
   const calcularExpiracao = (valor) => {
-    if (valor === 'nunca') {
-      return null;
-    }
+    if (valor === 'nunca') return null;
 
     const data = new Date();
-    const horas = {
-      '24h': 24,
-      '7d': 24 * 7,
-      '30d': 24 * 30
-    }[valor];
-
+    const horas = { '24h': 24, '7d': 24 * 7, '30d': 24 * 30 }[valor];
     data.setHours(data.getHours() + (horas || 0));
     return data.toISOString();
   };
 
   const formatarExpiracao = (dataIso) => {
-    if (!dataIso) {
-      return 'Nunca expira';
-    }
-
+    if (!dataIso) return 'Nunca expira';
     return new Date(dataIso).toLocaleDateString('pt-BR');
   };
 
   const carregarPermissoes = async () => {
     const token = obterToken();
-
-    if (!token) {
-      navigate('/');
-      return;
-    }
+    if (!token) { navigate('/'); return; }
 
     try {
       setErro('');
       const resposta = await fetch(`${API_URL}/api/pacientes/permissoes`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       const dados = await resposta.json();
@@ -68,7 +53,7 @@ export default function Permissoes() {
 
       setPermissoes(dados.permissoes || []);
     } catch (error) {
-      console.error('Erro ao carregar permissÃµes:', error);
+      console.error('Erro ao carregar permissões:', error);
       setErro('Erro de conexão com o servidor.');
     }
   };
@@ -83,10 +68,7 @@ export default function Permissoes() {
     setMensagem('');
 
     const token = obterToken();
-    if (!token) {
-      navigate('/');
-      return;
-    }
+    if (!token) { navigate('/'); return; }
 
     try {
       setCarregando(true);
@@ -114,7 +96,7 @@ export default function Permissoes() {
       setEmailProfissional('');
       await carregarPermissoes();
     } catch (error) {
-      console.error('Erro ao conceder permissÃ£o:', error);
+      console.error('Erro ao conceder permissão:', error);
       setErro('Erro de conexão com o servidor.');
     } finally {
       setCarregando(false);
@@ -123,17 +105,12 @@ export default function Permissoes() {
 
   const handleRevogar = async (permissaoId) => {
     const token = obterToken();
-    if (!token) {
-      navigate('/');
-      return;
-    }
+    if (!token) { navigate('/'); return; }
 
     try {
       const resposta = await fetch(`${API_URL}/api/pacientes/permissoes/${permissaoId}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       const dados = await resposta.json();
@@ -146,39 +123,30 @@ export default function Permissoes() {
       setMensagem('Permissão revogada com sucesso.');
       await carregarPermissoes();
     } catch (error) {
-      console.error('Erro ao revogar permissÃ£o:', error);
+      console.error('Erro ao revogar permissão:', error);
       setErro('Erro de conexão com o servidor.');
     }
   };
 
   return (
-    <div className="app-page">
-      <div className="app-container max-w-4xl space-y-6">
-        
-        {/* Cabeçalho */}
-        <div className="card p-6 flex items-center justify-between">
+    <AppLayout>
+      <div className="page-wrapper page-wrapper-md">
+        <div className="page-head">
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Gestão de Permissões</h1>
-            <p className="subtitle">Controle quem tem acesso ao seu prontuário</p>
+            <h1 className="page-title">Gestão de Permissões</h1>
+            <p className="page-subtitle">Controle quem tem acesso ao seu prontuário</p>
           </div>
-          <button 
-            onClick={() => navigate('/dashboard')}
-            className="btn btn-outline"
-          >
-            ← Voltar ao Painel
-          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
           {/* Coluna Esquerda: Novo Compartilhamento */}
           <div className="md:col-span-1 card p-6 h-fit">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">Novo Acesso</h2>
+            <h2 className="text-base font-extrabold tracking-tight mb-4">Novo Acesso</h2>
             <form className="space-y-4" onSubmit={handleConceder}>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">E-mail do Profissional</label>
-                <input 
-                  type="email" 
+              <div className="field">
+                <label className="label">E-mail do Profissional</label>
+                <input
+                  type="email"
                   placeholder="medico@hospital.com"
                   required
                   value={emailProfissional}
@@ -187,8 +155,8 @@ export default function Permissoes() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nível de Acesso</label>
+              <div className="field">
+                <label className="label">Nível de Acesso</label>
                 <select
                   value={nivelAcesso}
                   onChange={(e) => setNivelAcesso(e.target.value)}
@@ -199,8 +167,8 @@ export default function Permissoes() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Expiração do Link</label>
+              <div className="field">
+                <label className="label">Expiração do Acesso</label>
                 <select
                   value={expiracao}
                   onChange={(e) => setExpiracao(e.target.value)}
@@ -213,7 +181,7 @@ export default function Permissoes() {
                 </select>
               </div>
 
-              <button 
+              <button
                 type="submit"
                 disabled={carregando}
                 className="btn btn-primary w-full mt-2"
@@ -228,21 +196,30 @@ export default function Permissoes() {
 
           {/* Coluna Direita: Acessos Ativos */}
           <div className="md:col-span-2 card p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">Profissionais com Acesso Ativo</h2>
-            
-            <div className="space-y-4">
+            <h2 className="text-base font-extrabold tracking-tight mb-4">Profissionais com Acesso Ativo</h2>
+
+            <div className="space-y-3">
               {permissoes.length === 0 && (
                 <p className="text-sm text-muted">Você ainda não concedeu permissões.</p>
               )}
 
               {permissoes.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-4 border border-[rgb(var(--border))] rounded-xl bg-surface-2">
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between p-4 border border-[rgb(var(--border))] rounded-xl bg-surface-2"
+                >
                   <div>
-                    <p className="font-semibold text-gray-800">
-                      {item.profissional.nome} {item.profissional.especialidade ? `(${item.profissional.especialidade})` : ''}
+                    <p className="font-semibold">
+                      {item.profissional.nome}
+                      {item.profissional.especialidade ? ` (${item.profissional.especialidade})` : ''}
                     </p>
-                    <p className="text-sm text-gray-500">
-                      Acesso: {item.nivelAcesso} • Expira em: {formatarExpiracao(item.expiraEm)} • Status: {item.status}
+                    <p className="text-sm text-muted mt-0.5">
+                      Acesso: <span className="font-medium">{item.nivelAcesso}</span>
+                      {' · '}Expira: {formatarExpiracao(item.expiraEm)}
+                      {' · '}
+                      <span className={item.status === 'Ativo' ? 'text-success' : 'text-danger'}>
+                        {item.status}
+                      </span>
                     </p>
                   </div>
                   <button
@@ -250,18 +227,14 @@ export default function Permissoes() {
                     disabled={item.status !== 'Ativo'}
                     className="btn btn-danger"
                   >
-                    Revogar Acesso
+                    Revogar
                   </button>
                 </div>
               ))}
             </div>
-
           </div>
         </div>
-
       </div>
-    </div>
+    </AppLayout>
   );
 }
-
-

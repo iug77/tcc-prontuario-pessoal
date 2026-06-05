@@ -1,6 +1,7 @@
 import { API_URL } from '../config';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AppLayout from '../components/AppLayout';
 
 export default function Auditoria() {
   const navigate = useNavigate();
@@ -16,8 +17,6 @@ export default function Auditoria() {
     }
   }, []);
 
-  const rotaVoltar = usuario?.tipo === 'profissional' ? '/dashboard-profissional' : '/dashboard';
-
   useEffect(() => {
     const token = localStorage.getItem('token');
 
@@ -32,9 +31,7 @@ export default function Auditoria() {
         setErro('');
 
         const resposta = await fetch(`${API_URL}/api/auditoria`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
 
         const dados = await resposta.json();
@@ -64,32 +61,23 @@ export default function Auditoria() {
   }, [navigate]);
 
   const formatarData = (dataIso) => {
-    if (!dataIso) {
-      return '-';
-    }
-
+    if (!dataIso) return '-';
     return new Date(dataIso).toLocaleString('pt-BR');
   };
 
   return (
-    <div className="app-page">
-      <div className="app-container max-w-5xl space-y-6">
-        
-        {/* Cabeçalho */}
-        <div className="card strip-info p-6 flex items-center justify-between">
+    <AppLayout>
+      <div className="page-wrapper page-wrapper-lg">
+        <div className="page-head">
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Auditoria e Logs (LGPD)</h1>
-            <p className="subtitle">Rastreabilidade completa de interações para {usuario?.tipo === 'profissional' ? 'profissional' : 'paciente'}</p>
+            <h1 className="page-title">Auditoria e Logs (LGPD)</h1>
+            <p className="page-subtitle">
+              Rastreabilidade completa de interações para{' '}
+              {usuario?.tipo === 'profissional' ? 'profissional' : 'paciente'}
+            </p>
           </div>
-          <button 
-            onClick={() => navigate(rotaVoltar)}
-            className="btn btn-outline"
-          >
-            ← Voltar ao Painel
-          </button>
         </div>
 
-        {/* Tabela de Logs */}
         <div className="card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="table">
@@ -126,9 +114,7 @@ export default function Auditoria() {
                     <td className="whitespace-nowrap">{formatarData(log.data)}</td>
                     <td className="font-semibold">{log.usuario}</td>
                     <td>
-                      <span className="badge">
-                        {log.acao}
-                      </span>
+                      <span className="badge">{log.acao}</span>
                     </td>
                     <td>{log.documento}</td>
                     <td>
@@ -141,17 +127,13 @@ export default function Auditoria() {
               </tbody>
             </table>
           </div>
-          
-          {/* Rodapé da Tabela */}
+
           <div className="bg-surface-2 p-4 border-t border-[rgb(var(--border))] text-sm text-muted flex justify-between items-center">
             <p>Mostrando os {logs.length} registros mais recentes.</p>
             <button type="button" className="btn btn-outline">Exportar Relatório (PDF)</button>
           </div>
         </div>
-
       </div>
-    </div>
+    </AppLayout>
   );
 }
-
-

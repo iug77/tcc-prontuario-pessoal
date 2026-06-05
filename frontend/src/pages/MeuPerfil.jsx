@@ -1,6 +1,7 @@
 import { API_URL } from '../config';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AppLayout from '../components/AppLayout';
 
 const TIPOS_SANGUINEOS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -63,12 +64,7 @@ export default function MeuPerfil() {
   const handleFotoChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (file.size > 1_500_000) {
-      setErro('A foto deve ter no máximo 1,5 MB.');
-      return;
-    }
-
+    if (file.size > 1_500_000) { setErro('A foto deve ter no máximo 1,5 MB.'); return; }
     const reader = new FileReader();
     reader.onload = (ev) => setForm((f) => ({ ...f, foto: ev.target.result }));
     reader.readAsDataURL(file);
@@ -97,7 +93,6 @@ export default function MeuPerfil() {
         setForm(perfilParaForm(data.perfil));
         setSucesso('Perfil atualizado com sucesso!');
         setEditando(false);
-
         const usuarioAtual = JSON.parse(localStorage.getItem('usuario') || '{}');
         localStorage.setItem('usuario', JSON.stringify({ ...usuarioAtual, nome: data.perfil.nome }));
       } else {
@@ -120,56 +115,39 @@ export default function MeuPerfil() {
 
   if (carregando) {
     return (
-      <div className="app-page flex items-center justify-center">
-        <p className="text-muted text-sm">Carregando perfil...</p>
-      </div>
+      <AppLayout>
+        <div className="page-wrapper page-wrapper-sm flex items-center justify-center">
+          <p className="text-muted text-sm">Carregando perfil...</p>
+        </div>
+      </AppLayout>
     );
   }
 
-  const rotaVoltar = tipo === 'profissional' ? '/dashboard-profissional' : '/dashboard';
-
   return (
-    <div className="app-page">
-      <div className="app-container max-w-3xl space-y-6">
-
-        {/* Header */}
-        <header className="card border-0 shadow-sm">
-          <div className="card-header">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => navigate(rotaVoltar)}
-                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2 p-2"
-                aria-label="Voltar"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19 12H5M5 12l7 7M5 12l7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              <div>
-                <p className="title" style={{ fontSize: 18 }}>Meu Perfil</p>
-                <p className="text-sm text-muted">
-                  {tipo === 'profissional' ? 'Informações do profissional' : 'Informações do paciente'}
-                </p>
-              </div>
-            </div>
-            {!editando && (
-              <button
-                type="button"
-                onClick={() => { setEditando(true); setSucesso(''); setErro(''); }}
-                className="btn btn-soft"
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Editar
-              </button>
-            )}
+    <AppLayout>
+      <div className="page-wrapper page-wrapper-sm space-y-6">
+        <div className="page-head">
+          <div>
+            <h1 className="page-title">Meu Perfil</h1>
+            <p className="page-subtitle">
+              {tipo === 'profissional' ? 'Informações do profissional' : 'Informações do paciente'}
+            </p>
           </div>
-        </header>
+          {!editando && (
+            <button
+              type="button"
+              onClick={() => { setEditando(true); setSucesso(''); setErro(''); }}
+              className="btn btn-soft"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Editar
+            </button>
+          )}
+        </div>
 
-        {/* Alertas */}
         {erro && <div className="alert alert-danger">{erro}</div>}
         {sucesso && <div className="alert alert-success">{sucesso}</div>}
 
@@ -186,7 +164,7 @@ export default function MeuPerfil() {
               ) : (
                 <div
                   className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-extrabold text-white shadow-md"
-                  style={{ background: 'linear-gradient(135deg, rgb(var(--primary)), rgb(var(--accent)))' }}
+                  style={{ background: 'linear-gradient(135deg, rgb(var(--primary)), rgb(var(--info)))' }}
                 >
                   {iniciais(editando ? form.nome : perfil?.nome)}
                 </div>
@@ -199,18 +177,12 @@ export default function MeuPerfil() {
                     className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-white border border-[rgb(var(--border))] shadow flex items-center justify-center hover:bg-surface-2 transition-colors"
                     title="Trocar foto"
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                       <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2v11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       <circle cx="12" cy="13" r="4" stroke="currentColor" strokeWidth="2"/>
                     </svg>
                   </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleFotoChange}
-                  />
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFotoChange} />
                 </>
               )}
             </div>
@@ -225,7 +197,7 @@ export default function MeuPerfil() {
                   placeholder="Nome completo"
                 />
               ) : (
-                <h1 className="text-2xl font-extrabold tracking-tight">{perfil?.nome}</h1>
+                <h2 className="text-2xl font-extrabold tracking-tight">{perfil?.nome}</h2>
               )}
               <p className="text-sm text-muted mt-1">{perfil?.email}</p>
 
@@ -237,14 +209,15 @@ export default function MeuPerfil() {
                   <span className="tag tag-success">CRM Validado</span>
                 )}
                 <span className="tag">
-                  Membro desde {new Date(perfil?.criadoEm).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                  Membro desde{' '}
+                  {new Date(perfil?.criadoEm).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
                 </span>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Informações Pessoais */}
+        {/* Informações de Contato */}
         <section className="card p-6 space-y-5">
           <h2 className="text-base font-extrabold tracking-tight">Informações de Contato</h2>
 
@@ -341,9 +314,7 @@ export default function MeuPerfil() {
                 {editando ? (
                   <select className="select" value={form.tipoSanguineo} onChange={set('tipoSanguineo')}>
                     <option value="">Selecione</option>
-                    {TIPOS_SANGUINEOS.map((t) => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
+                    {TIPOS_SANGUINEOS.map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
                 ) : (
                   <p className="text-sm">
@@ -372,7 +343,6 @@ export default function MeuPerfil() {
           </section>
         )}
 
-        {/* Ações de edição */}
         {editando && (
           <div className="flex items-center justify-end gap-3 pb-4">
             <button type="button" onClick={handleCancelar} className="btn btn-outline" disabled={salvando}>
@@ -383,8 +353,7 @@ export default function MeuPerfil() {
             </button>
           </div>
         )}
-
       </div>
-    </div>
+    </AppLayout>
   );
 }

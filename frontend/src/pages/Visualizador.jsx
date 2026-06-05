@@ -1,6 +1,7 @@
 import { API_URL } from '../config';
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import AppLayout from '../components/AppLayout';
 
 export default function Visualizador() {
   const navigate = useNavigate();
@@ -32,17 +33,10 @@ export default function Visualizador() {
   })();
 
   useEffect(() => {
-    if (!pacienteId) {
-      navigate('/dashboard-profissional');
-      return;
-    }
+    if (!pacienteId) { navigate('/dashboard-profissional'); return; }
 
     const token = localStorage.getItem('token');
-
-    if (!token) {
-      navigate('/');
-      return;
-    }
+    if (!token) { navigate('/'); return; }
 
     const carregarRegistros = async () => {
       try {
@@ -50,22 +44,18 @@ export default function Visualizador() {
         setErro('');
 
         const resposta = await fetch(`${API_URL}/api/profissionais/registros/${pacienteId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
 
         const dados = await resposta.json();
 
         if (!resposta.ok) {
           setErro(dados.erro || 'Não foi possível carregar os registros.');
-
           if (resposta.status === 401) {
             localStorage.removeItem('token');
             localStorage.removeItem('usuario');
             navigate('/');
           }
-
           return;
         }
 
@@ -93,11 +83,10 @@ export default function Visualizador() {
       setErroParecer('');
       setSucessoParecer('');
 
-      const respostaRegistro = await fetch(`${API_URL}/api/profissionais/registros/${pacienteId}/${registroId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const respostaRegistro = await fetch(
+        `${API_URL}/api/profissionais/registros/${pacienteId}/${registroId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       const dadosRegistro = await respostaRegistro.json();
 
@@ -107,11 +96,7 @@ export default function Visualizador() {
 
         const respostaInsight = await fetch(
           `${API_URL}/api/profissionais/registros/${pacienteId}/${registroId}/insight`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
         if (respostaInsight.ok) {
@@ -120,8 +105,6 @@ export default function Visualizador() {
         } else {
           setInsightRegistro(null);
         }
-      } else {
-        console.error('Erro ao carregar detalhes:', dadosRegistro.erro);
       }
     } catch (error) {
       console.error('Erro ao carregar detalhes do registro:', error);
@@ -129,47 +112,34 @@ export default function Visualizador() {
   };
 
   const salvarParecer = async () => {
-    if (!registroSelecionado?.id) {
-      return;
-    }
+    if (!registroSelecionado?.id) return;
 
     try {
       setErroParecer('');
       setSucessoParecer('');
 
       const texto = String(parecerTexto || '').trim();
-      if (!texto) {
-        setErroParecer('O parecer não pode ser vazio.');
-        return;
-      }
+      if (!texto) { setErroParecer('O parecer não pode ser vazio.'); return; }
 
       const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/');
-        return;
-      }
+      if (!token) { navigate('/'); return; }
 
       setSalvandoParecer(true);
 
       const resposta = await fetch(`${API_URL}/api/registros/${registroSelecionado.id}/parecer`, {
         method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ parecerMedico: texto })
       });
 
       const dados = await resposta.json();
       if (!resposta.ok) {
         setErroParecer(dados.erro || 'Não foi possível salvar o parecer.');
-
         if (resposta.status === 401) {
           localStorage.removeItem('token');
           localStorage.removeItem('usuario');
           navigate('/');
         }
-
         return;
       }
 
@@ -188,9 +158,7 @@ export default function Visualizador() {
   };
 
   const gerarInsightRegistro = async () => {
-    if (!registroSelecionado?.id) {
-      return;
-    }
+    if (!registroSelecionado?.id) return;
 
     try {
       const token = localStorage.getItem('token');
@@ -199,12 +167,7 @@ export default function Visualizador() {
 
       const respostaInsight = await fetch(
         `${API_URL}/api/profissionais/registros/${pacienteId}/${registroSelecionado.id}/insight/gerar`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        { method: 'POST', headers: { Authorization: `Bearer ${token}` } }
       );
 
       const dadosInsight = await respostaInsight.json();
@@ -221,51 +184,30 @@ export default function Visualizador() {
     }
   };
 
-  const formatarData = (dataIso) => {
-    const data = new Date(dataIso);
-    return data.toLocaleDateString('pt-BR');
-  };
+  const formatarData = (dataIso) => new Date(dataIso).toLocaleDateString('pt-BR');
 
   const formatarTipo = (tipo) => {
-    const tipos = {
-      exame: 'Exame',
-      receita: 'Receita',
-      medicamento: 'Medicamento'
-    };
+    const tipos = { exame: 'Exame', receita: 'Receita', medicamento: 'Medicamento' };
     return tipos[tipo] || tipo;
   };
 
   const extrairMetaArquivo = (dataUrl = '') => {
     const match = dataUrl.match(/^data:([^;]+)(?:;name=([^;]+))?;base64,/i);
-    if (!match) {
-      return {
-        mimeType: 'application/octet-stream',
-        nomeArquivo: 'documento.bin'
-      };
-    }
+    if (!match) return { mimeType: 'application/octet-stream', nomeArquivo: 'documento.bin' };
 
     let mimeType = match[1] || 'application/octet-stream';
     const nomeCodificado = match[2] || '';
     let nomeArquivo = 'documento';
 
-    // Compatibilidade com arquivos antigos salvos como octet-stream
     if (mimeType === 'application/octet-stream') {
       const base64Conteudo = dataUrl.split(',')[1] || '';
-      if (base64Conteudo.startsWith('JVBERi0')) {
-        mimeType = 'application/pdf';
-      } else if (base64Conteudo.startsWith('/9j/')) {
-        mimeType = 'image/jpeg';
-      } else if (base64Conteudo.startsWith('iVBORw0KGgo')) {
-        mimeType = 'image/png';
-      }
+      if (base64Conteudo.startsWith('JVBERi0')) mimeType = 'application/pdf';
+      else if (base64Conteudo.startsWith('/9j/')) mimeType = 'image/jpeg';
+      else if (base64Conteudo.startsWith('iVBORw0KGgo')) mimeType = 'image/png';
     }
 
     if (nomeCodificado) {
-      try {
-        nomeArquivo = decodeURIComponent(nomeCodificado);
-      } catch {
-        nomeArquivo = nomeCodificado;
-      }
+      try { nomeArquivo = decodeURIComponent(nomeCodificado); } catch { nomeArquivo = nomeCodificado; }
     }
 
     if (!nomeArquivo.includes('.')) {
@@ -279,7 +221,6 @@ export default function Visualizador() {
 
   const handleDownload = () => {
     if (!registroSelecionado?.arquivoUrl) return;
-
     const { nomeArquivo } = extrairMetaArquivo(registroSelecionado.arquivoUrl);
     const link = document.createElement('a');
     link.href = registroSelecionado.arquivoUrl;
@@ -291,11 +232,8 @@ export default function Visualizador() {
 
   const handlePrint = () => {
     if (!registroSelecionado?.arquivoUrl) return;
-
     const printWindow = window.open(registroSelecionado.arquivoUrl, '_blank');
-    if (printWindow) {
-      printWindow.onload = () => printWindow.print();
-    }
+    if (printWindow) printWindow.onload = () => printWindow.print();
   };
 
   const handleAmpliar = async () => {
@@ -306,8 +244,6 @@ export default function Visualizador() {
     let objectUrlParaRevogar = '';
 
     try {
-      // Para data URLs grandes, abrir diretamente em nova aba pode falhar.
-      // Convertemos para Blob + object URL para garantir renderização.
       if (String(url).startsWith('data:')) {
         const resposta = await fetch(url);
         const blob = await resposta.blob();
@@ -317,18 +253,14 @@ export default function Visualizador() {
 
       const novaAba = window.open('', '_blank');
       if (!novaAba) {
-        if (objectUrlParaRevogar) {
-          URL.revokeObjectURL(objectUrlParaRevogar);
-        }
+        if (objectUrlParaRevogar) URL.revokeObjectURL(objectUrlParaRevogar);
         return;
       }
 
       novaAba.opener = null;
-
       novaAba.document.open();
       novaAba.document.write('<!doctype html><html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /></head><body style="margin:0"></body></html>');
       novaAba.document.close();
-
       novaAba.document.title = nomeArquivo || 'Documento';
 
       if (ehImagem) {
@@ -350,22 +282,15 @@ export default function Visualizador() {
         novaAba.document.body.appendChild(iframe);
       }
 
-      if (objectUrlParaRevogar) {
-        setTimeout(() => {
-          URL.revokeObjectURL(objectUrlParaRevogar);
-        }, 60_000);
-      }
+      if (objectUrlParaRevogar) setTimeout(() => URL.revokeObjectURL(objectUrlParaRevogar), 60_000);
     } catch (error) {
       console.error('Erro ao ampliar documento:', error);
-      if (objectUrlParaRevogar) {
-        URL.revokeObjectURL(objectUrlParaRevogar);
-      }
+      if (objectUrlParaRevogar) URL.revokeObjectURL(objectUrlParaRevogar);
     }
   };
 
   const hashDocumento = registroSelecionado?.hashDocumento || '';
   const statusHash = hashDocumento ? 'Verificado' : 'Indisponível';
-
   const { mimeType, nomeArquivo } = extrairMetaArquivo(registroSelecionado?.arquivoUrl || '');
   const ehImagem = mimeType.startsWith('image/');
 
@@ -376,76 +301,43 @@ export default function Visualizador() {
     return data.toLocaleString('pt-BR');
   };
 
-  if (!pacienteId) {
-    return null;
-  }
+  if (!pacienteId) return null;
 
   return (
-    <div className="app-page">
-      <div className="app-container max-w-5xl space-y-4">
-        
-        {/* Cabeçalho de Ações */}
-        <div className="card p-4 border-b border-[rgb(var(--border))]">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-start gap-4">
-              <button 
-                onClick={() => navigate('/dashboard-profissional')}
-                className="btn btn-outline"
-              >
-                ← Voltar
-              </button>
-
-              <div>
-                <h1 className="text-xl font-extrabold tracking-tight">
-                  {registroSelecionado ? formatarTipo(registroSelecionado.tipo) : 'Registros'}
-                </h1>
-                <p className="text-sm text-muted">
-                  {paciente?.nome ? (
-                    <>
-                      Paciente: <span className="font-semibold">{paciente.nome}</span>
-                      {paciente.email ? ` • ${paciente.email}` : ''}
-                    </>
-                  ) : (
-                    <>Paciente: {pacienteId}</>
-                  )}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={handleDownload}
-                disabled={!registroSelecionado?.arquivoUrl}
-                className="btn btn-soft"
-              >
-                ↓ Download
-              </button>
-              <button
-                onClick={handlePrint}
-                disabled={!registroSelecionado?.arquivoUrl}
-                className="btn btn-outline"
-              >
-                🖨 Imprimir
-              </button>
-            </div>
+    <AppLayout>
+      <div className="page-wrapper page-wrapper-lg">
+        <div className="page-head mb-4">
+          <div>
+            <h1 className="page-title">
+              {registroSelecionado ? formatarTipo(registroSelecionado.tipo) : 'Prontuário'}
+            </h1>
+            <p className="page-subtitle">
+              {paciente?.nome
+                ? <>Paciente: <span className="font-semibold">{paciente.nome}</span>{paciente.email ? ` · ${paciente.email}` : ''}</>
+                : `Paciente: ${pacienteId}`}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={handleDownload} disabled={!registroSelecionado?.arquivoUrl} className="btn btn-soft">
+              ↓ Download
+            </button>
+            <button onClick={handlePrint} disabled={!registroSelecionado?.arquivoUrl} className="btn btn-outline">
+              🖨 Imprimir
+            </button>
           </div>
         </div>
 
-        {erro && (
-          <div className="alert alert-danger">
-            {erro}
-          </div>
-        )}
+        {erro && <div className="alert alert-danger mb-4">{erro}</div>}
 
         {carregando ? (
-          <div className="p-4 text-center text-muted">Carregando registros...</div>
+          <div className="p-4 text-center text-muted text-sm">Carregando registros...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[75vh]">
-            
-            {/* Coluna Esquerda: Lista de Registros */}
+
+            {/* Lista de Registros */}
             <div className="md:col-span-1 card p-4 overflow-y-auto">
-              <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted mb-4">Registros do Paciente</h3>
-              
+              <h3 className="text-xs font-extrabold tracking-wider uppercase text-muted mb-4">Registros do Paciente</h3>
+
               {registros.length === 0 ? (
                 <div className="text-sm text-muted">Nenhum registro encontrado.</div>
               ) : (
@@ -454,10 +346,10 @@ export default function Visualizador() {
                     <button
                       key={registro.id}
                       onClick={() => carregarRegistroDetalhes(registro.id)}
-                      className={`w-full text-left rounded-xl p-3 border border-[rgb(var(--border))] font-semibold transition-colors ${
+                      className={`w-full text-left rounded-xl p-3 border font-semibold transition-colors ${
                         registroSelecionado?.id === registro.id
-                          ? 'bg-surface border-l-4 border-l-[rgb(var(--primary))]'
-                          : 'bg-surface-2 hover:bg-surface'
+                          ? 'bg-surface border-l-4 border-l-[rgb(var(--primary))] border-[rgb(var(--border))]'
+                          : 'bg-surface-2 border-[rgb(var(--border))] hover:bg-surface'
                       }`}
                     >
                       <p className="text-sm">{formatarTipo(registro.tipo)}</p>
@@ -468,29 +360,25 @@ export default function Visualizador() {
               )}
             </div>
 
-            {/* Coluna Direita: Metadados e Documento */}
-            <div className="md:col-span-2 space-y-4">
-              {/* Metadados do Registro */}
+            {/* Coluna de Detalhes */}
+            <div className="md:col-span-2 space-y-4 overflow-y-auto">
               {registroSelecionado ? (
                 <div className="card p-6">
-                  <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted mb-4">Informações do Registro</h3>
-                  
+                  <h3 className="text-xs font-extrabold tracking-wider uppercase text-muted mb-4">Informações do Registro</h3>
+
                   <div className="grid grid-cols-2 gap-6">
                     <div>
                       <p className="text-sm text-muted mb-1">Tipo</p>
                       <p className="font-semibold">{formatarTipo(registroSelecionado.tipo)}</p>
                     </div>
-                    
                     <div>
                       <p className="text-sm text-muted mb-1">Data de realização</p>
                       <p className="font-semibold">{formatarData(registroSelecionado.data)}</p>
                     </div>
-
                     <div>
                       <p className="text-sm text-muted mb-1">Órgão / Sistema</p>
                       <p className="font-semibold">{registroSelecionado.orgao || 'Não informado'}</p>
                     </div>
-
                     <div>
                       <p className="text-sm text-muted mb-1">ID do documento</p>
                       <p className="font-semibold text-xs">#{registroSelecionado.id.substring(0, 8)}</p>
@@ -498,10 +386,8 @@ export default function Visualizador() {
 
                     <div className="col-span-2">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm text-muted mb-1">Integridade / Hash do Documento</p>
-                        <span className={`tag ${hashDocumento ? 'tag-success' : 'tag'}`} title={hashDocumento ? 'Hash SHA-256 calculado no servidor a partir do conteúdo do documento.' : 'Hash não disponível para este tipo de arquivo.'}>
-                          {statusHash}
-                        </span>
+                        <p className="text-sm text-muted mb-1">Integridade / Hash</p>
+                        <span className={`tag ${hashDocumento ? 'tag-success' : ''}`}>{statusHash}</span>
                       </div>
                       {hashDocumento ? (
                         <p className="font-mono text-xs break-all">{hashDocumento}</p>
@@ -519,7 +405,7 @@ export default function Visualizador() {
                   </div>
                 </div>
               ) : (
-                <div className="card p-6 text-muted text-center">
+                <div className="card p-6 text-muted text-center text-sm">
                   Selecione um registro para ver os detalhes
                 </div>
               )}
@@ -528,13 +414,13 @@ export default function Visualizador() {
                 <div className="card p-6 bg-surface-2">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted">Insight do registro</h3>
+                      <h3 className="text-xs font-extrabold tracking-wider uppercase text-muted">Insight do registro</h3>
                       <span className="tag tag-info">IA</span>
                     </div>
                     <button
                       onClick={gerarInsightRegistro}
                       disabled={carregandoInsight}
-                      className="btn btn-outline"
+                      className="btn btn-outline btn-sm"
                     >
                       {carregandoInsight ? 'Gerando...' : (insightRegistro ? 'Atualizar' : 'Gerar')}
                     </button>
@@ -553,14 +439,14 @@ export default function Visualizador() {
                       <p className="text-xs text-muted">Modelo: {insightRegistro.modelo}</p>
                       {insightRegistro.diagnosticoExtracao && (
                         <p className="text-xs text-muted">
-                          Extração: {insightRegistro.diagnosticoExtracao.origem || 'sem origem'} • 
-                          {` ${insightRegistro.diagnosticoExtracao.caracteresExtraidos || 0} caracteres`}
-                          {insightRegistro.diagnosticoExtracao.erro ? ` • erro: ${insightRegistro.diagnosticoExtracao.erro}` : ''}
+                          Extração: {insightRegistro.diagnosticoExtracao.origem || 'sem origem'}
+                          {` · ${insightRegistro.diagnosticoExtracao.caracteresExtraidos || 0} caracteres`}
+                          {insightRegistro.diagnosticoExtracao.erro ? ` · erro: ${insightRegistro.diagnosticoExtracao.erro}` : ''}
                         </p>
                       )}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted">Clique em "Gerar Insight IA" para analisar este registro.</p>
+                    <p className="text-sm text-muted">Clique em "Gerar" para analisar este registro com IA.</p>
                   )}
                 </div>
               )}
@@ -568,11 +454,9 @@ export default function Visualizador() {
               {registroSelecionado && (
                 <div className="card p-6">
                   <div className="flex items-center justify-between gap-3 mb-3">
-                    <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted">Parecer Médico</h3>
+                    <h3 className="text-xs font-extrabold tracking-wider uppercase text-muted">Parecer Médico</h3>
                     {registroSelecionado?.dataParecer && (
-                      <span className="tag tag-primary" title="Data do parecer">
-                        {formatarDataHora(registroSelecionado.dataParecer)}
-                      </span>
+                      <span className="tag tag-primary">{formatarDataHora(registroSelecionado.dataParecer)}</span>
                     )}
                   </div>
 
@@ -584,7 +468,7 @@ export default function Visualizador() {
                           {registroSelecionado?.parecerProfissional?.nome && (
                             <p className="text-xs text-muted">
                               Assinado por {registroSelecionado.parecerProfissional.nome}
-                              {registroSelecionado.parecerProfissional.crm ? ` • CRM: ${registroSelecionado.parecerProfissional.crm}` : ''}
+                              {registroSelecionado.parecerProfissional.crm ? ` · CRM: ${registroSelecionado.parecerProfissional.crm}` : ''}
                             </p>
                           )}
                         </>
@@ -601,17 +485,14 @@ export default function Visualizador() {
                         placeholder="Escreva sua conclusão clínica oficial para este exame/registro..."
                         className="input w-full resize-y font-medium"
                       />
-
                       {erroParecer && <p className="text-sm text-danger font-semibold">{erroParecer}</p>}
                       {sucessoParecer && <p className="text-sm text-success font-semibold">{sucessoParecer}</p>}
-
                       {registroSelecionado?.parecerProfissional?.nome && (
                         <p className="text-xs text-muted">
                           Última assinatura: {registroSelecionado.parecerProfissional.nome}
-                          {registroSelecionado.parecerProfissional.crm ? ` • CRM: ${registroSelecionado.parecerProfissional.crm}` : ''}
+                          {registroSelecionado.parecerProfissional.crm ? ` · CRM: ${registroSelecionado.parecerProfissional.crm}` : ''}
                         </p>
                       )}
-
                       <div className="flex items-center justify-end">
                         <button
                           type="button"
@@ -627,14 +508,14 @@ export default function Visualizador() {
                 </div>
               )}
 
-              {/* Visualização do Documento */}
+              {/* Documento */}
               <div className="card p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted">Documento Original</h3>
+                  <h3 className="text-xs font-extrabold tracking-wider uppercase text-muted">Documento Original</h3>
                   <button
                     onClick={handleAmpliar}
                     disabled={!registroSelecionado?.arquivoUrl}
-                    className="btn btn-outline"
+                    className="btn btn-outline btn-sm"
                   >
                     ↗ Ampliar
                   </button>
@@ -657,11 +538,7 @@ export default function Visualizador() {
                     )
                   ) : (
                     <div className="text-center">
-                      <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <p className="text-muted font-semibold">Visualização do documento</p>
-                      <p className="text-sm text-muted">Arquivo não disponível</p>
+                      <p className="text-muted font-semibold text-sm">Arquivo não disponível</p>
                     </div>
                   )}
                 </div>
@@ -670,8 +547,6 @@ export default function Visualizador() {
           </div>
         )}
       </div>
-    </div>
+    </AppLayout>
   );
 }
-
-

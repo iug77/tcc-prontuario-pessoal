@@ -1,6 +1,7 @@
 import { API_URL } from '../config';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import AppLayout from '../components/AppLayout';
 
 export default function MeusRegistros() {
   const navigate = useNavigate();
@@ -14,11 +15,7 @@ export default function MeusRegistros() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-
-    if (!token) {
-      navigate('/');
-      return;
-    }
+    if (!token) { navigate('/'); return; }
 
     const carregarRegistros = async () => {
       try {
@@ -26,9 +23,7 @@ export default function MeusRegistros() {
         setErro('');
 
         const resposta = await fetch(`${API_URL}/api/pacientes/registros`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
 
         const dados = await resposta.json();
@@ -59,15 +54,10 @@ export default function MeusRegistros() {
     try {
       const token = localStorage.getItem('token');
       const resposta = await fetch(`${API_URL}/api/pacientes/registros/${registroId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
-
       const dados = await resposta.json();
-      if (resposta.ok) {
-        setRegistroSelecionado(dados.registro);
-      }
+      if (resposta.ok) setRegistroSelecionado(dados.registro);
     } catch (error) {
       console.error('Erro ao carregar detalhes do registro:', error);
     }
@@ -87,21 +77,15 @@ export default function MeusRegistros() {
 
   const formatarTipo = (tipo) => {
     const tipos = {
-      exame: 'Exame',
-      receita: 'Receita',
-      medicamento: 'Medicamento',
-      alergia: 'Alergia',
-      doenca: 'Doença',
-      cirurgia: 'Cirurgia'
+      exame: 'Exame', receita: 'Receita', medicamento: 'Medicamento',
+      alergia: 'Alergia', doenca: 'Doença', cirurgia: 'Cirurgia'
     };
     return tipos[tipo] || tipo;
   };
 
   const extrairMetaArquivo = (dataUrl = '') => {
     const match = dataUrl.match(/^data:([^;]+)(?:;name=([^;]+))?;base64,/i);
-    if (!match) {
-      return { mimeType: 'application/octet-stream', nomeArquivo: 'documento.bin' };
-    }
+    if (!match) return { mimeType: 'application/octet-stream', nomeArquivo: 'documento.bin' };
 
     let mimeType = match[1] || 'application/octet-stream';
     const nomeCodificado = match[2] || '';
@@ -115,11 +99,7 @@ export default function MeusRegistros() {
     }
 
     if (nomeCodificado) {
-      try {
-        nomeArquivo = decodeURIComponent(nomeCodificado);
-      } catch {
-        nomeArquivo = nomeCodificado;
-      }
+      try { nomeArquivo = decodeURIComponent(nomeCodificado); } catch { nomeArquivo = nomeCodificado; }
     }
 
     if (!nomeArquivo.includes('.')) {
@@ -133,7 +113,6 @@ export default function MeusRegistros() {
 
   const handleDownload = () => {
     if (!registroSelecionado?.arquivoUrl) return;
-
     const { nomeArquivo } = extrairMetaArquivo(registroSelecionado.arquivoUrl);
     const link = document.createElement('a');
     link.href = registroSelecionado.arquivoUrl;
@@ -147,25 +126,17 @@ export default function MeusRegistros() {
   const ehImagem = mimeType.startsWith('image/');
 
   const registrosFiltrados = useMemo(() => {
-    if (filtroTipo === 'todos') {
-      return registros;
-    }
-
+    if (filtroTipo === 'todos') return registros;
     return registros.filter((registro) => registro.tipo === filtroTipo);
   }, [filtroTipo, registros]);
 
   return (
-    <div className="app-page">
-      <div className="app-container max-w-5xl space-y-4">
-        <div className="card p-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="btn btn-outline"
-            >
-              ← Voltar
-            </button>
-            <h1 className="text-xl font-extrabold tracking-tight">Meus Registros</h1>
+    <AppLayout>
+      <div className="page-wrapper page-wrapper-lg">
+        <div className="page-head mb-4">
+          <div>
+            <h1 className="page-title">Meus Registros</h1>
+            <p className="page-subtitle">Visualize e gerencie seus documentos de saúde</p>
           </div>
           <button
             onClick={handleDownload}
@@ -176,14 +147,14 @@ export default function MeusRegistros() {
           </button>
         </div>
 
-        {erro && <div className="alert alert-danger">{erro}</div>}
+        {erro && <div className="alert alert-danger mb-4">{erro}</div>}
 
         {carregando ? (
-          <div className="p-4 text-center text-muted">Carregando registros...</div>
+          <div className="p-4 text-center text-muted text-sm">Carregando registros...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[75vh]">
             <div className="md:col-span-1 card p-4 overflow-y-auto">
-              <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted mb-4">Registros Adicionados</h3>
+              <h3 className="text-xs font-extrabold tracking-wider uppercase text-muted mb-4">Registros Adicionados</h3>
 
               <select
                 value={filtroTipo}
@@ -220,7 +191,7 @@ export default function MeusRegistros() {
             <div className="md:col-span-2 space-y-4">
               {registroSelecionado ? (
                 <div className="card p-6">
-                  <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted mb-4">Detalhes do Registro</h3>
+                  <h3 className="text-xs font-extrabold tracking-wider uppercase text-muted mb-4">Detalhes do Registro</h3>
                   <div className="grid grid-cols-2 gap-6">
                     <div>
                       <p className="text-sm text-muted mb-1">Tipo</p>
@@ -241,7 +212,7 @@ export default function MeusRegistros() {
                   </div>
                 </div>
               ) : (
-                <div className="card p-6 text-muted text-center">
+                <div className="card p-6 text-muted text-center text-sm">
                   Selecione um registro para ver os detalhes
                 </div>
               )}
@@ -249,7 +220,7 @@ export default function MeusRegistros() {
               {registroSelecionado && (
                 <div className="card p-6">
                   <div className="flex items-center justify-between gap-3 mb-3">
-                    <h3 className="text-sm font-extrabold tracking-wider uppercase text-muted">Parecer Médico</h3>
+                    <h3 className="text-xs font-extrabold tracking-wider uppercase text-muted">Parecer Médico</h3>
                     {registroSelecionado?.dataParecer && (
                       <span className="tag tag-primary" title="Data do parecer">
                         {formatarDataHora(registroSelecionado.dataParecer)}
@@ -263,7 +234,7 @@ export default function MeusRegistros() {
                       {registroSelecionado?.parecerProfissional?.nome && (
                         <p className="text-xs text-muted">
                           Assinado por {registroSelecionado.parecerProfissional.nome}
-                          {registroSelecionado.parecerProfissional.crm ? ` • CRM: ${registroSelecionado.parecerProfissional.crm}` : ''}
+                          {registroSelecionado.parecerProfissional.crm ? ` · CRM: ${registroSelecionado.parecerProfissional.crm}` : ''}
                         </p>
                       )}
                     </div>
@@ -290,7 +261,7 @@ export default function MeusRegistros() {
                   )
                 ) : (
                   <div className="text-center">
-                    <p className="text-muted font-semibold">Arquivo não disponível</p>
+                    <p className="text-muted font-semibold text-sm">Arquivo não disponível</p>
                   </div>
                 )}
               </div>
@@ -298,9 +269,6 @@ export default function MeusRegistros() {
           </div>
         )}
       </div>
-    </div>
+    </AppLayout>
   );
 }
-
-
-
