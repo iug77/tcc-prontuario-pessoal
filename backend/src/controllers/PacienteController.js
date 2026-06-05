@@ -611,3 +611,135 @@ exports.obterRegistroPaciente = async (req, res) => {
     return res.status(500).json({ erro: 'Erro interno no servidor ao obter registro.' });
   }
 };
+
+exports.obterPerfilPaciente = async (req, res) => {
+  try {
+    const payload = autenticarPaciente(req, res);
+    if (!payload) return;
+
+    const paciente = await prisma.paciente.findUnique({
+      where: { id: payload.id },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        telefone: true,
+        bio: true,
+        foto: true,
+        dataNascimento: true,
+        tipoSanguineo: true,
+        alergias: true,
+        criadoEm: true
+      }
+    });
+
+    if (!paciente) {
+      return res.status(404).json({ erro: 'Paciente não encontrado.' });
+    }
+
+    return res.status(200).json({ perfil: paciente });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno ao obter perfil do paciente.' });
+  }
+};
+
+exports.atualizarPerfilPaciente = async (req, res) => {
+  try {
+    const payload = autenticarPaciente(req, res);
+    if (!payload) return;
+
+    const { nome, telefone, bio, foto, dataNascimento, tipoSanguineo, alergias } = req.body;
+
+    const dados = {};
+    if (nome !== undefined) dados.nome = nome.trim();
+    if (telefone !== undefined) dados.telefone = telefone || null;
+    if (bio !== undefined) dados.bio = bio || null;
+    if (foto !== undefined) dados.foto = foto || null;
+    if (dataNascimento !== undefined) dados.dataNascimento = dataNascimento ? new Date(dataNascimento) : null;
+    if (tipoSanguineo !== undefined) dados.tipoSanguineo = tipoSanguineo || null;
+    if (alergias !== undefined) dados.alergias = alergias || null;
+
+    const paciente = await prisma.paciente.update({
+      where: { id: payload.id },
+      data: dados,
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        telefone: true,
+        bio: true,
+        foto: true,
+        dataNascimento: true,
+        tipoSanguineo: true,
+        alergias: true,
+        criadoEm: true
+      }
+    });
+
+    return res.status(200).json({ perfil: paciente, mensagem: 'Perfil atualizado com sucesso.' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno ao atualizar perfil do paciente.' });
+  }
+};
+
+exports.obterPerfilPacienteParaProfissional = async (req, res) => {
+  try {
+    const token = obterTokenBearer(req.headers.authorization || '');
+    if (!token) return res.status(401).json({ erro: 'Token não informado.' });
+
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch {
+      return res.status(401).json({ erro: 'Token inválido ou expirado.' });
+    }
+
+    if (payload.tipo !== 'profissional') {
+      return res.status(403).json({ erro: 'Acesso permitido apenas para profissionais.' });
+    }
+
+    const { id: pacienteId } = req.params;
+
+    const agora = new Date();
+    const permissao = await prisma.permissao.findFirst({
+      where: {
+        pacienteId,
+        profissionalId: payload.id,
+        ativo: true,
+        OR: [{ expiraEm: null }, { expiraEm: { gt: agora } }]
+      }
+    });
+
+    if (!permissao) {
+      return res.status(403).json({ erro: 'Sem permissão ativa para visualizar este perfil.' });
+    }
+
+    const paciente = await prisma.paciente.findUnique({
+      where: { id: pacienteId },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        telefone: true,
+        bio: true,
+        foto: true,
+        dataNascimento: true,
+        tipoSanguineo: true,
+        alergias: true,
+        criadoEm: true,
+        _count: { select: { registros: true } }
+      }
+    });
+
+    if (!paciente) {
+      return res.status(404).json({ erro: 'Paciente não encontrado.' });
+    }
+
+    return res.status(200).json({ perfil: paciente });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno ao obter perfil do paciente.' });
+  }
+};

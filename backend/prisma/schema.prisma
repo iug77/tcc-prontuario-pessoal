@@ -13,13 +13,18 @@ datasource db {
 
 // Tabela de Pacientes (Donos dos dados) [cite: 3]
 model Paciente {
-  id        String   @id @default(uuid())
-  nome      String
-  email     String   @unique
-  senha     String
-  telefone  String?
-  criadoEm  DateTime @default(now())
-  ativo     Boolean  @default(true)
+  id             String    @id @default(uuid())
+  nome           String
+  email          String    @unique
+  senha          String
+  telefone       String?
+  bio            String?
+  foto           String?
+  dataNascimento DateTime?
+  tipoSanguineo  String?
+  alergias       String?
+  criadoEm       DateTime  @default(now())
+  ativo          Boolean   @default(true)
 
   // Relacionamentos
   registros  Registro[]
@@ -37,6 +42,8 @@ model Profissional {
   crm           String?
   especialidade String?
   telefone      String?
+  bio           String?
+  foto          String?
   criadoEm      DateTime @default(now())
   ativo         Boolean  @default(true)
   crmValidado   Boolean  @default(false)

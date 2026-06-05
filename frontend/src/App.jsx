@@ -9,6 +9,9 @@ import DashboardProfissional from './pages/DashboardProfissional';
 import Visualizador from './pages/Visualizador';
 import MeusRegistros from './pages/MeusRegistros';
 import AdminDashboard from './pages/AdminDashboard';
+import MeuPerfil from './pages/MeuPerfil';
+import PerfilProfissional from './pages/PerfilProfissional';
+import PerfilPaciente from './pages/PerfilPaciente';
 
 const obterSessao = () => {
   const token = localStorage.getItem('token');
@@ -146,6 +149,30 @@ function App() {
           element={(
             <PrivateRoute tiposPermitidos={['profissional']}>
               <Visualizador />
+            </PrivateRoute>
+          )}
+        />
+        <Route
+          path="/meu-perfil"
+          element={(
+            <PrivateRoute tiposPermitidos={['paciente', 'profissional']}>
+              <MeuPerfil />
+            </PrivateRoute>
+          )}
+        />
+        <Route
+          path="/perfil/profissional/:id"
+          element={(
+            <PrivateRoute tiposPermitidos={['paciente', 'profissional']}>
+              <PerfilProfissional />
+            </PrivateRoute>
+          )}
+        />
+        <Route
+          path="/perfil/paciente/:id"
+          element={(
+            <PrivateRoute tiposPermitidos={['profissional']}>
+              <PerfilPaciente />
             </PrivateRoute>
           )}
         />

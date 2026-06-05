@@ -199,6 +199,13 @@ export default function Dashboard() {
             <nav className="flex items-center gap-2 flex-wrap justify-end">
               <button
                 type="button"
+                onClick={() => navigate('/meu-perfil')}
+                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2 transition-all duration-200 ease-in-out active:scale-95"
+              >
+                Meu Perfil
+              </button>
+              <button
+                type="button"
                 onClick={() => navigate('/permissoes')}
                 className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2 transition-all duration-200 ease-in-out active:scale-95"
               >
@@ -408,10 +415,23 @@ export default function Dashboard() {
                             key={permissao.id}
                             className="flex items-center gap-3 rounded-md px-2 py-2 transition-colors duration-200 hover:bg-[rgba(var(--text),0.04)]"
                           >
-                            <div className="avatar">{iniciaisNome(permissao?.profissional?.nome)}</div>
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/perfil/profissional/${permissao?.profissional?.id}`)}
+                              className="avatar hover:opacity-80 transition-opacity flex-shrink-0"
+                              title={`Ver perfil de ${permissao?.profissional?.nome}`}
+                            >
+                              {iniciaisNome(permissao?.profissional?.nome)}
+                            </button>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5">
-                                <p className="text-sm font-semibold truncate">{permissao?.profissional?.nome || 'Profissional'}</p>
+                                <button
+                                  type="button"
+                                  onClick={() => navigate(`/perfil/profissional/${permissao?.profissional?.id}`)}
+                                  className="text-sm font-semibold truncate text-left hover:text-[rgb(var(--primary))] hover:underline transition-colors"
+                                >
+                                  {permissao?.profissional?.nome || 'Profissional'}
+                                </button>
                                 {permissao?.profissional?.telefone && (
                                   <button
                                     type="button"

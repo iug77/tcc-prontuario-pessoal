@@ -199,6 +199,14 @@ export default function DashboardProfissional() {
             <nav className="flex items-center gap-2 flex-wrap justify-end">
               <button
                 type="button"
+                onClick={() => navigate('/meu-perfil')}
+                className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
+              >
+                Meu Perfil
+              </button>
+
+              <button
+                type="button"
                 onClick={() => navigate('/auditoria')}
                 className="btn btn-outline border-transparent bg-transparent hover:bg-surface-2"
               >
@@ -320,7 +328,13 @@ export default function DashboardProfissional() {
                   >
                     <td>
                       <div className="flex items-center gap-2">
-                        <p className="font-extrabold tracking-tight">{paciente.nome}</p>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/perfil/paciente/${paciente.pacienteId}`)}
+                          className="font-extrabold tracking-tight text-left hover:text-[rgb(var(--primary))] hover:underline transition-colors"
+                        >
+                          {paciente.nome}
+                        </button>
                         {paciente.telefone && (
                           <button
                             type="button"
@@ -426,7 +440,13 @@ export default function DashboardProfissional() {
                   <tr key={permissao.permissaoId}>
                     <td>
                       <div className="flex items-center gap-2">
-                        <p className="font-semibold">{permissao.nome}</p>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/perfil/paciente/${permissao.pacienteId}`)}
+                          className="font-semibold text-left hover:text-[rgb(var(--primary))] hover:underline transition-colors"
+                        >
+                          {permissao.nome}
+                        </button>
                         {permissao.telefone && (
                           <button
                             type="button"

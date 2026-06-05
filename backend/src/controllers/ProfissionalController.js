@@ -1425,3 +1425,136 @@ exports.gerarInsightRegistro = async (req, res) => {
     return res.status(500).json({ erro: 'Erro interno no servidor ao gerar insight do registro.' });
   }
 };
+
+exports.obterPerfilProfissional = async (req, res) => {
+  try {
+    const token = obterTokenBearer(req.headers.authorization || '');
+    if (!token) return res.status(401).json({ erro: 'Token não informado.' });
+
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch {
+      return res.status(401).json({ erro: 'Token inválido ou expirado.' });
+    }
+
+    if (payload.tipo !== 'profissional') {
+      return res.status(403).json({ erro: 'Acesso permitido apenas para profissionais.' });
+    }
+
+    const profissional = await prisma.profissional.findUnique({
+      where: { id: payload.id },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        crm: true,
+        especialidade: true,
+        telefone: true,
+        bio: true,
+        foto: true,
+        criadoEm: true,
+        crmValidado: true
+      }
+    });
+
+    if (!profissional) {
+      return res.status(404).json({ erro: 'Profissional não encontrado.' });
+    }
+
+    return res.status(200).json({ perfil: profissional });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno ao obter perfil do profissional.' });
+  }
+};
+
+exports.atualizarPerfilProfissional = async (req, res) => {
+  try {
+    const token = obterTokenBearer(req.headers.authorization || '');
+    if (!token) return res.status(401).json({ erro: 'Token não informado.' });
+
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch {
+      return res.status(401).json({ erro: 'Token inválido ou expirado.' });
+    }
+
+    if (payload.tipo !== 'profissional') {
+      return res.status(403).json({ erro: 'Acesso permitido apenas para profissionais.' });
+    }
+
+    const { nome, telefone, bio, foto, crm, especialidade } = req.body;
+
+    const dados = {};
+    if (nome !== undefined) dados.nome = nome.trim();
+    if (telefone !== undefined) dados.telefone = telefone || null;
+    if (bio !== undefined) dados.bio = bio || null;
+    if (foto !== undefined) dados.foto = foto || null;
+    if (crm !== undefined) dados.crm = crm || null;
+    if (especialidade !== undefined) dados.especialidade = especialidade || null;
+
+    const profissional = await prisma.profissional.update({
+      where: { id: payload.id },
+      data: dados,
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        crm: true,
+        especialidade: true,
+        telefone: true,
+        bio: true,
+        foto: true,
+        criadoEm: true,
+        crmValidado: true
+      }
+    });
+
+    return res.status(200).json({ perfil: profissional, mensagem: 'Perfil atualizado com sucesso.' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno ao atualizar perfil do profissional.' });
+  }
+};
+
+exports.obterPerfilPublicoProfissional = async (req, res) => {
+  try {
+    const token = obterTokenBearer(req.headers.authorization || '');
+    if (!token) return res.status(401).json({ erro: 'Token não informado.' });
+
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch {
+      return res.status(401).json({ erro: 'Token inválido ou expirado.' });
+    }
+
+    const { id: profissionalId } = req.params;
+
+    const profissional = await prisma.profissional.findUnique({
+      where: { id: profissionalId },
+      select: {
+        id: true,
+        nome: true,
+        crm: true,
+        especialidade: true,
+        telefone: true,
+        bio: true,
+        foto: true,
+        criadoEm: true,
+        crmValidado: true
+      }
+    });
+
+    if (!profissional) {
+      return res.status(404).json({ erro: 'Profissional não encontrado.' });
+    }
+
+    return res.status(200).json({ perfil: profissional });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno ao obter perfil do profissional.' });
+  }
+};

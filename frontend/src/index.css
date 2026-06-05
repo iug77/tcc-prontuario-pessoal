@@ -107,6 +107,8 @@
 	.strip-accent { border-left: 4px solid rgb(var(--accent)); }
 	.strip-info { border-left: 4px solid rgb(var(--info)); }
 	.strip-success { border-left: 4px solid rgb(var(--success)); }
+	.strip-danger { border-left: 4px solid rgb(var(--danger)); }
+	.strip-warning { border-left: 4px solid rgb(var(--warning)); }
 
 	.card-header {
 		display: flex;

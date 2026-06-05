@@ -19,10 +19,18 @@ router.post('/pacientes/permissoes', PacienteController.concederPermissaoPacient
 router.get('/pacientes/permissoes', PacienteController.listarPermissoesPaciente);
 router.delete('/pacientes/permissoes/:permissaoId', PacienteController.revogarPermissaoPaciente);
 
+// Rotas de Perfil (estáticas antes das dinâmicas)
+router.get('/pacientes/perfil', PacienteController.obterPerfilPaciente);
+router.put('/pacientes/perfil', PacienteController.atualizarPerfilPaciente);
+router.get('/pacientes/:id/perfil', PacienteController.obterPerfilPacienteParaProfissional);
+
 // Rotas de cadastro e login para profissional de saude
 router.post('/profissionais', ProfissionalController.cadastrarProfissional);
 router.post('/profissionais/login', ProfissionalController.loginProfissional);
 router.get('/profissionais/dashboard', ProfissionalController.dashboardProfissional);
+router.get('/profissionais/perfil', ProfissionalController.obterPerfilProfissional);
+router.put('/profissionais/perfil', ProfissionalController.atualizarPerfilProfissional);
+router.get('/profissionais/:id/perfil', ProfissionalController.obterPerfilPublicoProfissional);
 router.get('/profissionais/registros/:pacienteId', ProfissionalController.listarRegistrosPaciente);
 router.get('/profissionais/registros/:pacienteId/:registroId', ProfissionalController.obterRegistro);
 router.get('/profissionais/registros/:pacienteId/:registroId/insight', ProfissionalController.obterInsightRegistro);
