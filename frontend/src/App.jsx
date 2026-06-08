@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import Login from './pages/login';
 import Dashboard from './pages/dashboard';
 import NovoRegistro from './pages/novoregistro';
@@ -12,7 +13,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import MeuPerfil from './pages/MeuPerfil';
 import PerfilProfissional from './pages/PerfilProfissional';
 import PerfilPaciente from './pages/PerfilPaciente';
-import TendenciasClinicas from './pages/TendenciasClinicas';
+
+const TendenciasClinicas = lazy(() => import('./pages/TendenciasClinicas'));
 
 const obterSessao = () => {
   const token = localStorage.getItem('token');
@@ -181,7 +183,9 @@ function App() {
           path="/tendencias"
           element={(
             <PrivateRoute tiposPermitidos={['paciente']}>
-              <TendenciasClinicas />
+              <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#888' }}>Carregando...</div>}>
+                <TendenciasClinicas />
+              </Suspense>
             </PrivateRoute>
           )}
         />
