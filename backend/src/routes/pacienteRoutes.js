@@ -5,6 +5,7 @@ const ProfissionalController = require('../controllers/ProfissionalController');
 const ChatController = require('../controllers/ChatController');
 const AuditoriaController = require('../controllers/AuditoriaController');
 const InsightsIAController = require('../controllers/InsightsIAController');
+const TendenciasController = require('../controllers/TendenciasController');
 
 // Define que quando houver um POST em /pacientes, ele chama a função de cadastro
 router.post('/pacientes', PacienteController.cadastrarPaciente);
@@ -48,6 +49,9 @@ router.post('/chat/marcar-lidas', ChatController.marcarMensagensComoLidas);
 
 // Rota de auditoria (paciente ou profissional)
 router.get('/auditoria', AuditoriaController.listarAuditoria);
+
+// Tendências clínicas (paciente)
+router.get('/pacientes/tendencias', TendenciasController.obterTendencias);
 
 // Rotas de IA e Insights
 router.get('/ai/insights/:pacienteId', InsightsIAController.obterInsightsAtuais);

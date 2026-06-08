@@ -12,6 +12,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import MeuPerfil from './pages/MeuPerfil';
 import PerfilProfissional from './pages/PerfilProfissional';
 import PerfilPaciente from './pages/PerfilPaciente';
+import TendenciasClinicas from './pages/TendenciasClinicas';
 
 const obterSessao = () => {
   const token = localStorage.getItem('token');
@@ -173,6 +174,14 @@ function App() {
           element={(
             <PrivateRoute tiposPermitidos={['profissional']}>
               <PerfilPaciente />
+            </PrivateRoute>
+          )}
+        />
+        <Route
+          path="/tendencias"
+          element={(
+            <PrivateRoute tiposPermitidos={['paciente']}>
+              <TendenciasClinicas />
             </PrivateRoute>
           )}
         />

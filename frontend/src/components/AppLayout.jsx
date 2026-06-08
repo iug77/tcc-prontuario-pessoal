@@ -11,6 +11,7 @@ const Icon = ({ d, size = 18 }) => (
 
 const icons = {
   home:    'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z M9 22V12h6v10',
+  chart:   'M3 3v18h18 M7 16l4-4 4 4 4-4',
   file:    'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8',
   lock:    'M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2Z M7 11V7a5 5 0 0 1 10 0v4',
   chat:    'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z',
@@ -24,11 +25,12 @@ const icons = {
 };
 
 const NAV_PACIENTE = [
-  { label: 'Dashboard',  path: '/dashboard',       icon: 'home'   },
-  { label: 'Registros',  path: '/meus-registros',  icon: 'file'   },
-  { label: 'Permissões', path: '/permissoes',       icon: 'lock'   },
-  { label: 'Mensagens',  path: '/chat',             icon: 'chat',  badge: true },
-  { label: 'Logs LGPD',  path: '/auditoria',        icon: 'shield' },
+  { label: 'Dashboard',   path: '/dashboard',       icon: 'home'   },
+  { label: 'Registros',   path: '/meus-registros',  icon: 'file'   },
+  { label: 'Tendências',  path: '/tendencias',       icon: 'chart'  },
+  { label: 'Permissões',  path: '/permissoes',       icon: 'lock'   },
+  { label: 'Mensagens',   path: '/chat',             icon: 'chat',  badge: true },
+  { label: 'Logs LGPD',   path: '/auditoria',        icon: 'shield' },
 ];
 
 const NAV_PROFISSIONAL = [
