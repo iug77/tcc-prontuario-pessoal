@@ -1,5 +1,23 @@
 import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
+import { Component, lazy, Suspense } from 'react';
+
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { erro: null }; }
+  static getDerivedStateFromError(e) { return { erro: e?.message || 'Erro desconhecido' }; }
+  componentDidCatch(e, info) { console.error('[ErrorBoundary]', e, info); }
+  render() {
+    if (this.state.erro) {
+      return (
+        <div style={{ padding: 40, textAlign: 'center', background: 'rgb(248 250 252)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+          <p style={{ fontWeight: 700, fontSize: 16 }}>Esta página encontrou um erro</p>
+          <pre style={{ background: '#fee2e2', color: '#b91c1c', padding: '8px 14px', borderRadius: 6, fontSize: 12, maxWidth: 480, whiteSpace: 'pre-wrap' }}>{this.state.erro}</pre>
+          <button onClick={() => this.setState({ erro: null })} style={{ padding: '8px 20px', borderRadius: 6, background: '#6d28d9', color: 'white', border: 'none', cursor: 'pointer' }}>Tentar novamente</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 import Login from './pages/login';
 import Dashboard from './pages/dashboard';
 import NovoRegistro from './pages/novoregistro';
@@ -183,9 +201,11 @@ function App() {
           path="/tendencias"
           element={(
             <PrivateRoute tiposPermitidos={['paciente']}>
-              <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#888' }}>Carregando...</div>}>
-                <TendenciasClinicas />
-              </Suspense>
+              <ErrorBoundary>
+                <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#888' }}>Carregando...</div>}>
+                  <TendenciasClinicas />
+                </Suspense>
+              </ErrorBoundary>
             </PrivateRoute>
           )}
         />
