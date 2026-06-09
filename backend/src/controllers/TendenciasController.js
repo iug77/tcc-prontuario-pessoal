@@ -31,26 +31,35 @@ function parsearValor(texto) {
   );
   if (!match) return null;
 
-  // Remove trailing isolated number from name (artifact: "eosinofilos 5" → "eosinofilos")
-  const nome = match[1].trim().replace(/\s+\d{1,3}$/, '').trim();
+  // Apply all filters to the RAW name (before any transformation)
+  const nomeRaw = match[1].trim();
 
-  // Reject names that are clearly not clinical parameter names
   const padroesInvalidos = [
-    /^a\s+\d/i,                   // "a 2", "a 450 segmentados 49"
-    /maior\s+que/i,               // "maior que"
-    /menor\s+que/i,               // "menor que"
-    /maior\s+ou\s+igual/i,        // "maior ou igual a"
-    /menor\s+ou\s+igual/i,        // "menor ou igual a"
-    /inferior\s+a\b/i,            // "inferior a"
-    /superior\s+a\b/i,            // "superior a"
-    /acima\s+de/i,                // "acima de", "resultados de etgf acima de"
-    /abaixo\s+de/i,               // "abaixo de"
-    /\bresultados?\s+de\b/i,      // "resultados de ..."
-    /\ba\s+menor\b/i,             // "a menor que"
-    /[a-f0-9]{16,}/i,             // hash hexadecimal
+    /^a\s+\d/i,                    // "a 2", "a 6", "a 450 segmentados 49"
+    /^at[eé]\b/i,                  // "até", "ate"
+    /\bmaior\s+que\b/i,            // "maior que"
+    /\bmenor\s+que\b/i,            // "menor que"
+    /\bmaior\s+ou\s+igual\b/i,     // "maior ou igual a"
+    /\bmenor\s+ou\s+igual\b/i,     // "menor ou igual a"
+    /\bou\s+igual\b/i,             // "ou igual a" (frase truncada)
+    /\binferior\s+a\b/i,           // "inferior a"
+    /\bsuperior\s+a\b/i,           // "superior a"
+    /\bacima\s+de\b/i,             // "acima de", "valores acima de", "ns mulheres crianças acima de"
+    /\babaixo\s+de\b/i,            // "abaixo de"
+    /\bresultados?\s+de\b/i,       // "resultados de etgf acima de"
+    /\ba\s+menor\b/i,              // "a menor que"
+    /\bsão\s+liberados\b/i,        // "m2 são liberados como maior ou igual a"
+    /\b(crm|crf|coren|crefito)\b/i,// carimbo de médico/farmacêutico
+    /[a-f0-9]{16,}/i,              // hash hexadecimal
+    /\d+\/\d+/,                    // padrão de data "15/10", "170-66397-5222 15/10/"
   ];
-  if (padroesInvalidos.some(p => p.test(nome))) return null;
-  if (!nome || nome.length > 60) return null;
+
+  if (padroesInvalidos.some(p => p.test(nomeRaw))) return null;
+  if (nomeRaw.length > 60) return null;
+
+  // Strip trailing isolated number (artifact: "eosinofilos 5" → "eosinofilos", "monocitos 9" → "monocitos")
+  const nome = nomeRaw.replace(/\s+\d{1,3}$/, '').trim();
+  if (!nome || nome.length < 2) return null;
 
   const valor = parseFloat(match[2].replace(',', '.'));
   const unidade = match[3].replace(/[()]/g, '').trim();
