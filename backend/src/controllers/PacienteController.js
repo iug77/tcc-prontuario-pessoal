@@ -528,9 +528,6 @@ exports.criarRegistro = async (req, res) => {
       }
     });
 
-    // Gerar insight de IA em background (não bloqueia a resposta)
-    gerarESalvarInsightRegistro(novoRegistro).catch(() => {});
-
     return res.status(201).json({
       mensagem: 'Registro criado com sucesso.',
       registro: novoRegistro
@@ -745,5 +742,25 @@ exports.obterPerfilPacienteParaProfissional = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ erro: 'Erro interno ao obter perfil do paciente.' });
+  }
+};
+
+exports.gerarInsightRegistroPaciente = async (req, res) => {
+  try {
+    const payload = autenticarPaciente(req, res);
+    if (!payload) return;
+
+    const { registroId } = req.params;
+    const registro = await prisma.registro.findUnique({ where: { id: registroId } });
+
+    if (!registro || registro.pacienteId !== payload.id) {
+      return res.status(404).json({ erro: 'Registro não encontrado.' });
+    }
+
+    await gerarESalvarInsightRegistro(registro);
+    return res.status(200).json({ mensagem: 'Insight gerado com sucesso.' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno ao gerar insight.' });
   }
 };
