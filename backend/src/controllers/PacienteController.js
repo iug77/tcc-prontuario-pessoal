@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
-const { gerarESalvarInsightRegistro } = require('./ProfissionalController');
+const { gerarESalvarInsightRegistro, gerarInsightHeuristicoESalvar } = require('./ProfissionalController');
 
 const prisma = new PrismaClient();
 const JWT_SECRET = 'segredo_do_tcc_123';
@@ -527,6 +527,9 @@ exports.criarRegistro = async (req, res) => {
         status: 'Sucesso'
       }
     });
+
+    // Gera insight heurístico imediatamente (sem OCR, sem Gemini — rápido e confiável)
+    await gerarInsightHeuristicoESalvar(novoRegistro);
 
     return res.status(201).json({
       mensagem: 'Registro criado com sucesso.',

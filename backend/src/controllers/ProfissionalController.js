@@ -1566,3 +1566,14 @@ exports.gerarESalvarInsightRegistro = async (registro) => {
     console.error('[AUTO_INSIGHT] Erro ao gerar insight para registro', registro.id, err.message);
   }
 };
+
+// Fast heuristic-only insight — no OCR, no Gemini. Called synchronously during record creation.
+exports.gerarInsightHeuristicoESalvar = async (registro) => {
+  try {
+    const textoClinico = registro.descricaoClinica || '';
+    const insightLocal = gerarInsightRegistroLocal(registro, textoClinico, null);
+    await salvarInsightRegistro(registro.id, insightLocal);
+  } catch (err) {
+    console.error('[HEURISTIC_INSIGHT] Erro ao salvar insight heurístico', registro.id, err.message);
+  }
+};
