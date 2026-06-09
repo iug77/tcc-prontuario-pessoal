@@ -602,15 +602,20 @@ DADOS DO REGISTRO:
 - resumo_clinico_informado: ${registro.descricaoClinica || 'não informado'}
 - texto_extraido_do_arquivo: ${textoArquivoLimitado || 'não extraído'}
 
-Objetivo:
-1) Gerar um resumo curto e técnico do exame.
-2) Gerar uma conclusão curta, sem diagnóstico definitivo, usando linguagem cautelosa.
-3) Sempre incluir na conclusão o aviso: "Esta análise é uma ferramenta de apoio e não substitui a consulta com um profissional de saúde qualificado."
+Objetivos:
+1) Resumo curto e técnico do exame.
+2) Conclusão curta, sem diagnóstico definitivo, usando linguagem cautelosa. Sempre incluir: "Esta análise é uma ferramenta de apoio e não substitui a consulta com um profissional de saúde qualificado."
+3) Extrair TODOS os parâmetros numéricos identificados (exames laboratoriais, sinais vitais, etc.) em dois arrays:
+   - "valoresImportantes": cada item no formato "NOME: VALOR UNIDADE (referência MIN-MAX UNIDADE)" — ex: "Glicose: 95 mg/dL (referência 70-100 mg/dL)"
+   - "foraReferencia": apenas os parâmetros FORA da faixa normal, no formato "[STATUS] NOME: VALOR UNIDADE (referência MIN-MAX UNIDADE)." onde STATUS é ALTO, BAIXO ou CRITICO — ex: "[ALTO] Colesterol LDL: 145 mg/dL (referência 0-130 mg/dL)."
+   Se não houver valores numéricos identificáveis, retorne arrays vazios.
 
 Formato obrigatório final (JSON puro):
 {
   "resumo": "string",
-  "conclusao": "string"
+  "conclusao": "string",
+  "valoresImportantes": ["string", ...],
+  "foraReferencia": ["string", ...]
 }`;
 
     const geminiApiKey = process.env.GEMINI_API_KEY || '';
@@ -712,14 +717,17 @@ Formato obrigatório final (JSON puro):
 
     const parsed = parseJsonFromModelResponse(respostaTexto);
 
+    const valoresImportantesGemini = Array.isArray(parsed.valoresImportantes) ? parsed.valoresImportantes : [];
+    const foraReferenciaGemini = Array.isArray(parsed.foraReferencia) ? parsed.foraReferencia : [];
+
     return {
       resumo: parsed.resumo || 'Análise concluída. Revisar documento clínico para confirmação.',
       conclusao: parsed.conclusao || 'Resultado assistivo gerado. Necessária validação clínica profissional.',
-      foraReferencia: [],
+      foraReferencia: foraReferenciaGemini,
       alertas: [],
       itensNormais: [],
       itensAlterados: [],
-      valoresImportantes: [],
+      valoresImportantes: valoresImportantesGemini,
       pendencias: [],
       recomendacoes: [],
       modelo: `gemini-${geminiModel}`
@@ -1394,21 +1402,8 @@ exports.gerarInsightRegistro = async (req, res) => {
 
     const insightModelo = await gerarInsightRegistroComGemini(registro, extracaoArquivo);
     const insightCombinado = combinarInsightComLocal(insightModelo, insightLocal, extracaoArquivo);
-    const insight = {
-      resumo: insightCombinado.resumo || insightLocal.resumo,
-      conclusao: insightCombinado.conclusao || insightLocal.conclusao,
-      foraReferencia: [],
-      alertas: [],
-      itensNormais: [],
-      itensAlterados: [],
-      valoresImportantes: [],
-      pendencias: [],
-      recomendacoes: [],
-      modelo: insightCombinado.modelo,
-      diagnosticoExtracao: insightCombinado.diagnosticoExtracao
-    };
 
-    const insightPersistido = await salvarInsightRegistro(registroId, insight);
+    const insightPersistido = await salvarInsightRegistro(registroId, insightCombinado);
 
     await prisma.logAuditoria.create({
       data: {
@@ -1556,5 +1551,18 @@ exports.obterPerfilPublicoProfissional = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ erro: 'Erro interno ao obter perfil do profissional.' });
+  }
+};
+
+// Exported for use by PacienteController (auto-generation on record creation)
+exports.gerarESalvarInsightRegistro = async (registro) => {
+  try {
+    const extracaoArquivo = await extrairTextoArquivoUpado(registro.arquivoUrl);
+    const insightLocal = gerarInsightRegistroLocal(registro, extracaoArquivo.textoExtraido, extracaoArquivo.erro);
+    const insightModelo = await gerarInsightRegistroComGemini(registro, extracaoArquivo);
+    const insightCombinado = combinarInsightComLocal(insightModelo, insightLocal, extracaoArquivo);
+    await salvarInsightRegistro(registro.id, insightCombinado);
+  } catch (err) {
+    console.error('[AUTO_INSIGHT] Erro ao gerar insight para registro', registro.id, err.message);
   }
 };
