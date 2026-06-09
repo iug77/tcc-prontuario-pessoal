@@ -2,6 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
 
 const prisma = new PrismaClient();
+const JWT_SECRET = 'segredo_do_tcc_123';
 
 // Parses strings like:
 //   "Glicose: 150 mg/dL (referência 70-100 mg/dL)"
@@ -52,7 +53,7 @@ const obterTendencias = async (req, res) => {
 
     let payload;
     try {
-      payload = jwt.verify(token, process.env.JWT_SECRET);
+      payload = jwt.verify(token, JWT_SECRET);
     } catch {
       return res.status(401).json({ erro: 'Token inválido ou expirado.' });
     }
