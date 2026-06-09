@@ -1554,10 +1554,14 @@ exports.obterPerfilPublicoProfissional = async (req, res) => {
   }
 };
 
-// Exported for use by PacienteController (auto-generation on record creation)
-exports.gerarESalvarInsightRegistro = async (registro) => {
+// Exported for use by PacienteController (auto-generation on record creation).
+// opcoes.skipOcr = true skips Tesseract OCR (avoids OOM on Render free tier).
+// Gemini still receives the file inline via inlineData for native vision processing.
+exports.gerarESalvarInsightRegistro = async (registro, opcoes = {}) => {
   try {
-    const extracaoArquivo = await extrairTextoArquivoUpado(registro.arquivoUrl);
+    const extracaoArquivo = opcoes.skipOcr
+      ? { textoExtraido: registro.descricaoClinica || '', origem: 'texto-clinico', erro: null }
+      : await extrairTextoArquivoUpado(registro.arquivoUrl);
     const insightLocal = gerarInsightRegistroLocal(registro, extracaoArquivo.textoExtraido, extracaoArquivo.erro);
     const insightModelo = await gerarInsightRegistroComGemini(registro, extracaoArquivo);
     const insightCombinado = combinarInsightComLocal(insightModelo, insightLocal, extracaoArquivo);

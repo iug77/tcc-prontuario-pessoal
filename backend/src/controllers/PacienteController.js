@@ -531,6 +531,11 @@ exports.criarRegistro = async (req, res) => {
     // Gera insight heurístico imediatamente (sem OCR, sem Gemini — rápido e confiável)
     await gerarInsightHeuristicoESalvar(novoRegistro);
 
+    // Dispara upgrade Gemini em background sem bloquear a resposta.
+    // skipOcr=true evita Tesseract (pesado no Render free tier); o arquivo
+    // ainda é enviado inline ao Gemini para leitura nativa por visão.
+    gerarESalvarInsightRegistro(novoRegistro, { skipOcr: true }).catch(() => {});
+
     return res.status(201).json({
       mensagem: 'Registro criado com sucesso.',
       registro: novoRegistro
@@ -760,7 +765,7 @@ exports.gerarInsightRegistroPaciente = async (req, res) => {
       return res.status(404).json({ erro: 'Registro não encontrado.' });
     }
 
-    await gerarESalvarInsightRegistro(registro);
+    await gerarESalvarInsightRegistro(registro, { skipOcr: true });
     return res.status(200).json({ mensagem: 'Insight gerado com sucesso.' });
   } catch (error) {
     console.error(error);
