@@ -100,6 +100,17 @@ export default function NovoRegistro() {
       }
 
       setSucesso('Registro criado com sucesso!');
+
+      // Dispara upgrade Gemini via HTTP (skipOcr no servidor — ~30-60 s).
+      // Não aguarda: o servidor mantém a conexão ativa enquanto o Gemini processa.
+      const registroId = dados.registro?.id;
+      if (registroId) {
+        fetch(`${API_URL}/api/pacientes/registros/${registroId}/insight/gerar`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        }).catch(() => {});
+      }
+
       setTimeout(() => navigate('/dashboard'), 1500);
     } catch (error) {
       console.error('Erro ao criar registro:', error);
