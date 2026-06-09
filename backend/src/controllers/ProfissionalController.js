@@ -605,9 +605,25 @@ DADOS DO REGISTRO:
 Objetivos:
 1) Resumo curto e técnico do exame.
 2) Conclusão curta, sem diagnóstico definitivo, usando linguagem cautelosa. Sempre incluir: "Esta análise é uma ferramenta de apoio e não substitui a consulta com um profissional de saúde qualificado."
-3) Extrair TODOS os parâmetros numéricos identificados (exames laboratoriais, sinais vitais, etc.) em dois arrays:
-   - "valoresImportantes": cada item no formato "NOME: VALOR UNIDADE (referência MIN-MAX UNIDADE)" — ex: "Glicose: 95 mg/dL (referência 70-100 mg/dL)"
-   - "foraReferencia": apenas os parâmetros FORA da faixa normal, no formato "[STATUS] NOME: VALOR UNIDADE (referência MIN-MAX UNIDADE)." onde STATUS é ALTO, BAIXO ou CRITICO — ex: "[ALTO] Colesterol LDL: 145 mg/dL (referência 0-130 mg/dL)."
+3) Extrair os parâmetros numéricos laboratoriais do documento nos dois arrays abaixo.
+   Formato de cada item em "valoresImportantes": "NOME: VALOR UNIDADE (referência MIN-MAX UNIDADE)"
+   Formato de cada item em "foraReferencia": "[STATUS] NOME: VALOR UNIDADE (referência MIN-MAX UNIDADE)." (STATUS = ALTO, BAIXO ou CRITICO)
+
+   REGRAS OBRIGATÓRIAS para o campo NOME:
+   - Use SOMENTE o nome clínico/científico do parâmetro. Exemplos corretos: "Hemoglobina", "Glicose", "Segmentados", "TGO", "Colesterol LDL", "Ferritina", "Basófilos", "Eosinófilos"
+   - NUNCA inclua números de referência ou contagens no nome (errado: "a 450 segmentados 49" → certo: "Segmentados")
+   - NUNCA inclua frases de comparação: "maior que", "menor que", "inferior a", "superior a", "acima de", "abaixo de", "maior ou igual a", "a menor que"
+   - NUNCA inclua frases descritivas como "resultados de ETGF acima de 60" — extraia só o nome do parâmetro ("ETGF" ou "TFG")
+   - NUNCA inclua nomes de médicos, carimbos, assinaturas, hashes ou IDs de documentos
+   - NOME deve ter no máximo 35 caracteres; se estiver ambíguo ou não for claramente um parâmetro clínico, OMITA o item
+   - Exemplos CORRETOS vs ERRADOS:
+       "Segmentados: 49 % (referência 40-70 %)"  ← certo
+       "a 450 segmentados 49: 4.45 %"            ← ERRADO
+       "Eosinófilos: 5 % (referência 0-7 %)"     ← certo
+       "eosinofilos 5: 45 %"                      ← ERRADO
+       "Basófilos: 1 % (referência 0-2 %)"        ← certo
+       "a 550 basofilos 1: 9 %"                   ← ERRADO
+
    Se não houver valores numéricos identificáveis, retorne arrays vazios.
 
 Formato obrigatório final (JSON puro):

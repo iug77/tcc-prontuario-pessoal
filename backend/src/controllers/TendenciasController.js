@@ -31,7 +31,27 @@ function parsearValor(texto) {
   );
   if (!match) return null;
 
-  const nome = match[1].trim();
+  // Remove trailing isolated number from name (artifact: "eosinofilos 5" → "eosinofilos")
+  const nome = match[1].trim().replace(/\s+\d{1,3}$/, '').trim();
+
+  // Reject names that are clearly not clinical parameter names
+  const padroesInvalidos = [
+    /^a\s+\d/i,                   // "a 2", "a 450 segmentados 49"
+    /maior\s+que/i,               // "maior que"
+    /menor\s+que/i,               // "menor que"
+    /maior\s+ou\s+igual/i,        // "maior ou igual a"
+    /menor\s+ou\s+igual/i,        // "menor ou igual a"
+    /inferior\s+a\b/i,            // "inferior a"
+    /superior\s+a\b/i,            // "superior a"
+    /acima\s+de/i,                // "acima de", "resultados de etgf acima de"
+    /abaixo\s+de/i,               // "abaixo de"
+    /\bresultados?\s+de\b/i,      // "resultados de ..."
+    /\ba\s+menor\b/i,             // "a menor que"
+    /[a-f0-9]{16,}/i,             // hash hexadecimal
+  ];
+  if (padroesInvalidos.some(p => p.test(nome))) return null;
+  if (!nome || nome.length > 60) return null;
+
   const valor = parseFloat(match[2].replace(',', '.'));
   const unidade = match[3].replace(/[()]/g, '').trim();
   const refMin = match[4] != null ? parseFloat(match[4].replace(',', '.')) : null;
