@@ -272,8 +272,8 @@ export default function TendenciasClinicas() {
     const texto = busca.trim().toLowerCase();
     if (!texto) return dados.parametros;
     return Object.fromEntries(
-      Object.entries(dados.parametros).filter(([nome]) =>
-        nome.toLowerCase().includes(texto)
+      Object.entries(dados.parametros).filter(([chave, info]) =>
+        (info.nome || chave).toLowerCase().includes(texto)
       )
     );
   }, [dados, busca]);
@@ -444,8 +444,8 @@ export default function TendenciasClinicas() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {Object.entries(parametrosFiltrados).map(([nome, info]) => (
-                  <CardParametro key={nome} nome={nome} info={info} />
+                {Object.entries(parametrosFiltrados).map(([chave, info]) => (
+                  <CardParametro key={chave} nome={info.nome || chave} info={info} />
                 ))}
               </div>
             )}

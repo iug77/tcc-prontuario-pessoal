@@ -4,6 +4,16 @@ const jwt = require('jsonwebtoken');
 const prisma = new PrismaClient();
 const JWT_SECRET = 'segredo_do_tcc_123';
 
+// Normaliza nome para uso como chave de agrupamento (case + acento insensível)
+function normalizarChave(nome) {
+  return nome
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 // Parses strings like:
 //   "Glicose: 150 mg/dL (referência 70-100 mg/dL)"
 //   "[ALTO] Hemoglobina: 11.5 g/dL (referência 12-16 g/dL)."
@@ -26,8 +36,9 @@ function parsearValor(texto) {
     .trim();
 
   // "NOME: VALOR UNIDADE (referência MIN-MAX UNIDADE)"
+  // Nota: unidade usa [^\s(,]+ para aceitar "/" (g/dL, mg/dL, /mm³, U/L, etc.)
   const match = limpo.match(
-    /^(.+?):\s*([\d.,]+)\s*([^\s(,/]+)(?:\s*\(referência\s*([\d.,]+)\s*[-–]\s*([\d.,]+))?/i
+    /^(.+?):\s*([\d.,]+)\s*([^\s(,]+)(?:\s*\(referência\s*([\d.,]+)\s*[-–]\s*([\d.,]+))?/i
   );
   if (!match) return null;
 
@@ -146,15 +157,15 @@ const obterTendencias = async (req, res) => {
       const statusMap = {};
       for (const item of foraReferencia) {
         const p = parsearValor(item);
-        if (p?.status) statusMap[p.nome.toLowerCase()] = p.status;
+        if (p?.status) statusMap[normalizarChave(p.nome)] = p.status;
       }
 
       for (const item of valoresImportantes) {
         const p = parsearValor(item);
         if (!p) continue;
 
-        const chaveNorm = p.nome.toLowerCase();
-        let status = statusMap[chaveNorm] || p.status;
+        const chave = normalizarChave(p.nome);
+        let status = statusMap[chave] || p.status;
 
         // Fallback: determine from ref range if no explicit status
         if (!status && p.refMin != null && p.refMax != null) {
@@ -164,18 +175,25 @@ const obterTendencias = async (req, res) => {
         }
         status = status || 'NORMAL';
 
-        if (!parametros[p.nome]) {
-          parametros[p.nome] = {
+        if (!parametros[chave]) {
+          // Guarda nome display com primeira letra maiúscula
+          const nomeDisplay = p.nome.charAt(0).toUpperCase() + p.nome.slice(1);
+          parametros[chave] = {
+            nome: nomeDisplay,
             unidade: p.unidade,
             refMin: p.refMin,
             refMax: p.refMax,
             pontos: [],
           };
         } else {
-          // Fill in reference range if not yet captured
-          if (parametros[p.nome].refMin == null && p.refMin != null) {
-            parametros[p.nome].refMin = p.refMin;
-            parametros[p.nome].refMax = p.refMax;
+          // Preenche faixa de referência se ainda não capturada
+          if (parametros[chave].refMin == null && p.refMin != null) {
+            parametros[chave].refMin = p.refMin;
+            parametros[chave].refMax = p.refMax;
+          }
+          // Atualiza unidade se a atual for truncada (sem "/")
+          if (!parametros[chave].unidade.includes('/') && p.unidade.includes('/')) {
+            parametros[chave].unidade = p.unidade;
           }
         }
 
@@ -183,7 +201,7 @@ const obterTendencias = async (req, res) => {
           ? new Date(reg.data).toISOString().split('T')[0]
           : null;
 
-        parametros[p.nome].pontos.push({
+        parametros[chave].pontos.push({
           data: dataFormatada,
           valor: p.valor,
           status,
