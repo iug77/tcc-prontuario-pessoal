@@ -93,43 +93,47 @@ export default function MeusRegistros() {
       registro.insightRegistro?.resumo || ''
     ].join(' ').toLowerCase();
 
-    const regras = [
-      // Imagem / Funcional
-      [/ecocardiograma/,                           'Ecocardiograma'],
-      [/eletrocardiograma|ecg\b/,                  'ECG'],
-      [/holter/,                                   'Holter'],
-      [/mamografia/,                               'Mamografia'],
-      [/densitometria|dexa/,                       'Densitometria'],
-      [/ressonância|ressonancia|rmn?\b/,           'Ressonância'],
-      [/tomografia|tac\b|tc\b/,                    'Tomografia'],
-      [/raio.?x|radiografi/,                       'Raio-X'],
-      [/ultrassom|ultrasonografia|ecografi/,       'Ultrassom'],
-      [/endoscopia/,                               'Endoscopia'],
-      [/colonoscopia/,                             'Colonoscopia'],
-      [/espirometria/,                             'Espirometria'],
-      // Bioquímica específica
-      [/hemoglobina glicada|hba1c|glicada/,        'Glicemia'],
-      [/glicose|glicemia/,                         'Glicemia'],
-      [/colesterol|lipidograma|triglicerí|hdl|ldl/,'Lipídios'],
-      [/tsh|t[34]\s|tireóide|tireoide/,            'Tireoide'],
-      [/ureia|creatinina|tfg|ácido úrico|renal/,   'Função Renal'],
-      [/tgo|tgp|ast\b|alt\b|bilirrubina|hepáti|hepati|ggt\b/,'Função Hepática'],
-      [/ferritina|ferro\s|transferrina|tibc/,      'Ferro'],
-      [/vitamina\s+d/,                             'Vitamina D'],
-      [/vitamina\s+b12|cobalamina/,                'Vitamina B12'],
-      [/psa\b/,                                    'PSA'],
-      [/pcr\b|proteína c reativa/,                 'PCR'],
-      // Hematologia geral
-      [/hemograma|hematol|leucócit|eritrócit|plaqueta|sangue/,'Sangue'],
-      // Urina
-      [/urina|eas\b/,                              'Urina'],
+    // Marcadores laboratoriais têm prioridade máxima: se qualquer analito
+    // de sangue aparecer no texto (mesmo que "ressonância" também apareça),
+    // é um exame de sangue.
+    const marcadoresSangue = [
+      /hemograma/, /hematócrito|hematocrito/,
+      /eritrócit|eritrocit/, /leucócit|leucocit/, /plaqueta/,
+      /\bhemoglobina\b/,
+      /glicose|glicemia/, /insulina/, /hba1c|glicada/,
+      /colesterol/, /triglicerí|trigliceri/, /\bhdl\b|\bldl\b|\bvldl\b/, /lipidograma/,
+      /\btsh\b/, /\bt3\b|\bt4\b/, /tireóide|tireoide/,
+      /\bureia\b/, /\bcreatinina\b/, /ácido úrico|acido urico/, /\btfg\b/,
+      /\btgo\b|\btgp\b|\bast\b|\balt\b/, /bilirrubina/, /\bggt\b/, /fosfatase alcalina/,
+      /ferritina/, /transferrina/, /\btibc\b/, /\bferro\s/,
+      /vitamina\s+[bd]/, /\bpsa\b/, /\bpcr\b/,
+      /albumina/, /proteína total|proteina total/,
+      /\bsódio\b|\bsodio\b/, /potássio|potassio/, /\bcálcio\b|\bcalcio\b/,
+      /hemocultura/, /sorologia/, /hemossedimentação|hemossedimentacao/,
     ];
 
-    for (const [regex, label] of regras) {
-      if (regex.test(texto)) return label;
+    if (marcadoresSangue.some(r => r.test(texto))) return 'Sangue';
+
+    // Exames de imagem e funcionais (só chegam aqui se nenhum marcador de sangue bateu)
+    if (/ecocardiograma/.test(texto))                        return 'Ecocardiograma';
+    if (/eletrocardiograma|\becg\b/.test(texto))             return 'ECG';
+    if (/holter/.test(texto))                                return 'Holter';
+    if (/mamografia/.test(texto))                            return 'Mamografia';
+    if (/densitometria|dexa/.test(texto))                    return 'Densitometria';
+    if (/ressonância|ressonancia/.test(texto))               return 'Ressonância';
+    if (/tomografia/.test(texto))                            return 'Tomografia';
+    if (/raio.?x|radiografi/.test(texto))                    return 'Raio-X';
+    if (/ultrassom|ultrasonografia|ecografi/.test(texto))    return 'Ultrassom';
+    if (/endoscopia/.test(texto))                            return 'Endoscopia';
+    if (/colonoscopia/.test(texto))                          return 'Colonoscopia';
+    if (/espirometria/.test(texto))                          return 'Espirometria';
+    if (/\burina\b|\beas\b/.test(texto))                     return 'Urina';
+
+    // Fallback: orgao preenchido pelo paciente (capitaliza primeira letra)
+    if (registro.orgao) {
+      const o = registro.orgao.trim();
+      return o.charAt(0).toUpperCase() + o.slice(1);
     }
-    // Fallback: usa o orgao capitalizado se preenchido
-    if (registro.orgao) return registro.orgao;
     return null;
   };
 
