@@ -2,6 +2,7 @@ import { API_URL } from '../config';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
+import { derivarSubtipo } from '../utils/derivarSubtipo';
 
 export default function DashboardProfissional() {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ export default function DashboardProfissional() {
   const [profissional, setProfissional] = useState(null);
   const [pacientes, setPacientes] = useState([]);
   const [pagina, setPagina] = useState(1);
+  const [pendentes, setPendentes] = useState([]);
+  const [mostrarTodosPendentes, setMostrarTodosPendentes] = useState(false);
 
   const TAMANHO_PAGINA = 10;
 
@@ -25,9 +28,10 @@ export default function DashboardProfissional() {
         setCarregando(true);
         setErro('');
 
-        const respostaDashboard = await fetch(`${API_URL}/api/profissionais/dashboard`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const [respostaDashboard, respostaPendentes] = await Promise.all([
+          fetch(`${API_URL}/api/profissionais/dashboard`,           { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_URL}/api/profissionais/pareceres/pendentes`, { headers: { Authorization: `Bearer ${token}` } }),
+        ]);
 
         const dadosDashboard = await respostaDashboard.json();
 
@@ -45,6 +49,11 @@ export default function DashboardProfissional() {
 
         setProfissional(dadosDashboard.profissional);
         setPacientes(dadosDashboard.pacientes || []);
+
+        if (respostaPendentes.ok) {
+          const dadosPendentes = await respostaPendentes.json();
+          setPendentes(dadosPendentes.pendentes || []);
+        }
       } catch (error) {
         console.error('Erro ao carregar dashboard profissional:', error);
         setErro('Erro de conexão com o servidor.');
@@ -130,13 +139,17 @@ export default function DashboardProfissional() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 w-full md:w-auto">
-              <div className="bg-surface rounded-xl p-4 min-w-[140px]">
+            <div className="grid grid-cols-3 gap-3 w-full md:w-auto">
+              <div className="bg-surface rounded-xl p-4 min-w-[120px]">
                 <p className="text-xs text-muted font-semibold">Pacientes Ativos</p>
                 <p className="text-2xl font-extrabold tracking-tight mt-1">{totalPacientesAtivos}</p>
               </div>
-              <div className="bg-surface rounded-xl p-4 min-w-[140px]">
-                <p className="text-xs text-muted font-semibold">Expirando em 7 dias</p>
+              <div className="bg-surface rounded-xl p-4 min-w-[120px]" style={pendentes.length > 0 ? { borderLeft: '3px solid rgb(var(--warning, 234 179 8))' } : {}}>
+                <p className="text-xs text-muted font-semibold">Pareceres Pendentes</p>
+                <p className="text-2xl font-extrabold tracking-tight mt-1" style={pendentes.length > 0 ? { color: 'rgb(180 120 0)' } : {}}>{pendentes.length}</p>
+              </div>
+              <div className="bg-surface rounded-xl p-4 min-w-[120px]">
+                <p className="text-xs text-muted font-semibold">Expirando em 7d</p>
                 <p className="text-2xl font-extrabold tracking-tight mt-1">{permissoesExpirandoEmBreve.length}</p>
               </div>
             </div>
@@ -144,6 +157,67 @@ export default function DashboardProfissional() {
         </section>
 
         {erro && <div className="alert alert-danger">{erro}</div>}
+
+        {/* Fila de Pareceres Pendentes */}
+        {!carregando && pendentes.length > 0 && (() => {
+          const visiveis = mostrarTodosPendentes ? pendentes : pendentes.slice(0, 5);
+          const formatarTipo = (tipo) => ({ exame: 'Exame', receita: 'Receita', medicamento: 'Medicamento', alergia: 'Alergia', doenca: 'Doença', cirurgia: 'Cirurgia' })[tipo] || tipo;
+          return (
+            <section className="card overflow-hidden">
+              <div className="card-header">
+                <div>
+                  <h2 className="text-base font-extrabold tracking-tight">Fila de Pareceres Pendentes</h2>
+                  <p className="text-sm text-muted">Registros de pacientes autorizados aguardando seu parecer.</p>
+                </div>
+                <span className="tag" style={{ background: 'rgba(180,120,0,0.12)', color: 'rgb(160,100,0)' }}>
+                  {pendentes.length} pendente{pendentes.length > 1 ? 's' : ''}
+                </span>
+              </div>
+
+              <div className="divide-y divide-[rgb(var(--border))]">
+                {visiveis.map((item) => {
+                  const subtipo = derivarSubtipo(item);
+                  return (
+                    <div key={item.registroId} className="flex items-center gap-4 px-6 py-4 hover:bg-[rgba(var(--text),0.02)] transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-sm">{item.pacienteNome}</span>
+                          <span className="text-muted text-xs">·</span>
+                          <span className="text-sm text-muted">
+                            {formatarTipo(item.tipo)}{subtipo ? ` · ${subtipo}` : ''}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted mt-0.5">
+                          {new Date(item.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                          {item.orgao && ` · ${item.orgao}`}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => navigate('/visualizador', { state: { pacienteId: item.pacienteId, registroId: item.registroId } })}
+                        className="btn btn-sm btn-primary flex-shrink-0"
+                      >
+                        Adicionar Parecer
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {pendentes.length > 5 && (
+                <div className="bg-surface-2 p-4 border-t border-[rgb(var(--border))] text-center">
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setMostrarTodosPendentes(v => !v)}
+                  >
+                    {mostrarTodosPendentes ? 'Mostrar menos' : `Ver todos os ${pendentes.length} pendentes`}
+                  </button>
+                </div>
+              )}
+            </section>
+          );
+        })()}
 
         {/* Lista de Pacientes */}
         <div className="card overflow-hidden">

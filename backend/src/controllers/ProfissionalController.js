@@ -1015,6 +1015,71 @@ exports.dashboardProfissional = async (req, res) => {
   }
 };
 
+exports.listarParecesPendentes = async (req, res) => {
+  try {
+    const token = obterTokenBearer(req.headers.authorization || '');
+    if (!token) return res.status(401).json({ erro: 'Token não informado.' });
+
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch {
+      return res.status(401).json({ erro: 'Token inválido ou expirado.' });
+    }
+    if (payload.tipo !== 'profissional') {
+      return res.status(403).json({ erro: 'Acesso permitido apenas para profissionais.' });
+    }
+
+    const agora = new Date();
+
+    // Busca permissões ativas deste profissional
+    const permissoes = await prisma.permissao.findMany({
+      where: {
+        profissionalId: payload.id,
+        ativo: true,
+        OR: [{ expiraEm: null }, { expiraEm: { gt: agora } }]
+      },
+      select: { pacienteId: true, paciente: { select: { nome: true } } }
+    });
+
+    if (permissoes.length === 0) return res.json({ pendentes: [] });
+
+    const pacienteIds = permissoes.map(p => p.pacienteId);
+    const nomePorId = Object.fromEntries(permissoes.map(p => [p.pacienteId, p.paciente.nome]));
+
+    // Registros sem parecer médico dos pacientes autorizados
+    const registros = await prisma.registro.findMany({
+      where: {
+        pacienteId: { in: pacienteIds },
+        parecerMedico: null
+      },
+      orderBy: { data: 'desc' },
+      take: 30,
+      select: {
+        id: true, tipo: true, data: true, orgao: true,
+        descricaoClinica: true, pacienteId: true,
+        insightRegistro: { select: { resumo: true } }
+      }
+    });
+
+    const pendentes = registros.map(r => ({
+      registroId: r.id,
+      pacienteId: r.pacienteId,
+      pacienteNome: nomePorId[r.pacienteId] || 'Paciente',
+      tipo: r.tipo,
+      data: r.data,
+      orgao: r.orgao,
+      descricaoClinica: r.descricaoClinica,
+      insightRegistro: r.insightRegistro
+    }));
+
+    return res.json({ pendentes });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno ao listar pareceres pendentes.' });
+  }
+};
+
 exports.listarRegistrosPaciente = async (req, res) => {
   try {
     const token = obterTokenBearer(req.headers.authorization || '');
