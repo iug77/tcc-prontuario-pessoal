@@ -230,6 +230,37 @@ export function gerarPdfProntuario({ paciente, registros }) {
       }
     }
 
+    // Parecer médico
+    if (reg.parecerMedico) {
+      verificarPagina(10);
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...[34, 120, 60]);
+      doc.text('▸ PARECER MÉDICO', MARGIN, y);
+      y += 5;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...CORES.texto);
+      doc.setFontSize(8.5);
+      const linhasParecer = quebrarTexto(doc, reg.parecerMedico, CONTENT_W);
+      linhasParecer.forEach(l => { verificarPagina(5); doc.text(l, MARGIN, y); y += 4.5; });
+      y += 1;
+
+      // Assinatura do profissional
+      if (reg.parecerProfissional?.nome) {
+        verificarPagina(6);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(...CORES.muted);
+        let assinatura = `Assinado por ${reg.parecerProfissional.nome}`;
+        if (reg.parecerProfissional.crm) assinatura += ` · CRM: ${reg.parecerProfissional.crm}`;
+        if (reg.parecerProfissional.especialidade) assinatura += ` · ${reg.parecerProfissional.especialidade}`;
+        if (reg.dataParecer) assinatura += ` · ${new Date(reg.dataParecer).toLocaleDateString('pt-BR')}`;
+        doc.text(assinatura, MARGIN, y);
+        y += 5;
+      }
+    }
+
     // Separador entre registros
     verificarPagina(6);
     doc.setDrawColor(...CORES.borda);

@@ -643,6 +643,8 @@ exports.exportarProntuario = async (req, res) => {
         orderBy: { data: 'asc' },
         select: {
           id: true, tipo: true, data: true, orgao: true, descricaoClinica: true,
+          parecerMedico: true, dataParecer: true,
+          parecerProfissional: { select: { nome: true, crm: true, especialidade: true } },
           insightRegistro: {
             select: { resumo: true, conclusao: true, foraReferenciaJson: true, alertasJson: true, recomendacoesJson: true }
           }
