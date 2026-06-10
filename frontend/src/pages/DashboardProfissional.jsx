@@ -14,6 +14,7 @@ export default function DashboardProfissional() {
   const [pagina, setPagina] = useState(1);
   const [pendentes, setPendentes] = useState([]);
   const [mostrarTodosPendentes, setMostrarTodosPendentes] = useState(false);
+  const [pacientesAlerta, setPacientesAlerta] = useState([]);
 
   const TAMANHO_PAGINA = 10;
 
@@ -28,9 +29,10 @@ export default function DashboardProfissional() {
         setCarregando(true);
         setErro('');
 
-        const [respostaDashboard, respostaPendentes] = await Promise.all([
+        const [respostaDashboard, respostaPendentes, respostaAlertas] = await Promise.all([
           fetch(`${API_URL}/api/profissionais/dashboard`,           { headers: { Authorization: `Bearer ${token}` } }),
           fetch(`${API_URL}/api/profissionais/pareceres/pendentes`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_URL}/api/profissionais/pacientes/alertas`,   { headers: { Authorization: `Bearer ${token}` } }),
         ]);
 
         const dadosDashboard = await respostaDashboard.json();
@@ -53,6 +55,10 @@ export default function DashboardProfissional() {
         if (respostaPendentes.ok) {
           const dadosPendentes = await respostaPendentes.json();
           setPendentes(dadosPendentes.pendentes || []);
+        }
+        if (respostaAlertas.ok) {
+          const dadosAlertas = await respostaAlertas.json();
+          setPacientesAlerta(dadosAlertas.pacientes || []);
         }
       } catch (error) {
         console.error('Erro ao carregar dashboard profissional:', error);
@@ -218,6 +224,79 @@ export default function DashboardProfissional() {
             </section>
           );
         })()}
+
+        {/* Pacientes com Alertas Ativos */}
+        {!carregando && pacientesAlerta.length > 0 && (
+          <section className="card overflow-hidden">
+            <div className="card-header">
+              <div>
+                <h2 className="text-base font-extrabold tracking-tight">Pacientes com Alertas Ativos</h2>
+                <p className="text-sm text-muted">Parâmetros fora da referência nos exames mais recentes.</p>
+              </div>
+              <span className="tag tag-danger">{pacientesAlerta.length} paciente{pacientesAlerta.length > 1 ? 's' : ''}</span>
+            </div>
+
+            <div className="divide-y divide-[rgb(var(--border))]">
+              {pacientesAlerta.map((pac) => {
+                const corPorStatus = (status) => {
+                  if (status === 'CRITICO') return { bg: 'rgba(var(--danger),0.12)', text: 'rgb(var(--danger))' };
+                  if (status === 'ALTO')    return { bg: 'rgba(220,80,20,0.10)',     text: 'rgb(200,70,10)' };
+                  if (status === 'BAIXO')   return { bg: 'rgba(30,100,220,0.10)',    text: 'rgb(30,100,200)' };
+                  return                          { bg: 'rgba(var(--primary),0.10)', text: 'rgb(var(--primary))' };
+                };
+
+                return (
+                  <div key={pac.pacienteId} className="px-6 py-4 hover:bg-[rgba(var(--text),0.02)] transition-colors">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <button
+                            type="button"
+                            onClick={() => navigate('/visualizador', { state: { pacienteId: pac.pacienteId } })}
+                            className="font-extrabold tracking-tight hover:text-[rgb(var(--primary))] hover:underline transition-colors"
+                          >
+                            {pac.pacienteNome}
+                          </button>
+                          <span className="text-xs text-muted">
+                            · {pac.totalAlertas} alerta{pac.totalAlertas > 1 ? 's' : ''}
+                            · último exame {new Date(pac.ultimoExame).toLocaleDateString('pt-BR')}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {pac.alertas.slice(0, 6).map((alerta, i) => {
+                            const cor = corPorStatus(alerta.status);
+                            return (
+                              <span
+                                key={i}
+                                className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-medium"
+                                style={{ background: cor.bg, color: cor.text }}
+                              >
+                                <span className="font-bold">{alerta.status}</span>
+                                <span>·</span>
+                                <span>{alerta.nome}</span>
+                                <span className="opacity-70">{alerta.valor} {alerta.unidade}</span>
+                              </span>
+                            );
+                          })}
+                          {pac.alertas.length > 6 && (
+                            <span className="text-xs text-muted self-center">+{pac.alertas.length - 6} mais</span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => navigate('/visualizador', { state: { pacienteId: pac.pacienteId } })}
+                        className="btn btn-sm btn-outline flex-shrink-0"
+                      >
+                        Ver Prontuário
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Lista de Pacientes */}
         <div className="card overflow-hidden">

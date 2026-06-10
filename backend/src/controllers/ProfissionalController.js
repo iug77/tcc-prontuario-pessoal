@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const Tesseract = require('tesseract.js');
 const { createCanvas } = require('@napi-rs/canvas');
+const { parsearAlerta } = require('../utils/parsearAlerta');
 
 const prisma = new PrismaClient();
 const JWT_SECRET = 'segredo_do_tcc_123';
@@ -1077,6 +1078,90 @@ exports.listarParecesPendentes = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ erro: 'Erro interno ao listar pareceres pendentes.' });
+  }
+};
+
+exports.listarPacientesComAlertas = async (req, res) => {
+  try {
+    const token = obterTokenBearer(req.headers.authorization || '');
+    if (!token) return res.status(401).json({ erro: 'Token não informado.' });
+
+    let payload;
+    try { payload = jwt.verify(token, JWT_SECRET); } catch {
+      return res.status(401).json({ erro: 'Token inválido ou expirado.' });
+    }
+    if (payload.tipo !== 'profissional') {
+      return res.status(403).json({ erro: 'Acesso permitido apenas para profissionais.' });
+    }
+
+    const agora = new Date();
+
+    const permissoes = await prisma.permissao.findMany({
+      where: {
+        profissionalId: payload.id,
+        ativo: true,
+        OR: [{ expiraEm: null }, { expiraEm: { gt: agora } }]
+      },
+      select: { pacienteId: true, paciente: { select: { nome: true } } }
+    });
+
+    if (permissoes.length === 0) return res.json({ pacientes: [] });
+
+    const pacienteIds = permissoes.map(p => p.pacienteId);
+    const nomePorId = Object.fromEntries(permissoes.map(p => [p.pacienteId, p.paciente.nome]));
+
+    // Busca os registros mais recentes com insights de cada paciente
+    const registros = await prisma.registro.findMany({
+      where: {
+        pacienteId: { in: pacienteIds },
+        insightRegistro: { foraReferenciaJson: { not: '[]' } }
+      },
+      orderBy: { data: 'desc' },
+      select: {
+        id: true, tipo: true, data: true, pacienteId: true,
+        insightRegistro: { select: { foraReferenciaJson: true } }
+      }
+    });
+
+    // Agrupa alertas por paciente (deduplicado por nome de parâmetro — mantém o mais recente)
+    const porPaciente = {};
+    for (const reg of registros) {
+      const pid = reg.pacienteId;
+      if (!porPaciente[pid]) porPaciente[pid] = { nomesSeen: new Set(), alertas: [], ultimoExame: reg.data };
+
+      let itens = [];
+      try { itens = JSON.parse(reg.insightRegistro?.foraReferenciaJson || '[]') ?? []; } catch { continue; }
+
+      for (const item of itens) {
+        const parsed = parsearAlerta(item);
+        if (!parsed) continue;
+        const chave = parsed.nome.toLowerCase();
+        if (porPaciente[pid].nomesSeen.has(chave)) continue;
+        porPaciente[pid].nomesSeen.add(chave);
+        porPaciente[pid].alertas.push({ ...parsed, registroId: reg.id, registroData: reg.data });
+      }
+    }
+
+    // Monta resultado final — só pacientes que têm ao menos 1 alerta
+    const pacientes = Object.entries(porPaciente)
+      .filter(([, v]) => v.alertas.length > 0)
+      .map(([pacienteId, v]) => ({
+        pacienteId,
+        pacienteNome: nomePorId[pacienteId] || 'Paciente',
+        alertas: v.alertas,
+        totalAlertas: v.alertas.length,
+        ultimoExame: v.ultimoExame,
+      }))
+      .sort((a, b) => {
+        // Prioriza críticos, depois por total de alertas
+        const peso = (p) => p.alertas.some(a => a.status === 'CRITICO') ? 2 : p.alertas.some(a => a.status === 'ALTO') ? 1 : 0;
+        return peso(b) - peso(a) || b.totalAlertas - a.totalAlertas;
+      });
+
+    return res.json({ pacientes });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno ao listar pacientes com alertas.' });
   }
 };
 

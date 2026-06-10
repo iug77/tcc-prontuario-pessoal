@@ -35,6 +35,7 @@ router.post('/profissionais', ProfissionalController.cadastrarProfissional);
 router.post('/profissionais/login', ProfissionalController.loginProfissional);
 router.get('/profissionais/dashboard', ProfissionalController.dashboardProfissional);
 router.get('/profissionais/pareceres/pendentes', ProfissionalController.listarParecesPendentes);
+router.get('/profissionais/pacientes/alertas', ProfissionalController.listarPacientesComAlertas);
 router.get('/profissionais/perfil', ProfissionalController.obterPerfilProfissional);
 router.put('/profissionais/perfil', ProfissionalController.atualizarPerfilProfissional);
 router.get('/profissionais/:id/perfil', ProfissionalController.obterPerfilPublicoProfissional);
