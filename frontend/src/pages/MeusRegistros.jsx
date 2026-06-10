@@ -224,6 +224,13 @@ export default function MeusRegistros() {
             >
               ↓ Download
             </button>
+            <button
+              onClick={() => navigate(`/editar-registro/${registroSelecionado.id}`)}
+              disabled={!registroSelecionado}
+              className="btn btn-outline"
+            >
+              Editar
+            </button>
             {confirmandoRemocao ? (
               <>
                 <span className="text-sm text-muted">Tem certeza?</span>

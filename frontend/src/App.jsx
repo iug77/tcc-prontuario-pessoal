@@ -31,6 +31,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import MeuPerfil from './pages/MeuPerfil';
 import PerfilProfissional from './pages/PerfilProfissional';
 import PerfilPaciente from './pages/PerfilPaciente';
+import EditarRegistro from './pages/EditarRegistro';
 
 const TendenciasClinicas = lazy(() => import('./pages/TendenciasClinicas'));
 
@@ -206,6 +207,14 @@ function App() {
                   <TendenciasClinicas />
                 </Suspense>
               </ErrorBoundary>
+            </PrivateRoute>
+          )}
+        />
+        <Route
+          path="/editar-registro/:registroId"
+          element={(
+            <PrivateRoute tiposPermitidos={['paciente']}>
+              <EditarRegistro />
             </PrivateRoute>
           )}
         />

@@ -17,6 +17,7 @@ router.post('/pacientes/registros', PacienteController.criarRegistro);
 router.post('/pacientes/registros/:registroId/insight/gerar', PacienteController.gerarInsightRegistroPaciente);
 router.get('/pacientes/registros', PacienteController.listarRegistrosPaciente);
 router.get('/pacientes/registros/:registroId', PacienteController.obterRegistroPaciente);
+router.put('/pacientes/registros/:registroId', PacienteController.atualizarRegistro);
 router.delete('/pacientes/registros/:registroId', PacienteController.deletarRegistro);
 router.post('/pacientes/permissoes', PacienteController.concederPermissaoPaciente);
 router.get('/pacientes/permissoes', PacienteController.listarPermissoesPaciente);

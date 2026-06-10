@@ -628,6 +628,71 @@ exports.obterRegistroPaciente = async (req, res) => {
   }
 };
 
+exports.atualizarRegistro = async (req, res) => {
+  try {
+    const payload = autenticarPaciente(req, res);
+    if (!payload) return;
+
+    const { registroId } = req.params;
+    const { tipo, data, orgao, descricaoClinica, arquivoBase64, nomeArquivo, mimeType } = req.body;
+
+    const registro = await prisma.registro.findFirst({
+      where: { id: registroId, pacienteId: payload.id },
+      select: { id: true }
+    });
+    if (!registro) return res.status(404).json({ erro: 'Registro não encontrado.' });
+
+    const tiposValidos = ['exame', 'receita', 'medicamento', 'alergia', 'doenca', 'cirurgia'];
+    if (tipo && !tiposValidos.includes(tipo.toLowerCase())) {
+      return res.status(400).json({ erro: 'Tipo de registro inválido.' });
+    }
+
+    if (arquivoBase64) {
+      const tamanhoMB = Buffer.byteLength(arquivoBase64, 'utf8') / (1024 * 1024);
+      if (tamanhoMB > 5) return res.status(400).json({ erro: 'Arquivo excede o tamanho máximo de 5MB.' });
+    }
+
+    const dados = {};
+    if (tipo) dados.tipo = tipo.toLowerCase();
+    if (data) dados.data = new Date(data);
+    if (orgao !== undefined) dados.orgao = orgao || null;
+    if (descricaoClinica !== undefined) dados.descricaoClinica = descricaoClinica || null;
+    if (arquivoBase64 && nomeArquivo && mimeType) {
+      const nomeSeguro = nomeArquivo.replace(/[^a-zA-Z0-9._-]/g, '_');
+      dados.arquivoUrl = `data:${mimeType};name=${encodeURIComponent(nomeSeguro)};base64,${arquivoBase64}`;
+    }
+
+    const atualizado = await prisma.registro.update({
+      where: { id: registroId },
+      data: dados
+    });
+
+    await prisma.logAuditoria.create({
+      data: {
+        usuarioId: payload.id,
+        acao: 'REGISTRO_ATUALIZADO',
+        documentoId: registroId,
+        status: 'Sucesso'
+      }
+    });
+
+    return res.status(200).json({
+      mensagem: 'Registro atualizado com sucesso.',
+      registro: {
+        id: atualizado.id,
+        tipo: atualizado.tipo,
+        data: atualizado.data,
+        orgao: atualizado.orgao,
+        descricaoClinica: atualizado.descricaoClinica,
+        pacienteId: atualizado.pacienteId
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno ao atualizar registro.' });
+  }
+};
+
 exports.deletarRegistro = async (req, res) => {
   try {
     const payload = autenticarPaciente(req, res);
