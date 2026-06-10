@@ -85,6 +85,54 @@ export default function MeusRegistros() {
     return tipos[tipo] || tipo;
   };
 
+  const derivarSubtipo = (registro) => {
+    if (registro.tipo !== 'exame') return null;
+    const texto = [
+      registro.orgao || '',
+      registro.descricaoClinica || '',
+      registro.insightRegistro?.resumo || ''
+    ].join(' ').toLowerCase();
+
+    const regras = [
+      // Imagem / Funcional
+      [/ecocardiograma/,                           'Ecocardiograma'],
+      [/eletrocardiograma|ecg\b/,                  'ECG'],
+      [/holter/,                                   'Holter'],
+      [/mamografia/,                               'Mamografia'],
+      [/densitometria|dexa/,                       'Densitometria'],
+      [/ressonância|ressonancia|rmn?\b/,           'Ressonância'],
+      [/tomografia|tac\b|tc\b/,                    'Tomografia'],
+      [/raio.?x|radiografi/,                       'Raio-X'],
+      [/ultrassom|ultrasonografia|ecografi/,       'Ultrassom'],
+      [/endoscopia/,                               'Endoscopia'],
+      [/colonoscopia/,                             'Colonoscopia'],
+      [/espirometria/,                             'Espirometria'],
+      // Bioquímica específica
+      [/hemoglobina glicada|hba1c|glicada/,        'Glicemia'],
+      [/glicose|glicemia/,                         'Glicemia'],
+      [/colesterol|lipidograma|triglicerí|hdl|ldl/,'Lipídios'],
+      [/tsh|t[34]\s|tireóide|tireoide/,            'Tireoide'],
+      [/ureia|creatinina|tfg|ácido úrico|renal/,   'Função Renal'],
+      [/tgo|tgp|ast\b|alt\b|bilirrubina|hepáti|hepati|ggt\b/,'Função Hepática'],
+      [/ferritina|ferro\s|transferrina|tibc/,      'Ferro'],
+      [/vitamina\s+d/,                             'Vitamina D'],
+      [/vitamina\s+b12|cobalamina/,                'Vitamina B12'],
+      [/psa\b/,                                    'PSA'],
+      [/pcr\b|proteína c reativa/,                 'PCR'],
+      // Hematologia geral
+      [/hemograma|hematol|leucócit|eritrócit|plaqueta|sangue/,'Sangue'],
+      // Urina
+      [/urina|eas\b/,                              'Urina'],
+    ];
+
+    for (const [regex, label] of regras) {
+      if (regex.test(texto)) return label;
+    }
+    // Fallback: usa o orgao capitalizado se preenchido
+    if (registro.orgao) return registro.orgao;
+    return null;
+  };
+
   const extrairMetaArquivo = (dataUrl = '') => {
     const match = dataUrl.match(/^data:([^;]+)(?:;name=([^;]+))?;base64,/i);
     if (!match) return { mimeType: 'application/octet-stream', nomeArquivo: 'documento.bin' };
@@ -235,7 +283,12 @@ export default function MeusRegistros() {
                       onClick={() => carregarDetalhes(registro.id)}
                       className={`list-item font-semibold ${registroSelecionado?.id === registro.id ? 'list-item-active' : ''}`}
                     >
-                      <p className="text-sm">{formatarTipo(registro.tipo)}</p>
+                      <p className="text-sm">
+                        {formatarTipo(registro.tipo)}
+                        {derivarSubtipo(registro) && (
+                          <span className="font-normal text-muted"> · {derivarSubtipo(registro)}</span>
+                        )}
+                      </p>
                       <p className="text-xs text-muted mt-1">{formatarData(registro.data)}</p>
                     </button>
                   ))}
