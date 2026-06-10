@@ -35,23 +35,33 @@ function parsearValor(texto) {
   const nomeRaw = match[1].trim();
 
   const padroesInvalidos = [
+    // Padrões de comparação / referência (nunca são nomes de parâmetros)
     /^a\s+\d/i,                    // "a 2", "a 6", "a 450 segmentados 49"
     /^at[eé]\b/i,                  // "até", "ate"
     /\bmaior\s+que\b/i,            // "maior que"
     /\bmenor\s+que\b/i,            // "menor que"
     /\bmaior\s+ou\s+igual\b/i,     // "maior ou igual a"
     /\bmenor\s+ou\s+igual\b/i,     // "menor ou igual a"
-    /\bou\s+igual\b/i,             // "ou igual a" (frase truncada)
+    /\bou\s+igual\b/i,             // "ou igual a"
     /\binferior\s+a\b/i,           // "inferior a"
     /\bsuperior\s+a\b/i,           // "superior a"
-    /\bacima\s+de\b/i,             // "acima de", "valores acima de", "ns mulheres crianças acima de"
+    /\bacima\s+de\b/i,             // "acima de", "valores acima de"
     /\babaixo\s+de\b/i,            // "abaixo de"
     /\bresultados?\s+de\b/i,       // "resultados de etgf acima de"
     /\ba\s+menor\b/i,              // "a menor que"
     /\bsão\s+liberados\b/i,        // "m2 são liberados como maior ou igual a"
-    /\b(crm|crf|coren|crefito)\b/i,// carimbo de médico/farmacêutico
+    // Palavras genéricas de relatório (nunca fazem parte do nome do parâmetro)
+    /\bresultado\b/i,              // "resultado", "sangue resultado", "soro resultado"
+    /\bhoras?\s+de\s+jejum\b/i,    // "sangue horas de jejum" (condição, não parâmetro)
+    /\blaudo\b/i,                  // "laudo de ..."
+    /\bexame\b/i,                  // "s exame 170-66397-5222"
+    /\bpaciente\b/i,               // nome do paciente capturado
+    // Carimbo de médico/farmacêutico
+    /\b(crm|crf|coren|crefito)\b/i,
+    // Strings de identificação / artefatos técnicos
     /[a-f0-9]{16,}/i,              // hash hexadecimal
-    /\d+\/\d+/,                    // padrão de data "15/10", "170-66397-5222 15/10/"
+    /\d+\/\d+/,                    // data "15/10" ou número de documento "170/2024"
+    /\b\d{4,}\b/,                  // número com 4+ dígitos no meio do nome (nº de protocolo, etc.)
   ];
 
   if (padroesInvalidos.some(p => p.test(nomeRaw))) return null;
