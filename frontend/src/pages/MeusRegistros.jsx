@@ -12,6 +12,8 @@ export default function MeusRegistros() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('todos');
+  const [confirmandoRemocao, setConfirmandoRemocao] = useState(false);
+  const [removendo, setRemovendo] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -111,6 +113,30 @@ export default function MeusRegistros() {
     return { mimeType, nomeArquivo };
   };
 
+  const handleRemover = async () => {
+    if (!registroSelecionado) return;
+    setRemovendo(true);
+    try {
+      const token = localStorage.getItem('token');
+      const resposta = await fetch(`${API_URL}/api/pacientes/registros/${registroSelecionado.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (resposta.ok) {
+        setRegistros((prev) => prev.filter((r) => r.id !== registroSelecionado.id));
+        setRegistroSelecionado(null);
+        setConfirmandoRemocao(false);
+      } else {
+        const dados = await resposta.json();
+        setErro(dados.erro || 'Erro ao remover registro.');
+      }
+    } catch {
+      setErro('Erro de conexão ao remover registro.');
+    } finally {
+      setRemovendo(false);
+    }
+  };
+
   const handleDownload = () => {
     if (!registroSelecionado?.arquivoUrl) return;
     const { nomeArquivo } = extrairMetaArquivo(registroSelecionado.arquivoUrl);
@@ -138,13 +164,42 @@ export default function MeusRegistros() {
             <h1 className="page-title">Meus Registros</h1>
             <p className="page-subtitle">Visualize e gerencie seus documentos de saúde</p>
           </div>
-          <button
-            onClick={handleDownload}
-            disabled={!registroSelecionado?.arquivoUrl}
-            className="btn btn-soft"
-          >
-            ↓ Download
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDownload}
+              disabled={!registroSelecionado?.arquivoUrl}
+              className="btn btn-soft"
+            >
+              ↓ Download
+            </button>
+            {confirmandoRemocao ? (
+              <>
+                <span className="text-sm text-muted">Tem certeza?</span>
+                <button
+                  onClick={handleRemover}
+                  disabled={removendo}
+                  className="btn btn-danger"
+                >
+                  {removendo ? 'Removendo...' : 'Confirmar'}
+                </button>
+                <button
+                  onClick={() => setConfirmandoRemocao(false)}
+                  disabled={removendo}
+                  className="btn btn-outline"
+                >
+                  Cancelar
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setConfirmandoRemocao(true)}
+                disabled={!registroSelecionado}
+                className="btn btn-danger"
+              >
+                Remover
+              </button>
+            )}
+          </div>
         </div>
 
         {erro && <div className="alert alert-danger mb-4">{erro}</div>}

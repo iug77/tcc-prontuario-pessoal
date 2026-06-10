@@ -625,6 +625,42 @@ exports.obterRegistroPaciente = async (req, res) => {
   }
 };
 
+exports.deletarRegistro = async (req, res) => {
+  try {
+    const payload = autenticarPaciente(req, res);
+    if (!payload) return;
+
+    const { registroId } = req.params;
+
+    const registro = await prisma.registro.findFirst({
+      where: { id: registroId, pacienteId: payload.id },
+      select: { id: true }
+    });
+
+    if (!registro) {
+      return res.status(404).json({ erro: 'Registro não encontrado.' });
+    }
+
+    // InsightRegistro não tem cascade, precisa deletar antes
+    await prisma.insightRegistro.deleteMany({ where: { registroId } });
+    await prisma.registro.delete({ where: { id: registroId } });
+
+    await prisma.logAuditoria.create({
+      data: {
+        usuarioId: payload.id,
+        acao: 'REGISTRO_REMOVIDO',
+        documentoId: registroId,
+        status: 'Sucesso'
+      }
+    });
+
+    return res.status(200).json({ mensagem: 'Registro removido com sucesso.' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno ao remover registro.' });
+  }
+};
+
 exports.obterPerfilPaciente = async (req, res) => {
   try {
     const payload = autenticarPaciente(req, res);
