@@ -215,7 +215,9 @@ exports.dashboardPaciente = async (req, res) => {
             tipo: true,
             data: true,
             orgao: true,
-            arquivoUrl: true
+            descricaoClinica: true,
+            arquivoUrl: true,
+            insightRegistro: { select: { resumo: true } }
           },
           orderBy: {
             data: 'desc'

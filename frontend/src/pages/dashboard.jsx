@@ -2,6 +2,7 @@ import { API_URL } from '../config';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
+import { derivarSubtipo } from '../utils/derivarSubtipo';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -292,7 +293,12 @@ export default function Dashboard() {
                           </svg>
                         </div>
                         <div>
-                          <p className="font-semibold">{formatarTipoRegistro(registro.tipo)}</p>
+                            <p className="font-semibold">
+                            {formatarTipoRegistro(registro.tipo)}
+                            {derivarSubtipo(registro) && (
+                              <span className="font-normal text-muted"> · {derivarSubtipo(registro)}</span>
+                            )}
+                          </p>
                           <p className="text-xs text-muted">{formatarDataRegistro(registro.data)}</p>
                         </div>
                       </div>
