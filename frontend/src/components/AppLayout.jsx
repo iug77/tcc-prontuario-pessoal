@@ -22,15 +22,17 @@ const icons = {
   menu:    'M3 12h18 M3 6h18 M3 18h18',
   cross:   'M18 6 6 18 M6 6l12 12',
   heart:   'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z',
+  bell:    'M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0',
 };
 
 const NAV_PACIENTE = [
-  { label: 'Dashboard',   path: '/dashboard',       icon: 'home'   },
-  { label: 'Registros',   path: '/meus-registros',  icon: 'file'   },
-  { label: 'Tendências',  path: '/tendencias',       icon: 'chart'  },
-  { label: 'Permissões',  path: '/permissoes',       icon: 'lock'   },
-  { label: 'Mensagens',   path: '/chat',             icon: 'chat',  badge: true },
-  { label: 'Logs LGPD',   path: '/auditoria',        icon: 'shield' },
+  { label: 'Dashboard',      path: '/dashboard',        icon: 'home'   },
+  { label: 'Registros',      path: '/meus-registros',   icon: 'file'   },
+  { label: 'Tendências',     path: '/tendencias',        icon: 'chart'  },
+  { label: 'Permissões',     path: '/permissoes',        icon: 'lock'   },
+  { label: 'Mensagens',      path: '/chat',              icon: 'chat',  badge: true },
+  { label: 'Notificações',   path: '/notificacoes',      icon: 'bell',  notifBadge: true },
+  { label: 'Logs LGPD',      path: '/auditoria',         icon: 'shield' },
 ];
 
 const NAV_PROFISSIONAL = [
@@ -45,6 +47,7 @@ export default function AppLayout({ children, title }) {
   const location    = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [totalMensagens, setTotalMensagens] = useState(0);
+  const [totalNotificacoes, setTotalNotificacoes] = useState(0);
 
   const sessaoRaw = localStorage.getItem('usuario');
   const sessao    = sessaoRaw ? JSON.parse(sessaoRaw) : {};
@@ -75,9 +78,36 @@ export default function AppLayout({ children, title }) {
     return () => clearInterval(id);
   }, []);
 
-  /* Clear badge on chat */
+  /* Poll notificações (somente paciente) */
+  useEffect(() => {
+    if (tipo !== 'paciente') return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const calcularNaoLidas = (lista) => {
+      const vistasEm = new Date(localStorage.getItem('notificacoesVistasEm') || 0);
+      return lista.filter(n => new Date(n.criadoEm) > vistasEm).length;
+    };
+
+    const buscar = async () => {
+      try {
+        const r = await fetch(`${API_URL}/api/pacientes/notificacoes`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const d = await r.json();
+        if (r.ok) setTotalNotificacoes(calcularNaoLidas(d.notificacoes || []));
+      } catch { /* silently ignore */ }
+    };
+
+    buscar();
+    const id = setInterval(buscar, 30000);
+    return () => clearInterval(id);
+  }, [tipo]);
+
+  /* Clear badges on route change */
   useEffect(() => {
     if (location.pathname === '/chat') setTotalMensagens(0);
+    if (location.pathname === '/notificacoes') setTotalNotificacoes(0);
   }, [location.pathname]);
 
   const handleLogout = () => {
@@ -109,6 +139,7 @@ export default function AppLayout({ children, title }) {
         {navItems.map((item) => {
           const active  = isActive(item.path);
           const hasBadge = item.badge && totalMensagens > 0;
+          const hasNotifBadge = item.notifBadge && totalNotificacoes > 0;
           return (
             <button
               key={item.path}
@@ -119,6 +150,7 @@ export default function AppLayout({ children, title }) {
               <Icon d={icons[item.icon]} />
               {item.label}
               {hasBadge && <span className="sidebar-badge">{totalMensagens}</span>}
+              {hasNotifBadge && <span className="sidebar-badge">{totalNotificacoes}</span>}
             </button>
           );
         })}

@@ -968,3 +968,129 @@ exports.gerarInsightRegistroPaciente = async (req, res) => {
     return res.status(500).json({ erro: 'Erro interno ao gerar insight.' });
   }
 };
+
+exports.listarNotificacoes = async (req, res) => {
+  try {
+    const payload = autenticarPaciente(req, res);
+    if (!payload) return;
+
+    const agora = new Date();
+    const notificacoes = [];
+
+    // 1. Pareceres adicionados nos últimos 30 dias
+    const trintaDiasAtras = new Date(agora.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const registrosComParecer = await prisma.registro.findMany({
+      where: {
+        pacienteId: payload.id,
+        parecerMedico: { not: null },
+        dataParecer: { gte: trintaDiasAtras }
+      },
+      select: {
+        id: true,
+        tipo: true,
+        orgao: true,
+        dataRegistro: true,
+        dataParecer: true,
+        parecerProfissional: { select: { nome: true, especialidade: true } }
+      },
+      orderBy: { dataParecer: 'desc' }
+    });
+
+    for (const r of registrosComParecer) {
+      const tipoPt = r.tipo === 'exame' ? 'Exame' : r.tipo === 'consulta' ? 'Consulta' : 'Registro';
+      const nomeMedico = r.parecerProfissional?.nome || 'Um profissional';
+      const dataExame = r.dataRegistro
+        ? new Date(r.dataRegistro).toLocaleDateString('pt-BR')
+        : '';
+      notificacoes.push({
+        id: `parecer_${r.id}`,
+        tipo: 'PARECER_ADICIONADO',
+        titulo: 'Novo parecer médico',
+        descricao: `${nomeMedico} adicionou um parecer ao seu ${tipoPt}${dataExame ? ` de ${dataExame}` : ''}`,
+        criadoEm: r.dataParecer,
+        link: { rota: '/meus-registros', registroId: r.id }
+      });
+    }
+
+    // 2. Acessos de profissionais aos registros nos últimos 14 dias
+    const quatorzeDisAtras = new Date(agora.getTime() - 14 * 24 * 60 * 60 * 1000);
+    const registrosIds = await prisma.registro.findMany({
+      where: { pacienteId: payload.id },
+      select: { id: true }
+    });
+    const idsArr = registrosIds.map(r => r.id);
+
+    if (idsArr.length > 0) {
+      const acessos = await prisma.logAuditoria.findMany({
+        where: {
+          documentoId: { in: idsArr },
+          usuarioId: { not: payload.id },
+          acao: 'REGISTRO_VISUALIZADO',
+          data: { gte: quatorzeDisAtras }
+        },
+        orderBy: { data: 'desc' },
+        take: 30
+      });
+
+      const profissionalIds = [...new Set(acessos.map(a => a.usuarioId))];
+      const profissionais = await prisma.profissional.findMany({
+        where: { id: { in: profissionalIds } },
+        select: { id: true, nome: true, especialidade: true }
+      });
+      const profMap = Object.fromEntries(profissionais.map(p => [p.id, p]));
+
+      const vistosPorDia = new Set();
+      for (const a of acessos) {
+        const chave = `${a.usuarioId}_${new Date(a.data).toDateString()}`;
+        if (vistosPorDia.has(chave)) continue;
+        vistosPorDia.add(chave);
+
+        const prof = profMap[a.usuarioId];
+        const nome = prof?.nome || 'Um profissional';
+        const especialidade = prof?.especialidade ? ` (${prof.especialidade})` : '';
+        notificacoes.push({
+          id: `acesso_${a.id}`,
+          tipo: 'REGISTRO_ACESSADO',
+          titulo: 'Registro visualizado',
+          descricao: `${nome}${especialidade} visualizou seu prontuário`,
+          criadoEm: a.data,
+          link: { rota: '/auditoria' }
+        });
+      }
+    }
+
+    // 3. Permissões expirando nos próximos 7 dias
+    const seteDiasDepois = new Date(agora.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const permissoesExpirando = await prisma.permissao.findMany({
+      where: {
+        pacienteId: payload.id,
+        ativo: true,
+        expiraEm: { gte: agora, lte: seteDiasDepois }
+      },
+      select: {
+        id: true,
+        expiraEm: true,
+        profissional: { select: { nome: true, especialidade: true } }
+      }
+    });
+
+    for (const p of permissoesExpirando) {
+      const diasRestantes = Math.ceil((new Date(p.expiraEm) - agora) / (1000 * 60 * 60 * 24));
+      const nomeProfissional = p.profissional?.nome || 'Profissional';
+      notificacoes.push({
+        id: `permissao_${p.id}`,
+        tipo: 'PERMISSAO_EXPIRANDO',
+        titulo: 'Acesso expira em breve',
+        descricao: `A permissão de ${nomeProfissional} expira em ${diasRestantes} dia${diasRestantes === 1 ? '' : 's'}`,
+        criadoEm: p.expiraEm,
+        link: { rota: '/permissoes' }
+      });
+    }
+
+    notificacoes.sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm));
+    return res.status(200).json({ notificacoes });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno ao buscar notificações.' });
+  }
+};

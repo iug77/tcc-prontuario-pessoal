@@ -32,6 +32,7 @@ import MeuPerfil from './pages/MeuPerfil';
 import PerfilProfissional from './pages/PerfilProfissional';
 import PerfilPaciente from './pages/PerfilPaciente';
 import EditarRegistro from './pages/EditarRegistro';
+import Notificacoes from './pages/Notificacoes';
 
 const TendenciasClinicas = lazy(() => import('./pages/TendenciasClinicas'));
 
@@ -215,6 +216,14 @@ function App() {
           element={(
             <PrivateRoute tiposPermitidos={['paciente']}>
               <EditarRegistro />
+            </PrivateRoute>
+          )}
+        />
+        <Route
+          path="/notificacoes"
+          element={(
+            <PrivateRoute tiposPermitidos={['paciente']}>
+              <Notificacoes />
             </PrivateRoute>
           )}
         />
