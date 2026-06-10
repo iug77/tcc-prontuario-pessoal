@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [acessosAtuais, setAcessosAtuais] = useState([]);
   const [ultimosAcessos, setUltimosAcessos] = useState([]);
   const [filtroRapido, setFiltroRapido] = useState('Todos');
+  const [alertas, setAlertas] = useState([]);
 
   const primeiroNome = (paciente?.nome || '').trim().split(' ')[0] || 'Usuário';
 
@@ -25,21 +26,20 @@ export default function Dashboard() {
         setCarregando(true);
         setErro('');
 
-        const respostaDashboard = await fetch(`${API_URL}/api/pacientes/dashboard`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const [respostaDashboard, respostaAlertas] = await Promise.all([
+          fetch(`${API_URL}/api/pacientes/dashboard`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_URL}/api/pacientes/alertas`,   { headers: { Authorization: `Bearer ${token}` } }),
+        ]);
 
         const dadosDashboard = await respostaDashboard.json();
 
         if (!respostaDashboard.ok) {
           setErro(dadosDashboard.erro || 'Não foi possível carregar o dashboard.');
-
           if (respostaDashboard.status === 401 || respostaDashboard.status === 403) {
             localStorage.removeItem('token');
             localStorage.removeItem('usuario');
             navigate('/');
           }
-
           return;
         }
 
@@ -48,6 +48,11 @@ export default function Dashboard() {
         setTotalPermissoesAtivas(dadosDashboard.totalPermissoesAtivas || 0);
         setAcessosAtuais(Array.isArray(dadosDashboard.acessosAtuais) ? dadosDashboard.acessosAtuais : []);
         setUltimosAcessos(Array.isArray(dadosDashboard.ultimosAcessos) ? dadosDashboard.ultimosAcessos : []);
+
+        if (respostaAlertas.ok) {
+          const dadosAlertas = await respostaAlertas.json();
+          setAlertas(dadosAlertas.alertas || []);
+        }
       } catch (error) {
         console.error('Erro ao carregar dashboard do paciente:', error);
         setErro('Erro de conexão com o servidor.');
@@ -149,6 +154,66 @@ export default function Dashboard() {
 
           {erro && <div className="alert alert-danger mt-4">{erro}</div>}
         </section>
+
+        {/* Alertas Ativos */}
+        {!carregando && alertas.length > 0 && (
+          <section className="card p-6 mb-6" style={{ borderLeft: '4px solid rgb(var(--danger))' }}>
+            <div className="flex items-center gap-3 mb-4">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: 'rgb(var(--danger))', flexShrink: 0 }}>
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                <path d="M12 9v4M12 17h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <h2 className="font-extrabold tracking-tight">Alertas Ativos</h2>
+              <span className="tag tag-danger">{alertas.length} parâmetro{alertas.length > 1 ? 's' : ''} fora da referência</span>
+            </div>
+
+            <div className="space-y-2">
+              {alertas.map((alerta, i) => {
+                const isCritico = alerta.status === 'CRITICO';
+                const isAlto    = alerta.status === 'ALTO';
+                const isBaixo   = alerta.status === 'BAIXO';
+                const corStatus = isCritico
+                  ? { bg: 'rgba(var(--danger),0.12)', text: 'rgb(var(--danger))', label: 'CRÍTICO' }
+                  : isAlto
+                  ? { bg: 'rgba(220,80,20,0.10)',     text: 'rgb(200,70,10)',      label: 'ALTO'    }
+                  : isBaixo
+                  ? { bg: 'rgba(30,100,220,0.10)',     text: 'rgb(30,100,200)',     label: 'BAIXO'   }
+                  : { bg: 'rgba(var(--primary),0.10)', text: 'rgb(var(--primary))', label: alerta.status };
+
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => navigate('/meus-registros', { state: { registroId: alerta.registroId } })}
+                    className="w-full text-left rounded-xl px-4 py-3 flex items-center gap-3 transition-colors hover:bg-[rgba(var(--text),0.04)] border border-[rgb(var(--border))]"
+                  >
+                    <span
+                      className="text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+                      style={{ background: corStatus.bg, color: corStatus.text }}
+                    >
+                      {corStatus.label}
+                    </span>
+                    <span className="font-semibold text-sm flex-1 truncate">{alerta.nome}</span>
+                    <span className="text-sm tabular-nums">
+                      <strong>{alerta.valor}</strong> {alerta.unidade}
+                    </span>
+                    {alerta.refMin != null && alerta.refMax != null && (
+                      <span className="text-xs text-muted hidden sm:block flex-shrink-0">
+                        ref: {alerta.refMin}–{alerta.refMax}
+                      </span>
+                    )}
+                    <span className="text-xs text-muted flex-shrink-0 hidden md:block">
+                      {new Date(alerta.registroData).toLocaleDateString('pt-BR')}
+                    </span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-muted flex-shrink-0">
+                      <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Conteúdo principal */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
