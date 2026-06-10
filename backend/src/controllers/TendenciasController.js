@@ -34,41 +34,53 @@ function parsearValor(texto) {
   // Apply all filters to the RAW name (before any transformation)
   const nomeRaw = match[1].trim();
 
+  // Validação positiva: nomes de parâmetros clínicos só contêm letras (incluindo acentuadas),
+  // dígitos, espaços, hífens e pontos — qualquer outro caractere é artefato de OCR/parsing.
+  if (!/^[\p{L}\d\s\-.]+$/u.test(nomeRaw)) return null;
+
   const padroesInvalidos = [
-    // Padrões de comparação / referência (nunca são nomes de parâmetros)
-    /^a\s+\d/i,                    // "a 2", "a 6", "a 450 segmentados 49"
-    /^at[eé]\b/i,                  // "até", "ate"
-    /\bmaior\s+que\b/i,            // "maior que"
-    /\bmenor\s+que\b/i,            // "menor que"
-    /\bmaior\s+ou\s+igual\b/i,     // "maior ou igual a"
-    /\bmenor\s+ou\s+igual\b/i,     // "menor ou igual a"
-    /\bou\s+igual\b/i,             // "ou igual a"
-    /\binferior\s+a\b/i,           // "inferior a"
-    /\bsuperior\s+a\b/i,           // "superior a"
-    /\bacima\s+de\b/i,             // "acima de", "valores acima de"
-    /\babaixo\s+de\b/i,            // "abaixo de"
-    /\bresultados?\s+de\b/i,       // "resultados de etgf acima de"
-    /\ba\s+menor\b/i,              // "a menor que"
-    /\bsão\s+liberados\b/i,        // "m2 são liberados como maior ou igual a"
-    // Palavras genéricas de relatório (nunca fazem parte do nome do parâmetro)
-    /\bresultado\b/i,              // "resultado", "sangue resultado", "soro resultado"
-    /\bhoras?\s+de\s+jejum\b/i,    // "sangue horas de jejum" (condição, não parâmetro)
-    /\blaudo\b/i,                  // "laudo de ..."
-    /\bexame\b/i,                  // "s exame 170-66397-5222"
-    /\bpaciente\b/i,               // nome do paciente capturado
-    // Carimbo de médico/farmacêutico
+    // Padrões de comparação / faixa de referência (jamais são nomes de parâmetros)
+    /^a\s+\d/i,
+    /^at[eé]\b/i,
+    /\bmaior\s+que\b/i,
+    /\bmenor\s+que\b/i,
+    /\bmaior\s+ou\s+igual\b/i,
+    /\bmenor\s+ou\s+igual\b/i,
+    /\bou\s+igual\b/i,
+    /\binferior\s+a\b/i,
+    /\bsuperior\s+a\b/i,
+    /\bacima\s+de\b/i,
+    /\babaixo\s+de\b/i,
+    /\bresultados?\s+de\b/i,
+    /\ba\s+menor\b/i,
+    /\bsão\s+liberados\b/i,
+    // Palavras genéricas de relatório
+    /\bresultado\b/i,
+    /\bhoras?\s+de\s+jejum\b/i,
+    /\blaudo\b/i,
+    /\bexame\b/i,
+    /\bpaciente\b/i,
+    // Identificação de profissional de saúde
     /\b(crm|crf|coren|crefito)\b/i,
-    // Strings de identificação / artefatos técnicos
-    /[a-f0-9]{16,}/i,              // hash hexadecimal
-    /\d+\/\d+/,                    // data "15/10" ou número de documento "170/2024"
-    /\b\d{4,}\b/,                  // número com 4+ dígitos no meio do nome (nº de protocolo, etc.)
+    // Artefatos técnicos: hash hex, número de protocolo
+    /[a-f0-9]{16,}/i,
+    /\b\d{4,}\b/,
   ];
 
   if (padroesInvalidos.some(p => p.test(nomeRaw))) return null;
   if (nomeRaw.length > 60) return null;
 
-  // Strip trailing isolated number (artifact: "eosinofilos 5" → "eosinofilos", "monocitos 9" → "monocitos")
-  const nome = nomeRaw.replace(/\s+\d{1,3}$/, '').trim();
+  // Normalização 1: remove prefixo de material biológico
+  //   "soro capacidade total de ligação do ferro" → "capacidade total de ligação do ferro"
+  let nomeNorm = nomeRaw.replace(/^(soro|sangue|plasma|urina|líquido|liquido)\s+/i, '').trim();
+
+  // Normalização 2: remove prefixo de unidade colado ao nome
+  //   "mm3 vmp" → "vmp"  (mm³ é unidade de contagem, não faz parte do nome)
+  nomeNorm = nomeNorm.replace(/^mm\d+\s+/i, '').trim();
+
+  // Normalização 3: remove número isolado no final
+  //   "eosinofilos 5" → "eosinofilos"
+  const nome = nomeNorm.replace(/\s+\d{1,3}$/, '').trim();
   if (!nome || nome.length < 2) return null;
 
   const valor = parseFloat(match[2].replace(',', '.'));
