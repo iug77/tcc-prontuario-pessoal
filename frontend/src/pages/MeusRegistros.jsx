@@ -2,6 +2,7 @@ import { API_URL } from '../config';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
+import { gerarPdfProntuario } from '../utils/gerarPdfProntuario';
 
 export default function MeusRegistros() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function MeusRegistros() {
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [confirmandoRemocao, setConfirmandoRemocao] = useState(false);
   const [removendo, setRemovendo] = useState(false);
+  const [exportando, setExportando] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -165,6 +167,23 @@ export default function MeusRegistros() {
     return { mimeType, nomeArquivo };
   };
 
+  const handleExportarPdf = async () => {
+    setExportando(true);
+    try {
+      const token = localStorage.getItem('token');
+      const resposta = await fetch(`${API_URL}/api/pacientes/prontuario/exportar`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const dados = await resposta.json();
+      if (!resposta.ok) { setErro(dados.erro || 'Erro ao exportar prontuário.'); return; }
+      gerarPdfProntuario(dados);
+    } catch {
+      setErro('Erro de conexão ao exportar prontuário.');
+    } finally {
+      setExportando(false);
+    }
+  };
+
   const handleRemover = async () => {
     if (!registroSelecionado) return;
     setRemovendo(true);
@@ -217,6 +236,13 @@ export default function MeusRegistros() {
             <p className="page-subtitle">Visualize e gerencie seus documentos de saúde</p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleExportarPdf}
+              disabled={exportando || registros.length === 0}
+              className="btn btn-primary"
+            >
+              {exportando ? 'Gerando...' : '↓ Exportar PDF'}
+            </button>
             <button
               onClick={handleDownload}
               disabled={!registroSelecionado?.arquivoUrl}

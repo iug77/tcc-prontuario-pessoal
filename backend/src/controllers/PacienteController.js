@@ -628,6 +628,41 @@ exports.obterRegistroPaciente = async (req, res) => {
   }
 };
 
+exports.exportarProntuario = async (req, res) => {
+  try {
+    const payload = autenticarPaciente(req, res);
+    if (!payload) return;
+
+    const [paciente, registros] = await Promise.all([
+      prisma.paciente.findUnique({
+        where: { id: payload.id },
+        select: { nome: true, email: true, telefone: true, dataNascimento: true, tipoSanguineo: true, alergias: true, bio: true }
+      }),
+      prisma.registro.findMany({
+        where: { pacienteId: payload.id },
+        orderBy: { data: 'asc' },
+        select: {
+          id: true, tipo: true, data: true, orgao: true, descricaoClinica: true,
+          insightRegistro: {
+            select: { resumo: true, conclusao: true, foraReferenciaJson: true, alertasJson: true, recomendacoesJson: true }
+          }
+        }
+      })
+    ]);
+
+    if (!paciente) return res.status(404).json({ erro: 'Paciente não encontrado.' });
+
+    await prisma.logAuditoria.create({
+      data: { usuarioId: payload.id, acao: 'PRONTUARIO_EXPORTADO', status: 'Sucesso' }
+    });
+
+    return res.status(200).json({ paciente, registros });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno ao exportar prontuário.' });
+  }
+};
+
 exports.atualizarRegistro = async (req, res) => {
   try {
     const payload = autenticarPaciente(req, res);

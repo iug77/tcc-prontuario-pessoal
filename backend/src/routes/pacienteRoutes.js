@@ -13,6 +13,7 @@ router.post('/pacientes', PacienteController.cadastrarPaciente);
 // Nova Rota de Login
 router.post('/pacientes/login', PacienteController.loginPaciente);
 router.get('/pacientes/dashboard', PacienteController.dashboardPaciente);
+router.get('/pacientes/prontuario/exportar', PacienteController.exportarProntuario);
 router.post('/pacientes/registros', PacienteController.criarRegistro);
 router.post('/pacientes/registros/:registroId/insight/gerar', PacienteController.gerarInsightRegistroPaciente);
 router.get('/pacientes/registros', PacienteController.listarRegistrosPaciente);
