@@ -26,13 +26,12 @@ const icons = {
 };
 
 const NAV_PACIENTE = [
-  { label: 'Dashboard',      path: '/dashboard',        icon: 'home'   },
-  { label: 'Registros',      path: '/meus-registros',   icon: 'file'   },
-  { label: 'Tendências',     path: '/tendencias',        icon: 'chart'  },
-  { label: 'Permissões',     path: '/permissoes',        icon: 'lock'   },
-  { label: 'Mensagens',      path: '/chat',              icon: 'chat',  badge: true },
-  { label: 'Notificações',   path: '/notificacoes',      icon: 'bell',  notifBadge: true },
-  { label: 'Logs LGPD',      path: '/auditoria',         icon: 'shield' },
+  { label: 'Dashboard',   path: '/dashboard',       icon: 'home'   },
+  { label: 'Registros',   path: '/meus-registros',  icon: 'file'   },
+  { label: 'Tendências',  path: '/tendencias',       icon: 'chart'  },
+  { label: 'Permissões',  path: '/permissoes',       icon: 'lock'   },
+  { label: 'Mensagens',   path: '/chat',             icon: 'chat',  badge: true },
+  { label: 'Logs LGPD',   path: '/auditoria',        icon: 'shield' },
 ];
 
 const NAV_PROFISSIONAL = [
@@ -137,9 +136,8 @@ export default function AppLayout({ children, title }) {
       <div className="sidebar-section">
         <div className="sidebar-section-label">Menu</div>
         {navItems.map((item) => {
-          const active  = isActive(item.path);
+          const active   = isActive(item.path);
           const hasBadge = item.badge && totalMensagens > 0;
-          const hasNotifBadge = item.notifBadge && totalNotificacoes > 0;
           return (
             <button
               key={item.path}
@@ -150,7 +148,6 @@ export default function AppLayout({ children, title }) {
               <Icon d={icons[item.icon]} />
               {item.label}
               {hasBadge && <span className="sidebar-badge">{totalMensagens}</span>}
-              {hasNotifBadge && <span className="sidebar-badge">{totalNotificacoes}</span>}
             </button>
           );
         })}
@@ -231,7 +228,68 @@ export default function AppLayout({ children, title }) {
             </svg>
           </button>
           <span className="mobile-topbar-title">Prontuário</span>
+          {tipo === 'paciente' && (
+            <button
+              type="button"
+              onClick={() => navigate('/notificacoes')}
+              aria-label="Notificações"
+              style={{
+                position: 'relative', background: 'none', border: 'none',
+                cursor: 'pointer', padding: 6, color: '#94a3b8',
+                display: 'flex', alignItems: 'center', marginLeft: 'auto'
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0"
+                  stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {totalNotificacoes > 0 && (
+                <span style={{
+                  position: 'absolute', top: 2, right: 2,
+                  background: '#7c3aed', color: '#fff',
+                  borderRadius: '50%', fontSize: 10, fontWeight: 700,
+                  width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  lineHeight: 1
+                }}>
+                  {totalNotificacoes > 9 ? '9+' : totalNotificacoes}
+                </span>
+              )}
+            </button>
+          )}
         </div>
+
+        {/* Bell button — top-right corner, desktop only */}
+        {tipo === 'paciente' && (
+          <button
+            type="button"
+            onClick={() => navigate('/notificacoes')}
+            aria-label="Notificações"
+            style={{
+              position: 'fixed', top: 16, right: 20, zIndex: 100,
+              background: totalNotificacoes > 0 ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.05)',
+              border: totalNotificacoes > 0 ? '1px solid rgba(124,58,237,0.4)' : '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 10, cursor: 'pointer', padding: '7px 9px',
+              color: totalNotificacoes > 0 ? '#a78bfa' : '#94a3b8',
+              display: 'flex', alignItems: 'center', gap: 6,
+              transition: 'all 0.15s'
+            }}
+            className="notif-bell-desktop"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0"
+                stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            {totalNotificacoes > 0 && (
+              <span style={{
+                background: '#7c3aed', color: '#fff',
+                borderRadius: 20, fontSize: 11, fontWeight: 700,
+                padding: '1px 6px', lineHeight: '16px'
+              }}>
+                {totalNotificacoes > 9 ? '9+' : totalNotificacoes}
+              </span>
+            )}
+          </button>
+        )}
 
         {/* Page content */}
         {children}

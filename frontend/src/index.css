@@ -383,6 +383,10 @@
     .page-wrapper {
       padding: 16px;
     }
+
+    .notif-bell-desktop {
+      display: none !important;
+    }
   }
 
   /* ─── Legacy page wrapper (for login, admin) ─────── */

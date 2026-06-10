@@ -989,7 +989,7 @@ exports.listarNotificacoes = async (req, res) => {
         id: true,
         tipo: true,
         orgao: true,
-        dataRegistro: true,
+        data: true,
         dataParecer: true,
         parecerProfissional: { select: { nome: true, especialidade: true } }
       },
@@ -999,8 +999,8 @@ exports.listarNotificacoes = async (req, res) => {
     for (const r of registrosComParecer) {
       const tipoPt = r.tipo === 'exame' ? 'Exame' : r.tipo === 'consulta' ? 'Consulta' : 'Registro';
       const nomeMedico = r.parecerProfissional?.nome || 'Um profissional';
-      const dataExame = r.dataRegistro
-        ? new Date(r.dataRegistro).toLocaleDateString('pt-BR')
+      const dataExame = r.data
+        ? new Date(r.data).toLocaleDateString('pt-BR')
         : '';
       notificacoes.push({
         id: `parecer_${r.id}`,
