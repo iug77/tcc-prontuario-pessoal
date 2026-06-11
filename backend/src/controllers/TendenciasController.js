@@ -6,7 +6,7 @@ const JWT_SECRET = 'segredo_do_tcc_123';
 
 // Normaliza nome para uso como chave de agrupamento (case + acento insensível)
 function normalizarChave(nome) {
-  return nome
+  return String(nome)
     .toLowerCase()
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
@@ -150,63 +150,73 @@ const obterTendencias = async (req, res) => {
     for (const reg of registros) {
       if (!reg.insightRegistro) continue;
 
-      const valoresImportantes = parsearJson(reg.insightRegistro.valoresImportantesJson);
-      const foraReferencia = parsearJson(reg.insightRegistro.foraReferenciaJson);
-
-      // Build status map from foraReferenciaJson (these have [ALTO]/[BAIXO] tags)
-      const statusMap = {};
-      for (const item of foraReferencia) {
-        const p = parsearValor(item);
-        if (p?.status) statusMap[normalizarChave(p.nome)] = p.status;
-      }
-
-      for (const item of valoresImportantes) {
-        const p = parsearValor(item);
-        if (!p) continue;
-
-        const chave = normalizarChave(p.nome);
-        let status = statusMap[chave] || p.status;
-
-        // Fallback: determine from ref range if no explicit status
-        if (!status && p.refMin != null && p.refMax != null) {
-          if (p.valor > p.refMax) status = 'ALTO';
-          else if (p.valor < p.refMin) status = 'BAIXO';
-          else status = 'NORMAL';
-        }
-        status = status || 'NORMAL';
-
-        if (!parametros[chave]) {
-          // Guarda nome display com primeira letra maiúscula
-          const nomeDisplay = p.nome.charAt(0).toUpperCase() + p.nome.slice(1);
-          parametros[chave] = {
-            nome: nomeDisplay,
-            unidade: p.unidade,
-            refMin: p.refMin,
-            refMax: p.refMax,
-            pontos: [],
-          };
-        } else {
-          // Preenche faixa de referência se ainda não capturada
-          if (parametros[chave].refMin == null && p.refMin != null) {
-            parametros[chave].refMin = p.refMin;
-            parametros[chave].refMax = p.refMax;
-          }
-          // Atualiza unidade se a atual for truncada (sem "/")
-          if (!parametros[chave].unidade.includes('/') && p.unidade.includes('/')) {
-            parametros[chave].unidade = p.unidade;
-          }
-        }
+      try {
+        const valoresImportantes = parsearJson(reg.insightRegistro.valoresImportantesJson);
+        const foraReferencia = parsearJson(reg.insightRegistro.foraReferenciaJson);
 
         const dataFormatada = reg.data
           ? new Date(reg.data).toISOString().split('T')[0]
           : null;
 
-        parametros[chave].pontos.push({
-          data: dataFormatada,
-          valor: p.valor,
-          status,
-          tipo: reg.tipo,
-        });
+        // Build status map from foraReferenciaJson (these have [ALTO]/[BAIXO] tags)
+        const statusMap = {};
+        for (const item of foraReferencia) {
+          try {
+            const p = parsearValor(item);
+            if (p?.status) statusMap[normalizarChave(p.nome)] = p.status;
+          } catch { /* skip malformed item */ }
+        }
+
+        for (const item of valoresImportantes) {
+          try {
+            const p = parsearValor(item);
+            if (!p) continue;
+
+            const chave = normalizarChave(p.nome);
+            let status = statusMap[chave] || p.status;
+
+            // Fallback: determine from ref range if no explicit status
+            if (!status && p.refMin != null && p.refMax != null) {
+              if (p.valor > p.refMax) status = 'ALTO';
+              else if (p.valor < p.refMin) status = 'BAIXO';
+              else status = 'NORMAL';
+            }
+            status = status || 'NORMAL';
+
+            const unidade = typeof p.unidade === 'string' ? p.unidade : '';
+
+            if (!parametros[chave]) {
+              const nomeDisplay = p.nome.charAt(0).toUpperCase() + p.nome.slice(1);
+              parametros[chave] = {
+                nome: nomeDisplay,
+                unidade,
+                refMin: p.refMin,
+                refMax: p.refMax,
+                pontos: [],
+              };
+            } else {
+              // Preenche faixa de referência se ainda não capturada
+              if (parametros[chave].refMin == null && p.refMin != null) {
+                parametros[chave].refMin = p.refMin;
+                parametros[chave].refMax = p.refMax;
+              }
+              // Atualiza unidade se a atual for truncada (sem "/")
+              const unidadeAtual = typeof parametros[chave].unidade === 'string' ? parametros[chave].unidade : '';
+              if (!unidadeAtual.includes('/') && unidade.includes('/')) {
+                parametros[chave].unidade = unidade;
+              }
+            }
+
+            parametros[chave].pontos.push({
+              data: dataFormatada,
+              valor: p.valor,
+              status,
+              tipo: reg.tipo,
+            });
+          } catch { /* skip malformed item */ }
+        }
+      } catch (err) {
+        console.error('[TENDENCIAS] Erro ao processar registro', reg.id, err.message);
       }
     }
 
