@@ -2,6 +2,7 @@ import { API_URL } from '../config';
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
+import { derivarSubtipo } from '../utils/derivarSubtipo';
 
 export default function Visualizador() {
   const navigate = useNavigate();
@@ -342,20 +343,38 @@ export default function Visualizador() {
                 <div className="text-sm text-muted">Nenhum registro encontrado.</div>
               ) : (
                 <div className="space-y-2">
-                  {registros.map((registro) => (
-                    <button
-                      key={registro.id}
-                      onClick={() => carregarRegistroDetalhes(registro.id)}
-                      className={`w-full text-left rounded-xl p-3 border font-semibold transition-colors ${
-                        registroSelecionado?.id === registro.id
-                          ? 'bg-surface border-l-4 border-l-[rgb(var(--primary))] border-[rgb(var(--border))]'
-                          : 'bg-surface-2 border-[rgb(var(--border))] hover:bg-surface'
-                      }`}
-                    >
-                      <p className="text-sm">{formatarTipo(registro.tipo)}</p>
-                      <p className="text-xs text-muted mt-1">{formatarData(registro.data)}</p>
-                    </button>
-                  ))}
+                  {registros.map((registro) => {
+                    const ativo = registroSelecionado?.id === registro.id;
+                    const subtipo = derivarSubtipo(registro);
+                    return (
+                      <button
+                        key={registro.id}
+                        type="button"
+                        onClick={() => carregarRegistroDetalhes(registro.id)}
+                        className={`w-full text-left rounded-xl p-3 border transition-colors flex items-start gap-2 group ${
+                          ativo
+                            ? 'bg-surface border-l-4 border-l-[rgb(var(--primary))] border-[rgb(var(--border))]'
+                            : 'bg-surface-2 border-[rgb(var(--border))] hover:bg-surface'
+                        }`}
+                      >
+                        <div className="mt-0.5 text-muted flex-shrink-0">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 3h6a2 2 0 0 1 2 2v16H7V5a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                            <path d="M9 7h6M9 11h6M9 15h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                          </svg>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold truncate">
+                            {formatarTipo(registro.tipo)}
+                            {subtipo && (
+                              <span className="font-normal text-muted"> · {subtipo}</span>
+                            )}
+                          </p>
+                          <p className="text-xs text-muted mt-0.5">{formatarData(registro.data)}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>

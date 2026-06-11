@@ -1225,7 +1225,9 @@ exports.listarRegistrosPaciente = async (req, res) => {
         id: true,
         tipo: true,
         data: true,
-        orgao: true
+        orgao: true,
+        descricaoClinica: true,
+        insightRegistro: { select: { resumo: true } }
       },
       orderBy: {
         data: 'desc'
