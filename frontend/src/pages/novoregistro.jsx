@@ -12,12 +12,11 @@ export default function NovoRegistro() {
   const [descricaoClinica, setDescricaoClinica] = useState('');
   const [arquivo, setArquivo] = useState(null);
   const [nomeArquivo, setNomeArquivo] = useState('');
-  const [mimeArquivo, setMimeArquivo] = useState('');
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
 
-  const handleArquivoSelecionado = async (e) => {
+  const handleArquivoSelecionado = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -33,22 +32,14 @@ export default function NovoRegistro() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64String = reader.result.split(',')[1];
-      setArquivo(base64String);
-      setNomeArquivo(file.name);
-      setMimeArquivo(file.type || 'application/octet-stream');
-      setErro('');
-    };
-    reader.onerror = () => setErro('Erro ao ler o arquivo.');
-    reader.readAsDataURL(file);
+    setArquivo(file);
+    setNomeArquivo(file.name);
+    setErro('');
   };
 
   const handleRemoverArquivo = () => {
     setArquivo(null);
     setNomeArquivo('');
-    setMimeArquivo('');
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -68,21 +59,19 @@ export default function NovoRegistro() {
         return;
       }
 
+      const formData = new FormData();
+      formData.append('tipo', tipo);
+      formData.append('data', data);
+      if (orgao) formData.append('orgao', orgao);
+      if (descricaoClinica) formData.append('descricaoClinica', descricaoClinica);
+      if (arquivo) formData.append('arquivo', arquivo);
+
       const resposta = await fetch(`${API_URL}/api/pacientes/registros`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({
-          tipo,
-          data,
-          orgao: orgao || null,
-          descricaoClinica: descricaoClinica || null,
-          arquivoBase64: arquivo || null,
-          nomeArquivo: nomeArquivo || null,
-          mimeType: mimeArquivo || null
-        })
+        body: formData
       });
 
       const textoResposta = await resposta.text();

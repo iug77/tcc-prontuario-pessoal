@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const router = express.Router();
 const PacienteController = require('../controllers/PacienteController');
 const ProfissionalController = require('../controllers/ProfissionalController');
@@ -6,6 +7,25 @@ const ChatController = require('../controllers/ChatController');
 const AuditoriaController = require('../controllers/AuditoriaController');
 const InsightsIAController = require('../controllers/InsightsIAController');
 const TendenciasController = require('../controllers/TendenciasController');
+
+// Upload de arquivos em memória (encaminhados ao Cloudflare R2). Limite de 5MB.
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+// Aplica o multer e converte erros (ex: arquivo muito grande) em resposta JSON 400.
+const uploadArquivo = (req, res, next) => {
+  upload.single('arquivo')(req, res, (err) => {
+    if (err) {
+      const msg = err.code === 'LIMIT_FILE_SIZE'
+        ? 'Arquivo excede o tamanho máximo de 5MB.'
+        : 'Falha no upload do arquivo.';
+      return res.status(400).json({ erro: msg });
+    }
+    next();
+  });
+};
 
 // Define que quando houver um POST em /pacientes, ele chama a função de cadastro
 router.post('/pacientes', PacienteController.cadastrarPaciente);
@@ -16,11 +36,11 @@ router.get('/pacientes/dashboard', PacienteController.dashboardPaciente);
 router.get('/pacientes/prontuario/exportar', PacienteController.exportarProntuario);
 router.get('/pacientes/alertas', PacienteController.obterAlertas);
 router.get('/pacientes/notificacoes', PacienteController.listarNotificacoes);
-router.post('/pacientes/registros', PacienteController.criarRegistro);
+router.post('/pacientes/registros', uploadArquivo, PacienteController.criarRegistro);
 router.post('/pacientes/registros/:registroId/insight/gerar', PacienteController.gerarInsightRegistroPaciente);
 router.get('/pacientes/registros', PacienteController.listarRegistrosPaciente);
 router.get('/pacientes/registros/:registroId', PacienteController.obterRegistroPaciente);
-router.put('/pacientes/registros/:registroId', PacienteController.atualizarRegistro);
+router.put('/pacientes/registros/:registroId', uploadArquivo, PacienteController.atualizarRegistro);
 router.delete('/pacientes/registros/:registroId', PacienteController.deletarRegistro);
 router.post('/pacientes/permissoes', PacienteController.concederPermissaoPaciente);
 router.get('/pacientes/permissoes', PacienteController.listarPermissoesPaciente);

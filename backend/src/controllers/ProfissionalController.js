@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const Tesseract = require('tesseract.js');
 const { createCanvas } = require('@napi-rs/canvas');
 const { parsearAlerta } = require('../utils/parsearAlerta');
+const { r2Configurado, obterBufferObjeto, gerarUrlAssinada } = require('../lib/r2');
 
 const prisma = new PrismaClient();
 const JWT_SECRET = 'segredo_do_tcc_123';
@@ -51,35 +52,13 @@ const limparTextoClinico = (texto = '') => {
     .trim();
 };
 
-const calcularHashSha256Documento = async (arquivoUrl = '') => {
-  const valor = String(arquivoUrl || '').trim();
-
-  if (!valor) {
-    return null;
-  }
-
+const calcularHashSha256Documento = async (registro) => {
   try {
-    if (valor.startsWith('data:')) {
-      const base64 = valor.split(',')[1] || '';
-      if (!base64) {
-        return null;
-      }
-
-      const buffer = Buffer.from(base64, 'base64');
-      return crypto.createHash('sha256').update(buffer).digest('hex');
+    const conteudo = await obterConteudoArquivoRegistro(registro);
+    if (!conteudo?.buffer) {
+      return null;
     }
-
-    if (/^https?:\/\//i.test(valor) && typeof fetch === 'function') {
-      const resposta = await fetch(valor);
-      if (!resposta.ok) {
-        return null;
-      }
-
-      const arrayBuffer = await resposta.arrayBuffer();
-      return crypto.createHash('sha256').update(Buffer.from(arrayBuffer)).digest('hex');
-    }
-
-    return null;
+    return crypto.createHash('sha256').update(conteudo.buffer).digest('hex');
   } catch {
     return null;
   }
@@ -180,6 +159,33 @@ const extrairConteudoDataUrl = (dataUrl = '') => {
   };
 };
 
+// Obtém o conteúdo do arquivo de um registro a partir do Cloudflare R2.
+// Retorna { mimeType, nomeArquivo, buffer } ou null se não houver arquivo.
+// Mantém compatibilidade com registros legados em base64 (data:...).
+const obterConteudoArquivoRegistro = async (registro) => {
+  const chave = String(registro?.arquivoUrl || '').trim();
+  if (!chave) {
+    return null;
+  }
+
+  if (chave.startsWith('data:')) {
+    return extrairConteudoDataUrl(chave);
+  }
+
+  if (!r2Configurado()) {
+    return null;
+  }
+
+  try {
+    const buffer = await obterBufferObjeto(chave);
+    const mimeType = inferirMimeTypeArquivo(registro.arquivoMime || '', buffer, registro.arquivoNome || '');
+    return { mimeType, nomeArquivo: registro.arquivoNome || '', buffer };
+  } catch (erro) {
+    console.warn('[R2] Falha ao obter arquivo do registro', chave, erro.message);
+    return null;
+  }
+};
+
 const extrairTextoPdfComPdfJs = async (pdfBuffer) => {
   try {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
@@ -212,14 +218,9 @@ const extrairTextoPdfComPdfJs = async (pdfBuffer) => {
   }
 };
 
-const extrairTextoArquivoUpado = async (arquivoUrl) => {
-  if (!arquivoUrl || typeof arquivoUrl !== 'string') {
+const extrairTextoArquivoUpado = async (conteudo) => {
+  if (!conteudo || !conteudo.buffer) {
     return { textoExtraido: '', origem: null, erro: null };
-  }
-
-  const conteudo = extrairConteudoDataUrl(arquivoUrl);
-  if (!conteudo) {
-    return { textoExtraido: '', origem: null, erro: 'Formato de arquivo não suportado para extração.' };
   }
 
   const { mimeType, buffer } = conteudo;
@@ -561,11 +562,13 @@ const gerarInsightRegistroLocal = (registro, textoArquivoExtraido = '', erroExtr
   };
 };
 
-const gerarInsightRegistroComGemini = async (registro, extracaoArquivo = null) => {
+const gerarInsightRegistroComGemini = async (registro, extracaoArquivo = null, conteudoArquivoParam = undefined) => {
   try {
-    const extracao = extracaoArquivo || await extrairTextoArquivoUpado(registro.arquivoUrl);
+    const conteudoArquivo = conteudoArquivoParam === undefined
+      ? await obterConteudoArquivoRegistro(registro)
+      : conteudoArquivoParam;
+    const extracao = extracaoArquivo || await extrairTextoArquivoUpado(conteudoArquivo);
     const textoArquivoExtraido = extracao.textoExtraido || '';
-    const conteudoArquivo = extrairConteudoDataUrl(registro.arquivoUrl || '');
     const mimeTypeArquivo = conteudoArquivo?.mimeType || '';
     const mimeTypesGeminiInlineSuportados = new Set([
       'application/pdf',
@@ -1315,11 +1318,23 @@ exports.obterRegistro = async (req, res) => {
       }
     });
 
-    const hashDocumento = await calcularHashSha256Documento(registro.arquivoUrl);
+    const hashDocumento = await calcularHashSha256Documento(registro);
+
+    // Substitui a chave do R2 por uma URL assinada temporária para exibição.
+    let arquivoUrlAssinada = registro.arquivoUrl;
+    if (registro.arquivoUrl && !String(registro.arquivoUrl).startsWith('data:') && r2Configurado()) {
+      try {
+        arquivoUrlAssinada = await gerarUrlAssinada(registro.arquivoUrl);
+      } catch (erroUrl) {
+        console.warn('[R2] Falha ao gerar URL assinada', registro.arquivoUrl, erroUrl.message);
+        arquivoUrlAssinada = null;
+      }
+    }
 
     return res.status(200).json({
       registro: {
         ...registro,
+        arquivoUrl: arquivoUrlAssinada,
         hashDocumento: hashDocumento,
         hashAlgoritmo: hashDocumento ? 'SHA-256' : null
       }
@@ -1496,6 +1511,8 @@ const validarAcessoRegistroProfissional = async (req, res) => {
         orgao: true,
         descricaoClinica: true,
         arquivoUrl: true,
+        arquivoNome: true,
+        arquivoMime: true,
         pacienteId: true
       }
     });
@@ -1560,7 +1577,8 @@ exports.gerarInsightRegistro = async (req, res) => {
 
     const { payload, registro, registroId } = contexto;
 
-    const extracaoArquivo = await extrairTextoArquivoUpado(registro.arquivoUrl);
+    const conteudoArquivo = await obterConteudoArquivoRegistro(registro);
+    const extracaoArquivo = await extrairTextoArquivoUpado(conteudoArquivo);
 
     const insightLocal = gerarInsightRegistroLocal(
       registro,
@@ -1568,7 +1586,7 @@ exports.gerarInsightRegistro = async (req, res) => {
       extracaoArquivo.erro
     );
 
-    const insightModelo = await gerarInsightRegistroComGemini(registro, extracaoArquivo);
+    const insightModelo = await gerarInsightRegistroComGemini(registro, extracaoArquivo, conteudoArquivo);
     const insightCombinado = combinarInsightComLocal(insightModelo, insightLocal, extracaoArquivo);
 
     const insightPersistido = await salvarInsightRegistro(registroId, insightCombinado);
@@ -1727,11 +1745,12 @@ exports.obterPerfilPublicoProfissional = async (req, res) => {
 // Gemini still receives the file inline via inlineData for native vision processing.
 exports.gerarESalvarInsightRegistro = async (registro, opcoes = {}) => {
   try {
+    const conteudoArquivo = await obterConteudoArquivoRegistro(registro);
     const extracaoArquivo = opcoes.skipOcr
       ? { textoExtraido: registro.descricaoClinica || '', origem: 'texto-clinico', erro: null }
-      : await extrairTextoArquivoUpado(registro.arquivoUrl);
+      : await extrairTextoArquivoUpado(conteudoArquivo);
     const insightLocal = gerarInsightRegistroLocal(registro, extracaoArquivo.textoExtraido, extracaoArquivo.erro);
-    const insightModelo = await gerarInsightRegistroComGemini(registro, extracaoArquivo);
+    const insightModelo = await gerarInsightRegistroComGemini(registro, extracaoArquivo, conteudoArquivo);
     const insightCombinado = combinarInsightComLocal(insightModelo, insightLocal, extracaoArquivo);
     await salvarInsightRegistro(registro.id, insightCombinado);
   } catch (err) {

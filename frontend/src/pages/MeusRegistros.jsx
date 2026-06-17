@@ -88,34 +88,6 @@ export default function MeusRegistros() {
     return tipos[tipo] || tipo;
   };
 
-  const extrairMetaArquivo = (dataUrl = '') => {
-    const match = dataUrl.match(/^data:([^;]+)(?:;name=([^;]+))?;base64,/i);
-    if (!match) return { mimeType: 'application/octet-stream', nomeArquivo: 'documento.bin' };
-
-    let mimeType = match[1] || 'application/octet-stream';
-    const nomeCodificado = match[2] || '';
-    let nomeArquivo = 'documento';
-
-    if (mimeType === 'application/octet-stream') {
-      const base64Conteudo = dataUrl.split(',')[1] || '';
-      if (base64Conteudo.startsWith('JVBERi0')) mimeType = 'application/pdf';
-      else if (base64Conteudo.startsWith('/9j/')) mimeType = 'image/jpeg';
-      else if (base64Conteudo.startsWith('iVBORw0KGgo')) mimeType = 'image/png';
-    }
-
-    if (nomeCodificado) {
-      try { nomeArquivo = decodeURIComponent(nomeCodificado); } catch { nomeArquivo = nomeCodificado; }
-    }
-
-    if (!nomeArquivo.includes('.')) {
-      if (mimeType === 'application/pdf') nomeArquivo = `${nomeArquivo}.pdf`;
-      if (mimeType === 'image/jpeg' || mimeType === 'image/jpg') nomeArquivo = `${nomeArquivo}.jpg`;
-      if (mimeType === 'image/png') nomeArquivo = `${nomeArquivo}.png`;
-    }
-
-    return { mimeType, nomeArquivo };
-  };
-
   const handleExportarPdf = async () => {
     setExportando(true);
     try {
@@ -159,16 +131,12 @@ export default function MeusRegistros() {
 
   const handleDownload = () => {
     if (!registroSelecionado?.arquivoUrl) return;
-    const { nomeArquivo } = extrairMetaArquivo(registroSelecionado.arquivoUrl);
-    const link = document.createElement('a');
-    link.href = registroSelecionado.arquivoUrl;
-    link.download = nomeArquivo || 'documento';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // URL assinada do R2 é cross-origin; abrir em nova aba para o navegador exibir/salvar.
+    window.open(registroSelecionado.arquivoUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const { mimeType, nomeArquivo } = extrairMetaArquivo(registroSelecionado?.arquivoUrl || '');
+  const nomeArquivo = registroSelecionado?.arquivoNome || 'documento';
+  const mimeType = registroSelecionado?.arquivoMime || 'application/octet-stream';
   const ehImagem = mimeType.startsWith('image/');
 
   const registrosFiltrados = useMemo(() => {

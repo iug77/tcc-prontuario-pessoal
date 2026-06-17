@@ -3,9 +3,27 @@ const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const { gerarESalvarInsightRegistro, gerarInsightHeuristicoESalvar } = require('./ProfissionalController');
 const { parsearAlerta } = require('../utils/parsearAlerta');
+const { r2Configurado, uploadObjeto, gerarUrlAssinada, removerObjeto } = require('../lib/r2');
 
 const prisma = new PrismaClient();
 const JWT_SECRET = 'segredo_do_tcc_123';
+
+const MIMES_PERMITIDOS = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+
+// Substitui a chave do objeto R2 por uma URL assinada temporária para exibição no cliente.
+const resolverUrlArquivo = async (registro) => {
+  if (!registro) return registro;
+  const chave = registro.arquivoUrl;
+  if (chave && !String(chave).startsWith('data:')) {
+    try {
+      registro.arquivoUrl = await gerarUrlAssinada(chave);
+    } catch (erro) {
+      console.warn('[R2] Falha ao gerar URL assinada', chave, erro.message);
+      registro.arquivoUrl = null;
+    }
+  }
+  return registro;
+};
 
 const obterTokenBearer = (authHeader = '') => {
   const [tipo, token] = authHeader.split(' ');
@@ -474,11 +492,8 @@ exports.criarRegistro = async (req, res) => {
       return;
     }
 
-    const { tipo, data, orgao, descricaoClinica, arquivoBase64, nomeArquivo, mimeType } = req.body;
-  const mimePermitidos = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
-  const mimeArquivo = mimePermitidos.includes(mimeType) ? mimeType : 'application/octet-stream';
-  const nomeArquivoSeguro = (nomeArquivo || 'documento').replace(/[^a-zA-Z0-9._-]/g, '_');
-
+    const { tipo, data, orgao, descricaoClinica } = req.body;
+    const arquivo = req.file; // multer: { buffer, originalname, mimetype, size }
 
     // Validar campos obrigatórios
     if (!tipo) {
@@ -499,27 +514,37 @@ exports.criarRegistro = async (req, res) => {
       return res.status(400).json({ erro: 'Tipo de registro inválido.' });
     }
 
-    // Validar tamanho do arquivo (máximo 5MB em base64)
-    if (arquivoBase64) {
-      const tamanhoMB = Buffer.byteLength(arquivoBase64, 'utf8') / (1024 * 1024);
-      if (tamanhoMB > 5) {
-        return res.status(400).json({ erro: 'Arquivo excede o tamanho máximo de 5MB.' });
+    // Validar arquivo (se enviado)
+    if (arquivo) {
+      if (!MIMES_PERMITIDOS.includes(arquivo.mimetype)) {
+        return res.status(400).json({ erro: 'Apenas PDF, JPG e PNG são permitidos.' });
+      }
+      if (!r2Configurado()) {
+        return res.status(503).json({ erro: 'Armazenamento de arquivos indisponível no momento.' });
       }
     }
 
-    // Criar o registro
+    // Criar o registro (sem arquivo inicialmente)
     const novoRegistro = await prisma.registro.create({
       data: {
         tipo: tipo.toLowerCase(),
         data: new Date(data),
         orgao: orgao || null,
         descricaoClinica: descricaoClinica || null,
-        arquivoUrl: arquivoBase64
-          ? `data:${mimeArquivo};name=${encodeURIComponent(nomeArquivoSeguro)};base64,${arquivoBase64}`
-          : null,
         pacienteId: payload.id
       }
     });
+
+    // Sobe o arquivo ao R2 usando a própria id do registro como chave do objeto
+    if (arquivo) {
+      const chave = `registros/${novoRegistro.id}`;
+      const nomeSeguro = (arquivo.originalname || 'documento').replace(/[^a-zA-Z0-9._-]/g, '_');
+      await uploadObjeto(chave, arquivo.buffer, arquivo.mimetype);
+      await prisma.registro.update({
+        where: { id: novoRegistro.id },
+        data: { arquivoUrl: chave, arquivoNome: nomeSeguro, arquivoMime: arquivo.mimetype }
+      });
+    }
 
     // Criar log de auditoria
     await prisma.logAuditoria.create({
@@ -624,6 +649,7 @@ exports.obterRegistroPaciente = async (req, res) => {
       }
     });
 
+    await resolverUrlArquivo(registro);
     return res.status(200).json({ registro });
   } catch (error) {
     console.error(error);
@@ -722,7 +748,8 @@ exports.atualizarRegistro = async (req, res) => {
     if (!payload) return;
 
     const { registroId } = req.params;
-    const { tipo, data, orgao, descricaoClinica, arquivoBase64, nomeArquivo, mimeType } = req.body;
+    const { tipo, data, orgao, descricaoClinica } = req.body;
+    const arquivo = req.file;
 
     const registro = await prisma.registro.findFirst({
       where: { id: registroId, pacienteId: payload.id },
@@ -735,9 +762,13 @@ exports.atualizarRegistro = async (req, res) => {
       return res.status(400).json({ erro: 'Tipo de registro inválido.' });
     }
 
-    if (arquivoBase64) {
-      const tamanhoMB = Buffer.byteLength(arquivoBase64, 'utf8') / (1024 * 1024);
-      if (tamanhoMB > 5) return res.status(400).json({ erro: 'Arquivo excede o tamanho máximo de 5MB.' });
+    if (arquivo) {
+      if (!MIMES_PERMITIDOS.includes(arquivo.mimetype)) {
+        return res.status(400).json({ erro: 'Apenas PDF, JPG e PNG são permitidos.' });
+      }
+      if (!r2Configurado()) {
+        return res.status(503).json({ erro: 'Armazenamento de arquivos indisponível no momento.' });
+      }
     }
 
     const dados = {};
@@ -745,9 +776,13 @@ exports.atualizarRegistro = async (req, res) => {
     if (data) dados.data = new Date(data);
     if (orgao !== undefined) dados.orgao = orgao || null;
     if (descricaoClinica !== undefined) dados.descricaoClinica = descricaoClinica || null;
-    if (arquivoBase64 && nomeArquivo && mimeType) {
-      const nomeSeguro = nomeArquivo.replace(/[^a-zA-Z0-9._-]/g, '_');
-      dados.arquivoUrl = `data:${mimeType};name=${encodeURIComponent(nomeSeguro)};base64,${arquivoBase64}`;
+    if (arquivo) {
+      const chave = `registros/${registroId}`;
+      const nomeSeguro = (arquivo.originalname || 'documento').replace(/[^a-zA-Z0-9._-]/g, '_');
+      await uploadObjeto(chave, arquivo.buffer, arquivo.mimetype);
+      dados.arquivoUrl = chave;
+      dados.arquivoNome = nomeSeguro;
+      dados.arquivoMime = arquivo.mimetype;
     }
 
     const atualizado = await prisma.registro.update({
@@ -790,7 +825,7 @@ exports.deletarRegistro = async (req, res) => {
 
     const registro = await prisma.registro.findFirst({
       where: { id: registroId, pacienteId: payload.id },
-      select: { id: true }
+      select: { id: true, arquivoUrl: true }
     });
 
     if (!registro) {
@@ -800,6 +835,11 @@ exports.deletarRegistro = async (req, res) => {
     // InsightRegistro não tem cascade, precisa deletar antes
     await prisma.insightRegistro.deleteMany({ where: { registroId } });
     await prisma.registro.delete({ where: { id: registroId } });
+
+    // Remove o arquivo do R2 (ignora se for legado base64 ou inexistente)
+    if (registro.arquivoUrl && !String(registro.arquivoUrl).startsWith('data:')) {
+      await removerObjeto(registro.arquivoUrl);
+    }
 
     await prisma.logAuditoria.create({
       data: {

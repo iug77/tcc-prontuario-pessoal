@@ -14,7 +14,6 @@ export default function EditarRegistro() {
   const [descricaoClinica, setDescricaoClinica] = useState('');
   const [arquivo, setArquivo] = useState(null);
   const [nomeArquivo, setNomeArquivo] = useState('');
-  const [mimeArquivo, setMimeArquivo] = useState('');
   const [nomeArquivoAtual, setNomeArquivoAtual] = useState('');
 
   const [carregando, setCarregando] = useState(true);
@@ -41,11 +40,7 @@ export default function EditarRegistro() {
         setDescricaoClinica(r.descricaoClinica || '');
 
         if (r.arquivoUrl) {
-          const match = r.arquivoUrl.match(/^data:[^;]+(?:;name=([^;]+))?;base64,/i);
-          const nomeCodificado = match?.[1] || '';
-          let nome = 'documento';
-          try { nome = nomeCodificado ? decodeURIComponent(nomeCodificado) : 'documento'; } catch { nome = nomeCodificado; }
-          setNomeArquivoAtual(nome);
+          setNomeArquivoAtual(r.arquivoNome || 'documento');
         }
       } catch {
         setErro('Erro de conexão ao carregar registro.');
@@ -71,21 +66,14 @@ export default function EditarRegistro() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setArquivo(reader.result.split(',')[1]);
-      setNomeArquivo(file.name);
-      setMimeArquivo(file.type || 'application/octet-stream');
-      setErro('');
-    };
-    reader.onerror = () => setErro('Erro ao ler o arquivo.');
-    reader.readAsDataURL(file);
+    setArquivo(file);
+    setNomeArquivo(file.name);
+    setErro('');
   };
 
   const handleRemoverNovoArquivo = () => {
     setArquivo(null);
     setNomeArquivo('');
-    setMimeArquivo('');
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -105,22 +93,17 @@ export default function EditarRegistro() {
         return;
       }
 
-      const body = {
-        tipo,
-        data,
-        orgao: orgao || null,
-        descricaoClinica: descricaoClinica || null,
-      };
-      if (arquivo) {
-        body.arquivoBase64 = arquivo;
-        body.nomeArquivo = nomeArquivo;
-        body.mimeType = mimeArquivo;
-      }
+      const formData = new FormData();
+      formData.append('tipo', tipo);
+      formData.append('data', data);
+      formData.append('orgao', orgao || '');
+      formData.append('descricaoClinica', descricaoClinica || '');
+      if (arquivo) formData.append('arquivo', arquivo);
 
       const resposta = await fetch(`${API_URL}/api/pacientes/registros/${registroId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(body)
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
       });
 
       const textoResposta = await resposta.text();

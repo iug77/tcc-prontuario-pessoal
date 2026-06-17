@@ -63,7 +63,9 @@ model Registro {
   data        DateTime
   orgao       String?  // metadado [cite: 12]
   descricaoClinica String? // resumo textual do laudo/achados
-  arquivoUrl  String?  // link do S3/Upload [cite: 12]
+  arquivoUrl  String?  // chave do objeto no Cloudflare R2 (ex: registros/<id>)
+  arquivoNome String?  // nome original do arquivo enviado
+  arquivoMime String?  // tipo MIME do arquivo (application/pdf, image/png, ...)
 
   // Parecer Médico Contextualizado (assinado pelo profissional)
   parecerMedico          String?
